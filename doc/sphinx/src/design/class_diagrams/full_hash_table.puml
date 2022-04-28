@@ -1,10 +1,9 @@
 @startuml FullHashTable
 
-class hash_table<ValueType, KeyType, \nExtractKey, Hash, KeyEqual, \nAllocator, RehashPolicy> {
+class hash_table<ValueType, KeyType, \nHash, KeyEqual, \nAllocator, RehashPolicy> {
     .. types ..
     + using value_type = ValueType
     + using key_type = KeyType
-    + using extract_key_type = ExtractKey
     + using hash_type = Hash
     + using key_equal_type = KeyEqual
     + using allocator_type = Allocator
@@ -12,7 +11,6 @@ class hash_table<ValueType, KeyType, \nExtractKey, Hash, KeyEqual, \nAllocator, 
     + uisng size_type = std::size_t
     ------
     .. common private members ..
-    - extract_key_ : extract_key_type
     - hash_ : hash_type
     - key_equal_ : key_equal_type
     - allocator_ : allocator_type
@@ -21,7 +19,6 @@ class hash_table<ValueType, KeyType, \nExtractKey, Hash, KeyEqual, \nAllocator, 
     .. constructor ..
     + hash_table()
     .. access to basic information ..
-    + extract_key() : extract_key_type
     + hash() : hash_type
     + key_equal() : key_equal_type
     + allocator() : allocator_type
