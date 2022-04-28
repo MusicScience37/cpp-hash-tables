@@ -1,6 +1,6 @@
 @startuml FullHashTable
 
-class hash_table<ValueType, KeyType, ExtractKey, Hash, KeyEqual, Allocator, RehashPolicy> {
+class hash_table<ValueType, KeyType, \nExtractKey, Hash, KeyEqual, \nAllocator, RehashPolicy> {
     .. types ..
     + using value_type = ValueType
     + using key_type = KeyType
@@ -46,6 +46,7 @@ class hash_table<ValueType, KeyType, ExtractKey, Hash, KeyEqual, Allocator, Reha
     + rehash(<implementation-defined-arguments>) : void
     + load_factor() : float
     + max_load_factor() : float
+    + max_load_factor(float value) : void
 }
 
 @enduml
