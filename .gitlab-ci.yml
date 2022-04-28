@@ -383,6 +383,19 @@ msvc-debug:
   extends: msvc-release
   variables:
     BUILD_DIR: build_msvc_debug
+  before_script:
+    - Import-Module "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
+    - choco install cmake -y --installargs 'ADD_CMAKE_TO_PATH=System'
+    - choco install python --version=3.9.12 -y
+    - RefreshEnv
+    - pip install pipenv
+    - pipenv sync
+    - mkdir $BUILD_DIR
+    - cd $BUILD_DIR
+    - pipenv run conan profile new --detect default
+    - pipenv run conan remote add gitlab https://gitlab.com/api/v4/packages/conan
+    - pipenv run conan install --build missing -o cpp-hash-tables:requirements_for_tests=True -s build_type=Debug ..
+    - cd ../
   script:
     - cmake -S ./ -B $BUILD_DIR
       -DCMAKE_BUILD_TYPE=Debug
