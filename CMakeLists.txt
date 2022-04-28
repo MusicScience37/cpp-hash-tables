@@ -57,12 +57,16 @@ include(pipenv)
 
 set(HASH_TABLES_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
+add_library(hash_tables INTERFACE)
+target_include_directories(hash_tables
+                           INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+
 if(HASH_TABLES_BUILD_DOC)
     add_subdirectory(doc)
 endif()
 
 if(HASH_TABLES_TESTING)
-    # add_subdirectory(tests)
+    add_subdirectory(tests)
 endif()
 
 if(HASH_TABLES_BUILD_EXAMPLES)
