@@ -1,5 +1,5 @@
 buildType:
-  default: docs
+  default: none
   choices:
     none:
       short: None
