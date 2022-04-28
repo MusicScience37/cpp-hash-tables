@@ -1,0 +1,73 @@
+HeaderFilterRegex: "include/hash_tables/|test/"
+Checks: >
+  clang-diagnostic-*,
+  clang-analyzer-*,
+  cppcoreguidelines-*,
+    -cppcoreguidelines-owning-memory,
+    -cppcoreguidelines-pro-bounds-constant-array-index,
+  google-*,
+    -google-runtime-references,
+    -google-readability-todo,
+  performance-*,
+  portability-*,
+  readability-*,
+    readability-identifier-naming,
+    -readability-function-cognitive-complexity,
+  modernize-*,
+  hicpp-*,
+  cert-*,
+  bugprone-*,
+    -bugprone-easily-swappable-parameters,
+  concurrency-*,
+  boost-*,
+  openmp-*,
+
+# Ignored checks:
+#
+# - google-runtime-references is a Google-specific rule, and forces use of raw pointers.
+# - readability-function-cognitive-complexity is hard to be fixed in tests.
+# - cppcoreguidelines-owning-memory forces to use an external library.
+# - cppcoreguidelines-pro-bounds-constant-array-index forces to use an external library.
+# - bugprone-easily-swappable-parameters is difficult to be solved.
+
+CheckOptions:
+  # Naming Conventions
+  # for these parameters of the naming convention,
+  # see https://clang.llvm.org/extra/clang-tidy/checks/readability-identifier-naming.html
+  - key: readability-identifier-naming.NamespaceCase
+    value: lower_case
+
+  - key: readability-identifier-naming.ClassCase
+    value: lower_case
+  - key: readability-identifier-naming.StructCase
+    value: lower_case
+  - key: readability-identifier-naming.EnumCase
+    value: lower_case
+
+  - key: readability-identifier-naming.FunctionCase
+    value: lower_case
+
+  - key: readability-identifier-naming.VariableCase
+    value: lower_case
+  - key: readability-identifier-naming.ConstantCase
+    value: lower_case
+  - key: readability-identifier-naming.ParameterCase
+    value: lower_case
+  - key: readability-identifier-naming.EnumConstantCase
+    value: lower_case
+  - key: readability-identifier-naming.MemberCase
+    value: lower_case
+  - key: readability-identifier-naming.PrivateMemberSuffix
+    value: _
+  - key: readability-identifier-naming.ProtectedMemberSuffix
+    value: _
+
+  - key: readability-identifier-naming.TypeTemplateParameterCase
+    value: CamelCase
+  - key: readability-identifier-naming.ValueTemplateParameterCase
+    value: CamelCase
+
+  - key: readability-identifier-length.MinimumVariableNameLength
+    value: 2
+  - key: readability-identifier-length.MinimumParameterNameLength
+    value: 2

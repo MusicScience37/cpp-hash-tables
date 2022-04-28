@@ -1,0 +1,47 @@
+buildType:
+  default: none
+  choices:
+    none:
+      short: None
+      long: Don't set any test options
+    clang-asan-ubsan-unit:
+      short: ClangAUSan-Unit
+      long: ASan and USan in Clang + Unit Tests
+      buildType: Debug
+      settings:
+        HASH_TABLES_ENABLE_AUSAN: ON
+        HASH_TABLES_TESTING: ON
+        HASH_TABLES_WRITE_JUNIT: OFF
+        HASH_TABLES_ENABLE_BENCH: ON
+        HASH_TABLES_TEST_BENCHMARKS: OFF
+        HASH_TABLES_BUILD_EXAMPLES: ON
+        HASH_TABLES_BUILD_DOC: OFF
+        HASH_TABLES_ENABLE_PROFILING: OFF
+    clang-asan-ubsan-unit-dox:
+      short: ClangAUSan-Unit-Dox
+      long: ASan and USan in Clang + Unit Tests + Doxygen
+      buildType: Debug
+      settings:
+        HASH_TABLES_ENABLE_AUSAN: ON
+        HASH_TABLES_TESTING: ON
+        HASH_TABLES_WRITE_JUNIT: OFF
+        HASH_TABLES_ENABLE_BENCH: ON
+        HASH_TABLES_TEST_BENCHMARKS: OFF
+        HASH_TABLES_BUILD_EXAMPLES: ON
+        HASH_TABLES_BUILD_DOC: ON
+        HASH_TABLES_BUILD_DOC_SPHINX: OFF
+        HASH_TABLES_ENABLE_PROFILING: OFF
+    clang-asan-ubsan-unit-docs:
+      short: ClangAUSan-Unit-Documents
+      long: ASan and USan in Clang + Unit Tests + All documents
+      buildType: Debug
+      settings:
+        HASH_TABLES_ENABLE_AUSAN: ON
+        HASH_TABLES_TESTING: ON
+        HASH_TABLES_WRITE_JUNIT: OFF
+        HASH_TABLES_ENABLE_BENCH: ON
+        HASH_TABLES_TEST_BENCHMARKS: OFF
+        HASH_TABLES_BUILD_EXAMPLES: ON
+        HASH_TABLES_BUILD_DOC: ON
+        HASH_TABLES_BUILD_DOC_SPHINX: ON
+        HASH_TABLES_ENABLE_PROFILING: OFF
