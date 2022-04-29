@@ -19,6 +19,8 @@
  */
 #include "hash_tables/tables/open_address_table_st.h"
 
+#include <unordered_set>
+
 #include <catch2/catch_test_macros.hpp>
 
 #include "hash_tables_test/extract_key_functions/extract_first_element.h"
@@ -347,6 +349,57 @@ TEST_CASE("hash_tables::tables::open_address_table_st") {
         CHECK(*res1 == value1);
         const std::string* res2 = const_table.try_get(key2);
         CHECK(static_cast<const void*>(res2) == nullptr);
+    }
+
+    SECTION("has") {
+        table_type table;
+        const auto value1 = std::string("abc");
+        const char key1 = extract_key_type()(value1);
+        const auto value2 = std::string("bcdef");
+        const char key2 = extract_key_type()(value2);
+        CHECK_NOTHROW(table.emplace(key1, value1));
+
+        CHECK(table.has(key1));
+        CHECK_FALSE(table.has(key2));
+    }
+
+    SECTION("for_all (non const)") {
+        table_type table;
+
+        const auto value1 = std::string("abc");
+        const char key1 = extract_key_type()(value1);
+        CHECK(table.insert(value1));
+        const auto value2 = std::string("bcd");
+        const char key2 = extract_key_type()(value2);
+        CHECK(table.insert(value2));
+
+        std::unordered_set<std::string> args;
+        table.for_all([&args](std::string& val) {
+            INFO(val);
+            const auto res = args.insert(val);
+            CHECK(res.second);
+        });
+        CHECK(args == std::unordered_set<std::string>{value1, value2});
+    }
+
+    SECTION("for_all (const)") {
+        table_type table;
+
+        const auto value1 = std::string("abc");
+        const char key1 = extract_key_type()(value1);
+        CHECK(table.insert(value1));
+        const auto value2 = std::string("bcd");
+        const char key2 = extract_key_type()(value2);
+        CHECK(table.insert(value2));
+
+        const auto& const_table = table;
+        std::unordered_set<std::string> args;
+        const_table.for_all([&args](const std::string& val) {
+            INFO(val);
+            const auto res = args.insert(val);
+            CHECK(res.second);
+        });
+        CHECK(args == std::unordered_set<std::string>{value1, value2});
     }
 
     SECTION("reserve") {

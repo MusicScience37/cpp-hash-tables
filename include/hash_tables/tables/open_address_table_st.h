@@ -465,6 +465,48 @@ public:
         return &nodes_[*node_ind].value();
     }
 
+    /*!
+     * \brief Check whether a key exists.
+     *
+     * \param[in] key Key.
+     * \retval true Key exists.
+     * \retval false Key doesn't exists.
+     */
+    [[nodiscard]] auto has(const key_type& key) const -> bool {
+        return static_cast<bool>(find_node_ind_for(key));
+    }
+
+    /*!
+     * \brief Call a function with all values.
+     *
+     * \tparam Function Type of the function.
+     * \param[in] function Function.
+     */
+    template <typename Function>
+    void for_all(const Function& function) {
+        for (auto& node : nodes_) {
+            if (node.state() == node_type::node_state::filled) {
+                std::invoke(function, static_cast<value_type&>(node.value()));
+            }
+        }
+    }
+
+    /*!
+     * \brief Call a function with all values.
+     *
+     * \tparam Function Type of the function.
+     * \param[in] function Function.
+     */
+    template <typename Function>
+    void for_all(const Function& function) const {
+        for (const auto& node : nodes_) {
+            if (node.state() == node_type::node_state::filled) {
+                std::invoke(
+                    function, static_cast<const value_type&>(node.value()));
+            }
+        }
+    }
+
     ///@}
 
     /*!
