@@ -37,6 +37,12 @@ endmacro()
 
 add_subdirectory(units)
 
+option(HASH_TABLES_ENABLE_INTEG_TESTS
+       "enable integration test of ${FULL_PROJECT_NAME}" ON)
+if(HASH_TABLES_ENABLE_INTEG_TESTS)
+    add_subdirectory(integ)
+endif()
+
 option(HASH_TABLES_ENABLE_BENCH "enable benchmarks of ${FULL_PROJECT_NAME}" OFF)
 if(HASH_TABLES_ENABLE_BENCH)
     # add_subdirectory(bench)

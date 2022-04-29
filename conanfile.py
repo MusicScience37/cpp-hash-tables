@@ -22,7 +22,7 @@ class CppHashTablesConan(ConanFile):
     generators = "cmake", "cmake_find_package"
 
     def requirements(self):
-        self.requires("fmt/8.1.1")
+        pass
 
     def build_requirements(self):
         if self.options.requirements_for_tests:
