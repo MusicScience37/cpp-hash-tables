@@ -20,6 +20,7 @@
 #pragma once
 
 #include <cassert>
+#include <cmath>
 #include <cstddef>
 #include <functional>
 #include <memory>
@@ -173,7 +174,7 @@ public:
     using size_type = std::size_t;
 
     //! Default number of nodes.
-    static constexpr size_type default_num_nodes = 128;
+    static constexpr size_type default_num_nodes = 32;
 
     /*!
      * \brief Constructor.
@@ -200,10 +201,45 @@ public:
           hash_(std::move(hash)),
           key_equal_(std::move(key_equal)) {}
 
+    // TODO: Enable copy and move.
+    open_address_table_st(const open_address_table_st&) = delete;
+    open_address_table_st(open_address_table_st&&) = delete;
+    auto operator=(const open_address_table_st&) = delete;
+    auto operator=(open_address_table_st&&) = delete;
+
+    /*!
+     * \brief Destructor.
+     */
+    ~open_address_table_st() noexcept = default;
+
     /*!
      * \name Create or update values.
      */
     ///@{
+
+    /*!
+     * \brief Insert a value.
+     *
+     * \param[in] value Value.
+     * \retval true Value is inserted.
+     * \retval false Value is not inserted due to a duplicated key.
+     */
+    auto insert(const value_type& value) -> bool {
+        reserve(size_ + 1U);
+        return insert_without_rehash(value);
+    }
+
+    /*!
+     * \brief Insert a value.
+     *
+     * \param[in] value Value.
+     * \retval true Value is inserted.
+     * \retval false Value is not inserted due to a duplicated key.
+     */
+    auto insert(value_type&& value) -> bool {
+        reserve(size_ + 1U);
+        return insert_without_rehash(std::move(value));
+    }
 
     /*!
      * \brief Insert a value from the arguments of its constructor.
@@ -218,13 +254,7 @@ public:
     template <typename... Args>
     auto emplace(const key_type& key, Args&&... args) -> bool {
         reserve(size_ + 1U);
-        const auto [node_ptr, dist] = prepare_place_for(key);
-        if (node_ptr->state() == node_type::node_state::filled) {
-            return false;
-        }
-        node_ptr->emplace(std::forward<Args>(args)...);
-        update_max_dist_if_needed(dist);
-        return true;
+        return emplace_without_rehash(key, std::forward<Args>(args)...);
     }
 
     ///@}
@@ -280,8 +310,9 @@ public:
      *
      * \param[in] size Number of values.
      */
-    void reserve(std::size_t size) {
-        // TODO
+    void reserve(size_type size) {
+        rehash(static_cast<size_type>(
+            std::ceil(static_cast<float>(size) / max_load_factor_)));
     }
 
     ///@}
@@ -327,6 +358,36 @@ public:
         return allocator_type(nodes_.get_allocator());
     }
 
+    /*!
+     * \brief Get the number of nodes.
+     *
+     * \return Number of nodes.
+     */
+    [[nodiscard]] auto num_nodes() const noexcept -> size_type {
+        return nodes_.size();
+    }
+
+    /*!
+     * \brief Change the number of nodes.
+     *
+     * \param[in] min_num_node Minimum number of nodes.
+     */
+    void rehash(size_type min_num_node) {
+        if (min_num_node < nodes_.size()) {
+            return;
+        }
+
+        open_address_table_st new_table{
+            min_num_node, extract_key_, hash_, key_equal_, allocator()};
+        for (const auto& node : nodes_) {
+            if (node.state() == node_type::node_state::filled) {
+                // TODO: Consider exception safety.
+                new_table.insert_without_rehash(std::move(node.value()));
+            }
+        }
+        std::swap(nodes_, new_table.nodes_);
+    }
+
     ///@}
 
 private:
@@ -355,6 +416,51 @@ private:
     ///@{
 
     /*!
+     * \brief Insert a value without changing the number of nodes.
+     *
+     * \param[in] value Value.
+     * \retval true Value is inserted.
+     * \retval false Value is not inserted due to a duplicated key.
+     */
+    auto insert_without_rehash(const value_type& value) -> bool {
+        return emplace_without_rehash(extract_key_(value), value);
+    }
+
+    /*!
+     * \brief Insert a value without changing the number of nodes.
+     *
+     * \param[in] value Value.
+     * \retval true Value is inserted.
+     * \retval false Value is not inserted due to a duplicated key.
+     */
+    auto insert_without_rehash(value_type&& value) -> bool {
+        return emplace_without_rehash(extract_key_(value), std::move(value));
+    }
+
+    /*!
+     * \brief Insert a value from the arguments of its constructor without
+     * changing the number of nodes.
+     *
+     * \tparam Args Type of arguments of the constructor.
+     * \param[in] key Key of the value. (Assumed to be equal to the key of the
+     * value constructed from arguments.)
+     * \param[in] args Arguments of the constructor.
+     * \retval true Value is inserted.
+     * \retval false Value is not inserted due to a duplicated key.
+     */
+    template <typename... Args>
+    auto emplace_without_rehash(const key_type& key, Args&&... args) -> bool {
+        const auto [node_ptr, dist] = prepare_place_for(key);
+        if (node_ptr->state() == node_type::node_state::filled) {
+            return false;
+        }
+        node_ptr->emplace(std::forward<Args>(args)...);
+        update_max_dist_if_needed(dist);
+        ++size_;
+        return true;
+    }
+
+    /*!
      * \brief Determine the number of nodes from the minimum number of nodes.
      *
      * \param[in] min_num_node Minimum number of nodes.
@@ -363,7 +469,7 @@ private:
     [[nodiscard]] static auto determine_num_node_from_min_num_node(
         size_type min_num_node) -> size_type {
         // TODO: Consider better implementation.
-        std::size_t num_node = default_num_nodes;
+        size_type num_node = default_num_nodes;
         while (num_node < min_num_node) {
             num_node <<= 1U;
         }
@@ -477,7 +583,7 @@ private:
     //! Maximum load factor.
     float max_load_factor_{0.5F};  // NOLINT
 
-    //! Maximum distance from the place determined by hash number.
+    //! Current maximum distance from the place determined by hash number.
     size_type max_dist_{1};
 };
 
