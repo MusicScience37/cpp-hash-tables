@@ -405,8 +405,64 @@ public:
      * \param[in] key Key.
      * \return Value.
      */
+    [[nodiscard]] auto at(const key_type& key) -> value_type& {
+        return nodes_[require_node_ind_for(key)].value();
+    }
+
+    /*!
+     * \brief Get a value.
+     *
+     * \param[in] key Key.
+     * \return Value.
+     */
     [[nodiscard]] auto at(const key_type& key) const -> const value_type& {
         return nodes_[require_node_ind_for(key)].value();
+    }
+
+    /*!
+     * \brief Get a value constructing it if not found.
+     *
+     * \tparam Args Type of arguments of the constructor.
+     * \param[in] key Key.
+     * \param[in] args Arguments of the constructor.
+     * \return Value.
+     */
+    template <typename... Args>
+    [[nodiscard]] auto get_or_create(const key_type& key, Args&&... args)
+        -> value_type& {
+        const auto [node_ptr, dist] = prepare_place_for(key);
+        if (node_ptr->state() != node_type::node_state::filled) {
+            node_ptr->emplace(std::forward<Args>(args)...);
+        }
+        return node_ptr->value();
+    }
+
+    /*!
+     * \brief Get a value if found.
+     *
+     * \param[in] key Key.
+     * \return Pointer to the value if found, otherwise nullptr.
+     */
+    [[nodiscard]] auto try_get(const key_type& key) -> value_type* {
+        const auto node_ind = find_node_ind_for(key);
+        if (!node_ind) {
+            return nullptr;
+        }
+        return &nodes_[*node_ind].value();
+    }
+
+    /*!
+     * \brief Get a value if found.
+     *
+     * \param[in] key Key.
+     * \return Pointer to the value if found, otherwise nullptr.
+     */
+    [[nodiscard]] auto try_get(const key_type& key) const -> const value_type* {
+        const auto node_ind = find_node_ind_for(key);
+        if (!node_ind) {
+            return nullptr;
+        }
+        return &nodes_[*node_ind].value();
     }
 
     ///@}
@@ -623,14 +679,23 @@ private:
         const size_type start_node_ind = desired_node_ind(key);
         auto iter = nodes_.begin() + start_node_ind;
         size_type dist = 0;
+        auto empty_iter = nodes_.end();
         while (true) {
-            if ((iter->state() != node_type::node_state::filled) ||
-                ((iter->state() == node_type::node_state::filled) &&
-                    (extract_key_(iter->value()) == key))) {
-                return {&(*iter), dist};
+            if (iter->state() == node_type::node_state::filled) {
+                if (extract_key_(iter->value()) == key) {
+                    return {&(*iter), dist};
+                }
+            } else {
+                empty_iter = iter;
+            }
+            ++dist;
+            if (dist > max_dist_ && empty_iter != nodes_.end()) {
+                return {&(*empty_iter), dist};
             }
             ++iter;
-            ++dist;
+            if (iter == nodes_.end()) {
+                iter = nodes_.begin();
+            }
         }
     }
 
@@ -719,7 +784,7 @@ private:
     float max_load_factor_{0.5F};  // NOLINT
 
     //! Current maximum distance from the place determined by hash number.
-    size_type max_dist_{1};
+    size_type max_dist_{0};
 };
 
 }  // namespace hash_tables::tables

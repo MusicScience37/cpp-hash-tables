@@ -279,6 +279,19 @@ TEST_CASE("hash_tables::tables::open_address_table_st") {
         }
     }
 
+    SECTION("at (non const)") {
+        table_type table;
+        const auto value1 = std::string("abc");
+        const char key1 = extract_key_type()(value1);
+        const auto value2 = std::string("bcdef");
+        const char key2 = extract_key_type()(value2);
+        CHECK_NOTHROW(table.emplace(key1, value1));
+        CHECK_NOTHROW(table.emplace(key2, value2));
+
+        CHECK(table.at(key1) == value1);
+        CHECK(table.at(key2) == value2);
+    }
+
     SECTION("at (const)") {
         table_type table;
         const auto value1 = std::string("abc");
@@ -291,6 +304,49 @@ TEST_CASE("hash_tables::tables::open_address_table_st") {
         const auto& const_table = table;
         CHECK(const_table.at(key1) == value1);
         CHECK(const_table.at(key2) == value2);
+    }
+
+    SECTION("get_or_create") {
+        table_type table;
+        const auto value1 = std::string("abc");
+        const char key1 = extract_key_type()(value1);
+        const auto value2 = std::string("bcdef");
+        const char key2 = extract_key_type()(value2);
+        CHECK_NOTHROW(table.emplace(key1, value1));
+
+        CHECK(table.get_or_create(key1, "af") == value1);
+        CHECK(table.get_or_create(key2, value2.c_str()) == value2);
+    }
+
+    SECTION("try_get (non const)") {
+        table_type table;
+        const auto value1 = std::string("abc");
+        const char key1 = extract_key_type()(value1);
+        const auto value2 = std::string("bcdef");
+        const char key2 = extract_key_type()(value2);
+        CHECK_NOTHROW(table.emplace(key1, value1));
+
+        std::string* res1 = table.try_get(key1);
+        REQUIRE(static_cast<const void*>(res1) != nullptr);
+        CHECK(*res1 == value1);
+        std::string* res2 = table.try_get(key2);
+        CHECK(static_cast<const void*>(res2) == nullptr);
+    }
+
+    SECTION("try_get (const)") {
+        table_type table;
+        const auto value1 = std::string("abc");
+        const char key1 = extract_key_type()(value1);
+        const auto value2 = std::string("bcdef");
+        const char key2 = extract_key_type()(value2);
+        CHECK_NOTHROW(table.emplace(key1, value1));
+
+        const auto& const_table = table;
+        const std::string* res1 = const_table.try_get(key1);
+        REQUIRE(static_cast<const void*>(res1) != nullptr);
+        CHECK(*res1 == value1);
+        const std::string* res2 = const_table.try_get(key2);
+        CHECK(static_cast<const void*>(res2) == nullptr);
     }
 
     SECTION("reserve") {
