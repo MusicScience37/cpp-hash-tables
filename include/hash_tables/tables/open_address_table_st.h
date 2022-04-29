@@ -510,7 +510,64 @@ public:
     ///@}
 
     /*!
-     * \name Handles size.
+     * \name Delete values.
+     */
+    ///@{
+
+    /*!
+     * \brief Delete all values.
+     */
+    void clear() {
+        for (auto& node : nodes_) {
+            node.clear();
+        }
+        size_ = 0;
+    }
+
+    /*!
+     * \brief Delete a value.
+     *
+     * \param[in] key Key.
+     * \retval true Deleted the value.
+     * \retval false Failed to deleted the value because the key not found.
+     */
+    auto erase(const key_type& key) -> bool {
+        const auto node_ind = find_node_ind_for(key);
+        if (!node_ind) {
+            return false;
+        }
+        nodes_[*node_ind].clear();
+        --size_;
+        return true;
+    }
+
+    /*!
+     * \brief Delete values which satisfy a condition.
+     *
+     * \tparam Function Type of the function.
+     * \param[in] function Function to check the condition.
+     * \return Number of removed values.
+     */
+    template <typename Function>
+    auto erase_if(const Function& function) -> size_type {
+        size_type removed = 0;
+        for (auto& node : nodes_) {
+            if (node.state() == node_type::node_state::filled) {
+                if (std::invoke(function,
+                        static_cast<const value_type&>(node.value()))) {
+                    node.clear();
+                    ++removed;
+                    --size_;
+                }
+            }
+        }
+        return removed;
+    }
+
+    ///@}
+
+    /*!
+     * \name Handle size.
      */
     ///@{
 
