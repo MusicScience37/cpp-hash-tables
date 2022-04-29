@@ -909,7 +909,7 @@ private:
     key_equal_type key_equal_;
 
     //! Maximum load factor.
-    float max_load_factor_{0.5F};  // NOLINT
+    float max_load_factor_{0.2F};  // NOLINT
 
     //! Current maximum distance from the place determined by hash number.
     size_type max_dist_{0};

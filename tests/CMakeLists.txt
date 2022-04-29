@@ -45,5 +45,5 @@ endif()
 
 option(HASH_TABLES_ENABLE_BENCH "enable benchmarks of ${FULL_PROJECT_NAME}" OFF)
 if(HASH_TABLES_ENABLE_BENCH)
-    # add_subdirectory(bench)
+    add_subdirectory(bench)
 endif()
