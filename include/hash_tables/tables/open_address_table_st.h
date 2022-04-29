@@ -31,6 +31,7 @@
 #include <vector>
 
 #include "hash_tables/hashes/default_hash.h"
+#include "hash_tables/utility/move_if_nothrow_move_constructible.h"
 #include "hash_tables/utility/value_storage.h"
 
 namespace hash_tables::tables {
@@ -381,8 +382,8 @@ public:
             min_num_node, extract_key_, hash_, key_equal_, allocator()};
         for (const auto& node : nodes_) {
             if (node.state() == node_type::node_state::filled) {
-                // TODO: Consider exception safety.
-                new_table.insert_without_rehash(std::move(node.value()));
+                new_table.insert_without_rehash(
+                    utility::move_if_nothrow_move_constructible(node.value()));
             }
         }
         std::swap(nodes_, new_table.nodes_);
