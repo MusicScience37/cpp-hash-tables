@@ -21,12 +21,16 @@
 
 #include <unordered_set>
 
+#include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 
 #include "hash_tables_test/extract_key_functions/extract_first_element.h"
+#include "hash_tables_test/hashes/fixed_hash.h"
 
 // NOLINTNEXTLINE
-TEST_CASE("hash_tables::tables::open_address_table_st") {
+TEMPLATE_TEST_CASE("hash_tables::tables::open_address_table_st", "",
+    (std::tuple<hash_tables::hashes::std_hash<char>>),
+    (std::tuple<hash_tables_test::hashes::fixed_hash<char>>)) {
     using hash_tables::tables::open_address_table_st;
 
     using key_type = char;
@@ -34,8 +38,9 @@ TEST_CASE("hash_tables::tables::open_address_table_st") {
     using extract_key_type =
         hash_tables_test::extract_key_functions::extract_first_element<
             value_type>;
-    using table_type =
-        open_address_table_st<value_type, key_type, extract_key_type>;
+    using hash_type = std::tuple_element_t<0, TestType>;
+    using table_type = open_address_table_st<value_type, key_type,
+        extract_key_type, hash_type>;
 
     SECTION("default constructor") {
         table_type table;
