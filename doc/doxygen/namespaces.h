@@ -29,4 +29,35 @@
  */
 
 //! Namespace of this project.
-namespace hash_tables {}  // namespace hash_tables
+namespace hash_tables {
+
+    /*!
+     * \dir include/hash_tables/hashes
+     * \brief Directory of hash functions.
+     */
+
+    //! Namespace of hash functions.
+    namespace hashes {}
+
+    /*!
+     * \dir include/hash_tables/tables
+     * \brief Directory of hash tables.
+     */
+
+    //! Namespace of hash tables.
+    namespace tables {
+
+        //! Namespace of internal implementations.
+        namespace internal {}
+
+    }  // namespace tables
+
+    /*!
+     * \dir include/hash_tables/utility
+     * \brief Directory of utility classes and functions.
+     */
+
+    //! Namespace of utility classes and functions.
+    namespace utility {}
+
+}  // namespace hash_tables

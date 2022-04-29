@@ -240,16 +240,19 @@ public:
     /*!
      * \brief Move constructor.
      */
-    open_address_table_st(open_address_table_st&&) noexcept(
-        std::is_nothrow_move_assignable_v<extract_key_type>&&        //
-            std::is_nothrow_move_assignable_v<hash_type>&&           //
-                std::is_nothrow_move_assignable_v<key_equal_type>&&  //
-                    std::is_nothrow_move_assignable_v<std::vector<
-                        internal::open_address_table_st_node<value_type>,
-                        typename std::allocator_traits<
-                            allocator_type>::template rebind_alloc<internal::
-                                open_address_table_st_node<value_type>>>>) =
-        default;
+    open_address_table_st(open_address_table_st&&)
+#ifndef HASH_TABLES_DOCUMENTATION
+        noexcept(std::is_nothrow_move_assignable_v<extract_key_type>&&   //
+                std::is_nothrow_move_assignable_v<hash_type>&&           //
+                    std::is_nothrow_move_assignable_v<key_equal_type>&&  //
+                        std::is_nothrow_move_assignable_v<std::vector<
+                            internal::open_address_table_st_node<value_type>,
+                            typename std::allocator_traits<allocator_type>::
+                                template rebind_alloc<
+                                    internal::open_address_table_st_node<
+                                        value_type>>>>)
+#endif
+        = default;
 
     /*!
      * \brief Copy assignment operator.
@@ -264,16 +267,19 @@ public:
      *
      * \return This.
      */
-    auto operator=(open_address_table_st&&) noexcept(
-        std::is_nothrow_swappable_v<extract_key_type>&&        //
-            std::is_nothrow_swappable_v<hash_type>&&           //
-                std::is_nothrow_swappable_v<key_equal_type>&&  //
-                    std::is_nothrow_swappable_v<std::vector<
-                        internal::open_address_table_st_node<value_type>,
-                        typename std::allocator_traits<
-                            allocator_type>::template rebind_alloc<internal::
-                                open_address_table_st_node<value_type>>>>)
-        -> open_address_table_st& = default;
+    auto operator=(open_address_table_st&&)
+#ifndef HASH_TABLES_DOCUMENTATION
+        noexcept(std::is_nothrow_swappable_v<extract_key_type>&&   //
+                std::is_nothrow_swappable_v<hash_type>&&           //
+                    std::is_nothrow_swappable_v<key_equal_type>&&  //
+                        std::is_nothrow_swappable_v<std::vector<
+                            internal::open_address_table_st_node<value_type>,
+                            typename std::allocator_traits<allocator_type>::
+                                template rebind_alloc<
+                                    internal::open_address_table_st_node<
+                                        value_type>>>>)
+#endif
+            -> open_address_table_st& = default;
 
     /*!
      * \brief Destructor.
@@ -467,6 +473,22 @@ private:
         allocator_type>::template rebind_alloc<node_type>;
 
     /*!
+     * \brief Determine the number of nodes from the minimum number of nodes.
+     *
+     * \param[in] min_num_node Minimum number of nodes.
+     * \return Number of nodes to use.
+     */
+    [[nodiscard]] static auto determine_num_node_from_min_num_node(
+        size_type min_num_node) -> size_type {
+        // TODO: Consider better implementation.
+        size_type num_node = default_num_nodes;
+        while (num_node < min_num_node) {
+            num_node <<= 1U;
+        }
+        return num_node;
+    }
+
+    /*!
      * \brief Calculate the node index determined by hash number.
      *
      * \param[in] key Key.
@@ -526,22 +548,6 @@ private:
         update_max_dist_if_needed(dist);
         ++size_;
         return true;
-    }
-
-    /*!
-     * \brief Determine the number of nodes from the minimum number of nodes.
-     *
-     * \param[in] min_num_node Minimum number of nodes.
-     * \return Number of nodes to use.
-     */
-    [[nodiscard]] static auto determine_num_node_from_min_num_node(
-        size_type min_num_node) -> size_type {
-        // TODO: Consider better implementation.
-        size_type num_node = default_num_nodes;
-        while (num_node < min_num_node) {
-            num_node <<= 1U;
-        }
-        return num_node;
     }
 
     /*!
