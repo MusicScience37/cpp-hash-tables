@@ -320,9 +320,12 @@ TEMPLATE_TEST_CASE("hash_tables::tables::open_address_table_st", "",
         const auto value2 = std::string("bcdef");
         const char key2 = extract_key_type()(value2);
         CHECK_NOTHROW(table.emplace(key1, value1));
+        CHECK(table.size() == 1);
 
         CHECK(table.get_or_create(key1, "af") == value1);
+        CHECK(table.size() == 1);
         CHECK(table.get_or_create(key2, value2.c_str()) == value2);
+        CHECK(table.size() == 2);
     }
 
     SECTION("try_get (non const)") {
