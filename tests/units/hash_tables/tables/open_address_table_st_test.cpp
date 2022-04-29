@@ -209,6 +209,76 @@ TEST_CASE("hash_tables::tables::open_address_table_st") {
         }
     }
 
+    SECTION("emplace_or_assign") {
+        SECTION("successfull") {
+            table_type table;
+
+            const auto value = std::string("abc");
+            const char key = extract_key_type()(value);
+            CHECK(table.emplace_or_assign(key, value.c_str()));
+            CHECK(table.size() == 1);
+            CHECK(table.at(key) == value);
+        }
+
+        SECTION("multiple") {
+            table_type table;
+
+            const auto value1 = std::string("abc");
+            const char key1 = extract_key_type()(value1);
+            CHECK(table.emplace_or_assign(key1, value1.c_str()));
+            CHECK(table.size() == 1);
+            CHECK(table.at(key1) == value1);
+
+            const auto value2 = std::string("bcd");
+            const char key2 = extract_key_type()(value2);
+            CHECK(table.emplace_or_assign(key2, value2.c_str()));
+            CHECK(table.size() == 2);
+            CHECK(table.at(key2) == value2);
+        }
+
+        SECTION("duplicate") {
+            table_type table;
+
+            const auto value1 = std::string("abc");
+            const char key1 = extract_key_type()(value1);
+            CHECK(table.emplace_or_assign(key1, value1));
+            CHECK(table.size() == 1);
+            CHECK(table.at(key1) == value1);
+
+            const auto value2 = std::string("ab");
+            CHECK_FALSE(table.emplace_or_assign(key1, value2));
+            CHECK(table.size() == 1);
+            CHECK(table.at(key1) == value2);
+        }
+    }
+
+    SECTION("assign") {
+        SECTION("successfull") {
+            table_type table;
+
+            const auto value1 = std::string("abc");
+            const char key1 = extract_key_type()(value1);
+            CHECK(table.emplace(key1, value1));
+            CHECK(table.size() == 1);
+            CHECK(table.at(key1) == value1);
+
+            const auto value2 = std::string("ab");
+            CHECK(table.assign(key1, value2));
+            CHECK(table.size() == 1);
+            CHECK(table.at(key1) == value2);
+        }
+
+        SECTION("non-existing key") {
+            table_type table;
+
+            const auto value = std::string("abc");
+            const char key = extract_key_type()(value);
+            CHECK_FALSE(table.assign(key, value.c_str()));
+            CHECK(table.size() == 0);  // NOLINT
+            CHECK_THROWS(table.at(key));
+        }
+    }
+
     SECTION("at (const)") {
         table_type table;
         const auto value1 = std::string("abc");

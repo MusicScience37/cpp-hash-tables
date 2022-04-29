@@ -116,8 +116,23 @@ public:
      */
     template <typename... Args>
     void emplace(Args&&... args) {
+        assert(state_ != node_state::filled);
         storage_.emplace(std::forward<Args>(args)...);
         state_ = node_state::filled;
+    }
+
+    /*!
+     * \brief Assign a value.
+     *
+     * \tparam Args Type of arguments.
+     * \param[in] args Arguments of the constructor.
+     */
+    template <typename... Args>
+    void assign(Args&&... args) {
+        // TODO: Consider better implementation.
+        assert(state_ == node_state::filled);
+        clear();
+        emplace(std::forward<Args>(args)...);
     }
 
     /*!
@@ -329,6 +344,52 @@ public:
     auto emplace(const key_type& key, Args&&... args) -> bool {
         reserve(size_ + 1U);
         return emplace_without_rehash(key, std::forward<Args>(args)...);
+    }
+
+    /*!
+     * \brief Insert a value from the arguments of its constructor if not exist,
+     * or assign to an existing value.
+     *
+     * \tparam Args Type of arguments of the constructor.
+     * \param[in] key Key of the value. (Assumed to be equal to the key of the
+     * value constructed from arguments.)
+     * \param[in] args Arguments of the constructor.
+     * \retval true Value is inserted.
+     * \retval false Value is assigned to an existing value.
+     */
+    template <typename... Args>
+    auto emplace_or_assign(const key_type& key, Args&&... args) -> bool {
+        reserve(size_ + 1U);
+        const auto [node_ptr, dist] = prepare_place_for(key);
+        if (node_ptr->state() == node_type::node_state::filled) {
+            node_ptr->assign(std::forward<Args>(args)...);
+            return false;
+        }
+        node_ptr->emplace(std::forward<Args>(args)...);
+        update_max_dist_if_needed(dist);
+        ++size_;
+        return true;
+    }
+
+    /*!
+     * \brief Assign a value to an existing key from the arguments of its
+     * constructor.
+     *
+     * \tparam Args Type of arguments of the constructor.
+     * \param[in] key Key of the value. (Assumed to be equal to the key of the
+     * value constructed from arguments.)
+     * \param[in] args Arguments of the constructor.
+     * \retval true Value is assigned.
+     * \retval false Value is not assigned due to non-existing key.
+     */
+    template <typename... Args>
+    auto assign(const key_type& key, Args&&... args) -> bool {
+        const auto [node_ptr, dist] = prepare_place_for(key);
+        if (node_ptr->state() == node_type::node_state::filled) {
+            node_ptr->assign(std::forward<Args>(args)...);
+            return true;
+        }
+        return false;
     }
 
     ///@}
