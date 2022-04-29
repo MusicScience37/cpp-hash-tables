@@ -679,6 +679,34 @@ public:
         std::swap(nodes_, new_table.nodes_);
     }
 
+    /*!
+     * \brief Get the load factor (number of values / number of nodes).
+     *
+     * \return Load factor.
+     */
+    auto load_factor() -> float {
+        return static_cast<float>(size_) / static_cast<float>(nodes_.size());
+    }
+
+    /*!
+     * \brief Get the maximum load factor (number of values / number of nodes).
+     *
+     * \return Maximum load factor.
+     */
+    auto max_load_factor() -> float { return max_load_factor_; }
+
+    /*!
+     * \brief Set the maximum load factor (number of values / number of nodes).
+     *
+     * \param[in] value Maximum load factor.
+     */
+    void max_load_factor(float value) {
+        if (value <= 0.0F || 1.0F <= value) {
+            throw std::invalid_argument("Invalid maximum load factor.");
+        }
+        max_load_factor_ = value;
+    }
+
     ///@}
 
 private:

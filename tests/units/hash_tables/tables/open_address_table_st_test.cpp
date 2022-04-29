@@ -553,12 +553,42 @@ TEMPLATE_TEST_CASE("hash_tables::tables::open_address_table_st", "",
             CHECK(table.at(key) == value);
         }
 
-        SECTION("to larger size") {
+        SECTION("to smaller size") {
             constexpr std::size_t min_num_nodes = 1;
             CHECK_NOTHROW(table.rehash(min_num_nodes));
             CHECK(table.size() == 1);
             CHECK(table.num_nodes() == table_type::default_num_nodes);
             CHECK(table.at(key) == value);
         }
+    }
+
+    SECTION("load_factor") {
+        table_type table;
+        CHECK(table.load_factor() == 0.0F);
+
+        CHECK(table.insert("abc"));
+        CHECK(table.size() == 1);
+        CHECK(table.load_factor() ==
+            static_cast<float>(table.size()) /
+                static_cast<float>(table.num_nodes()));
+
+        CHECK(table.insert("def"));
+        CHECK(table.size() == 2);
+        CHECK(table.load_factor() ==
+            static_cast<float>(table.size()) /
+                static_cast<float>(table.num_nodes()));
+    }
+
+    SECTION("max_load_factor") {
+        table_type table;
+
+        constexpr float value = 0.1;
+        CHECK_NOTHROW(table.max_load_factor(value));
+        CHECK(table.max_load_factor() == value);
+
+        CHECK_THROWS(table.max_load_factor(0.0));    // NOLINT
+        CHECK_NOTHROW(table.max_load_factor(0.01));  // NOLINT
+        CHECK_NOTHROW(table.max_load_factor(0.99));  // NOLINT
+        CHECK_THROWS(table.max_load_factor(1.0));    // NOLINT
     }
 }
