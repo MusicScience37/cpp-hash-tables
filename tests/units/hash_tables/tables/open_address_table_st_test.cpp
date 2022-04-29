@@ -42,6 +42,44 @@ TEST_CASE("hash_tables::tables::open_address_table_st") {
         CHECK(table.num_nodes() == table_type::default_num_nodes);
     }
 
+    SECTION("copy constructor") {
+        table_type orig;
+        const auto value = std::string("abc");
+        orig.insert(value);
+
+        table_type copy{orig};  // NOLINT
+        CHECK(copy.at(extract_key_type()(value)) == value);
+    }
+
+    SECTION("move constructor") {
+        table_type orig;
+        const auto value = std::string("abc");
+        orig.insert(value);
+
+        table_type copy{std::move(orig)};  // NOLINT
+        CHECK(copy.at(extract_key_type()(value)) == value);
+    }
+
+    SECTION("copy assignment operator") {
+        table_type orig;
+        const auto value = std::string("abc");
+        orig.insert(value);
+
+        table_type copy;
+        copy = orig;  // NOLINT
+        CHECK(copy.at(extract_key_type()(value)) == value);
+    }
+
+    SECTION("move assignment operator") {
+        table_type orig;
+        const auto value = std::string("abc");
+        orig.insert(value);
+
+        table_type copy;
+        copy = std::move(orig);  // NOLINT
+        CHECK(copy.at(extract_key_type()(value)) == value);
+    }
+
     SECTION("insert (const reference)") {
         SECTION("successfull") {
             table_type table;

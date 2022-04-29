@@ -27,6 +27,7 @@
 #include <optional>
 #include <stdexcept>
 #include <tuple>
+#include <type_traits>
 #include <utility>
 #include <vector>
 
@@ -66,19 +67,46 @@ public:
      */
     open_address_table_st_node() noexcept = default;
 
-    open_address_table_st_node(const open_address_table_st_node&) = delete;
+    /*!
+     * \brief Copy constructor.
+     *
+     * \param[in] obj Object to copy from.
+     */
+    open_address_table_st_node(const open_address_table_st_node& obj) {
+        if (obj.state_ == node_state::filled) {
+            storage_.emplace(obj.value());
+        }
+        state_ = obj.state_;
+    }
+
     open_address_table_st_node(open_address_table_st_node&&) = delete;
-    auto operator=(const open_address_table_st_node&) = delete;
+
+    /*!
+     * \brief Copy assignment operator.
+     *
+     * \param[in] obj Object to copy from.
+     * \return This.
+     */
+    auto operator=(const open_address_table_st_node& obj)
+        -> open_address_table_st_node& {
+        if (this == &obj) {
+            return *this;
+        }
+
+        clear();
+        if (obj.state_ == node_state::filled) {
+            storage_.emplace(obj.value());
+        }
+        state_ = obj.state_;
+        return *this;
+    }
+
     auto operator=(open_address_table_st_node&&) = delete;
 
     /*!
      * \brief Destructor.
      */
-    ~open_address_table_st_node() noexcept {
-        if (state_ == node_state::filled) {
-            clear();
-        }
-    }
+    ~open_address_table_st_node() noexcept { clear(); }
 
     /*!
      * \brief Construct a value.
@@ -96,8 +124,10 @@ public:
      * \brief Clear the value.
      */
     void clear() noexcept {
-        storage_.clear();
-        state_ = node_state::erased;
+        if (state_ == node_state::filled) {
+            storage_.clear();
+            state_ = node_state::erased;
+        }
     }
 
     /*!
@@ -202,11 +232,48 @@ public:
           hash_(std::move(hash)),
           key_equal_(std::move(key_equal)) {}
 
-    // TODO: Enable copy and move.
-    open_address_table_st(const open_address_table_st&) = delete;
-    open_address_table_st(open_address_table_st&&) = delete;
-    auto operator=(const open_address_table_st&) = delete;
-    auto operator=(open_address_table_st&&) = delete;
+    /*!
+     * \brief Copy constructor.
+     */
+    open_address_table_st(const open_address_table_st&) = default;
+
+    /*!
+     * \brief Move constructor.
+     */
+    open_address_table_st(open_address_table_st&&) noexcept(
+        std::is_nothrow_move_assignable_v<extract_key_type>&&        //
+            std::is_nothrow_move_assignable_v<hash_type>&&           //
+                std::is_nothrow_move_assignable_v<key_equal_type>&&  //
+                    std::is_nothrow_move_assignable_v<std::vector<
+                        internal::open_address_table_st_node<value_type>,
+                        typename std::allocator_traits<
+                            allocator_type>::template rebind_alloc<internal::
+                                open_address_table_st_node<value_type>>>>) =
+        default;
+
+    /*!
+     * \brief Copy assignment operator.
+     *
+     * \return This.
+     */
+    auto operator=(const open_address_table_st&)
+        -> open_address_table_st& = default;
+
+    /*!
+     * \brief Move assignment operator.
+     *
+     * \return This.
+     */
+    auto operator=(open_address_table_st&&) noexcept(
+        std::is_nothrow_swappable_v<extract_key_type>&&        //
+            std::is_nothrow_swappable_v<hash_type>&&           //
+                std::is_nothrow_swappable_v<key_equal_type>&&  //
+                    std::is_nothrow_swappable_v<std::vector<
+                        internal::open_address_table_st_node<value_type>,
+                        typename std::allocator_traits<
+                            allocator_type>::template rebind_alloc<internal::
+                                open_address_table_st_node<value_type>>>>)
+        -> open_address_table_st& = default;
 
     /*!
      * \brief Destructor.
