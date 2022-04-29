@@ -1,13 +1,64 @@
 @startuml FullHashTable
 
-class hash_table<ValueType, KeyType, \nHash, KeyEqual, \nAllocator, RehashPolicy> {
+class hash_table<ValueType, KeyType, \nExtractKey, Hash, KeyEqual, Allocator> {
     .. types ..
     + using value_type = ValueType
     + using key_type = KeyType
+    + using extract_key_type = ExtractKey
     + using hash_type = Hash
     + using key_equal_type = KeyEqual
     + using allocator_type = Allocator
-    + using rehash_policy = RehashPolicy
+    + uisng size_type = std::size_t
+    ------
+    .. common private members ..
+    - size_ : size_type
+    - extract_key_ : extract_key_type
+    - hash_ : hash_type
+    - key_equal_ : key_equal_type
+    - allocator_ : allocator_type
+    ------
+    .. constructor ..
+    + hash_table()
+    .. create / update values ..
+    + insert(const value_type& value) : bool
+    + insert(value_type&& value) : bool
+    + emplace(const key_type& key, Args&& ... args) : bool
+    + emplace_or_assign(const key_type& key, Args&& ... args) : bool
+    + assign(const key_type& key, Args&& ... args) : bool
+    .. read values ..
+    + at(const key_type& key) : value_type
+    + operator[](const key_type& key) : value_type
+    + try_get(const key_type& key) : value_type*
+    + has(const key_type& key) : bool
+    + for_all(const Function& function) : void
+    .. delete values ..
+    + clear() : void
+    + erase(const key_type& key) : bool
+    + erase_if(const Function& function) : void
+    .. handle size ..
+    + size() : size_type
+    + empty() : bool
+    + max_size() : size_type
+    + reserve(size_t size) : void
+    .. access to internal information ..
+    + extract_key() : extract_key_type
+    + hash() : hash_type
+    + key_equal() : key_equal_type
+    + allocator() : allocator_type
+    + rehash(<implementation-defined-arguments>) : void
+    + load_factor() : float
+    + max_load_factor() : float
+    + max_load_factor(float value) : void
+}
+
+class hash_map<KeyType, MappedType, \nHash, KeyEqual, Allocator> {
+    .. types ..
+    + using key_type = KeyType
+    + using mapped_type = MappedType
+    + using value_type = std::pair<key_type, mapped_type>
+    + using hash_type = Hash
+    + using key_equal_type = KeyEqual
+    + using allocator_type = Allocator
     + uisng size_type = std::size_t
     ------
     .. common private members ..
@@ -26,12 +77,15 @@ class hash_table<ValueType, KeyType, \nHash, KeyEqual, \nAllocator, RehashPolicy
     + empty() : bool
     + max_size() : size_type
     .. create / update values ..
-    + emplace(KeyInput&& key, Args&& ... args) : bool
-    + emplace_or_assign(KeyInput&& key, Args&& ... args) : bool
+    + emplace(const key_type& key, Args&& ... args) : bool
+    + emplace(key_type&& key, Args&& ... args) : bool
+    + emplace_or_assign(const key_type& key, Args&& ... args) : bool
+    + emplace_or_assign(key_type&& key, Args&& ... args) : bool
     + assign(const key_type& key, Args&& ... args) : bool
     .. read values ..
-    + at(const key_type& key) : object_type
-    + operator[](const key_type& key) : object_type
+    + at(const key_type& key) : mapped_type
+    + operator[](const key_type& key) : mapped_type
+    + try_get(const key_type& key) : mapped_type*
     + has(const key_type& key) : bool
     + for_all(const Function& function) : void
     .. delete values ..
@@ -45,5 +99,6 @@ class hash_table<ValueType, KeyType, \nHash, KeyEqual, \nAllocator, RehashPolicy
     + max_load_factor() : float
     + max_load_factor(float value) : void
 }
+hash_map o-- hash_table
 
 @enduml
