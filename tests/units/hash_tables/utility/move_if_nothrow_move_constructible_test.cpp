@@ -19,6 +19,7 @@
  */
 #include "hash_tables/utility/move_if_nothrow_move_constructible.h"
 
+#include <stdexcept>
 #include <type_traits>
 
 #include <catch2/catch_test_macros.hpp>
@@ -37,6 +38,7 @@ TEST_CASE("hash_tables::utility::move_if_nothrow_constructible") {
                 -> nothrow_type& = default;
             ~nothrow_type() = default;
         };
+        STATIC_CHECK(std::is_nothrow_move_constructible_v<nothrow_type>);
 
         STATIC_CHECK(std::is_same_v<
             std::invoke_result_t<
@@ -49,11 +51,14 @@ TEST_CASE("hash_tables::utility::move_if_nothrow_constructible") {
         struct throw_type {
             throw_type() = default;
             throw_type(const throw_type&) noexcept = default;
-            throw_type(throw_type&&) noexcept(false) = default;
+            throw_type(throw_type&&) noexcept(false) {  // NOLINT
+                throw std::runtime_error("Don't move this");
+            }
             auto operator=(const throw_type&) noexcept -> throw_type& = default;
             auto operator=(throw_type&&) noexcept -> throw_type& = default;
             ~throw_type() = default;
         };
+        STATIC_CHECK(!std::is_nothrow_move_constructible_v<throw_type>);
 
         STATIC_CHECK(std::is_same_v<
             std::invoke_result_t<
