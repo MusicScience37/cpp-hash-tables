@@ -36,10 +36,13 @@ public:
     fixture() {
         // NOLINTNEXTLINE
         add_param<std::size_t>("size")->add(10)->add(100)->add(1000);
+        // NOLINTNEXTLINE
+        add_param<float>("load")->add(0.1)->add(0.2)->add(0.5)->add(0.8);
     }
 
     void setup(stat_bench::bench::InvocationContext& context) override {
         size_ = context.get_param<std::size_t>("size");
+        max_load_factor_ = context.get_param<float>("load");
         keys_ = hash_tables_test::create_random_int_vector<key_type>(size_);
         second_values_.clear();
         second_values_.reserve(keys_.size());
@@ -53,6 +56,9 @@ protected:
     std::size_t size_{};
 
     // NOLINTNEXTLINE(cppcoreguidelines-non-private-member-variables-in-classes)
+    float max_load_factor_{};
+
+    // NOLINTNEXTLINE(cppcoreguidelines-non-private-member-variables-in-classes)
     std::vector<key_type> keys_{};
 
     // NOLINTNEXTLINE(cppcoreguidelines-non-private-member-variables-in-classes)
@@ -60,66 +66,12 @@ protected:
 };
 
 // NOLINTNEXTLINE
-STAT_BENCH_CASE_F(fixture, "create_pairs", "open_address_table_st(0.1)") {
+STAT_BENCH_CASE_F(fixture, "create_pairs", "open_address_st") {
     STAT_BENCH_MEASURE() {
         hash_tables::tables::open_address_table_st<value_type, key_type,
             extract_key>
             table;
-        table.max_load_factor(0.1F);  // NOLINT
-        table.reserve(size_);
-        for (std::size_t i = 0; i < size_; ++i) {
-            const auto& key = keys_.at(i);
-            const auto& second_value = second_values_.at(i);
-            table.emplace(key, key, second_value);
-        }
-        assert(table.size() == size_);  // NOLINT
-        stat_bench::util::do_not_optimize(table);
-    };
-}
-
-// NOLINTNEXTLINE
-STAT_BENCH_CASE_F(fixture, "create_pairs", "open_address_table_st(0.2)") {
-    STAT_BENCH_MEASURE() {
-        hash_tables::tables::open_address_table_st<value_type, key_type,
-            extract_key>
-            table;
-        table.max_load_factor(0.2F);  // NOLINT
-        table.reserve(size_);
-        for (std::size_t i = 0; i < size_; ++i) {
-            const auto& key = keys_.at(i);
-            const auto& second_value = second_values_.at(i);
-            table.emplace(key, key, second_value);
-        }
-        assert(table.size() == size_);  // NOLINT
-        stat_bench::util::do_not_optimize(table);
-    };
-}
-
-// NOLINTNEXTLINE
-STAT_BENCH_CASE_F(fixture, "create_pairs", "open_address_table_st(0.5)") {
-    STAT_BENCH_MEASURE() {
-        hash_tables::tables::open_address_table_st<value_type, key_type,
-            extract_key>
-            table;
-        table.max_load_factor(0.5F);  // NOLINT
-        table.reserve(size_);
-        for (std::size_t i = 0; i < size_; ++i) {
-            const auto& key = keys_.at(i);
-            const auto& second_value = second_values_.at(i);
-            table.emplace(key, key, second_value);
-        }
-        assert(table.size() == size_);  // NOLINT
-        stat_bench::util::do_not_optimize(table);
-    };
-}
-
-// NOLINTNEXTLINE
-STAT_BENCH_CASE_F(fixture, "create_pairs", "open_address_table_st(0.8)") {
-    STAT_BENCH_MEASURE() {
-        hash_tables::tables::open_address_table_st<value_type, key_type,
-            extract_key>
-            table;
-        table.max_load_factor(0.8F);  // NOLINT
+        table.max_load_factor(max_load_factor_);
         table.reserve(size_);
         for (std::size_t i = 0; i < size_; ++i) {
             const auto& key = keys_.at(i);
