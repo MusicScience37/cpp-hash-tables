@@ -249,6 +249,7 @@ clang coverage:
       -DCMAKE_BUILD_TYPE=Debug
       -DHASH_TABLES_TESTING:BOOL=ON
       -DHASH_TABLES_WRITE_JUNIT:BOOL=ON
+      -DHASH_TABLES_ENABLE_INTEG_TESTS:BOOL=OFF
       "-DCMAKE_CXX_FLAGS=-fprofile-instr-generate -fcoverage-mapping"
       "-DCMAKE_MODULE_LINKER_FLAGS=-fprofile-instr-generate -fcoverage-mapping"
     - cd $BUILD_DIR
@@ -271,6 +272,7 @@ gcc coverage:
       -DCMAKE_BUILD_TYPE=Debug
       -DHASH_TABLES_TESTING:BOOL=ON
       -DHASH_TABLES_WRITE_JUNIT:BOOL=ON
+      -DHASH_TABLES_ENABLE_INTEG_TESTS:BOOL=OFF
       "-DCMAKE_CXX_FLAGS=--coverage"
       "-DCMAKE_MODULE_LINKER_FLAGS=--coverage"
     - cd $BUILD_DIR
