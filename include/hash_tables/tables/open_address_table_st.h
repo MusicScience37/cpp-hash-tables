@@ -430,9 +430,11 @@ public:
     template <typename... Args>
     [[nodiscard]] auto get_or_create(const key_type& key, Args&&... args)
         -> value_type& {
+        reserve(size_ + 1U);
         const auto [node_ptr, dist] = prepare_place_for(key);
         if (node_ptr->state() != node_type::node_state::filled) {
             node_ptr->emplace(std::forward<Args>(args)...);
+            update_max_dist_if_needed(dist);
             ++size_;
         }
         return node_ptr->value();
