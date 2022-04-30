@@ -129,10 +129,8 @@ public:
      */
     template <typename... Args>
     void assign(Args&&... args) {
-        // TODO: Consider better implementation.
         assert(state_ == node_state::filled);
-        clear();
-        emplace(std::forward<Args>(args)...);
+        value() = value_type(std::forward<Args>(args)...);
     }
 
     /*!
