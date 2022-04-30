@@ -808,18 +808,23 @@ private:
         const size_type start_node_ind = desired_node_ind(key);
         auto iter = nodes_.begin() + start_node_ind;
         size_type dist = 0;
-        auto empty_iter = nodes_.end();
+        std::optional<std::tuple<node_type*, size_type>> empty_place;
         while (true) {
             if (iter->state() == node_type::node_state::filled) {
                 if (extract_key_(iter->value()) == key) {
                     return {&(*iter), dist};
                 }
             } else {
-                empty_iter = iter;
+                if (!empty_place) {
+                    empty_place.emplace(&(*iter), dist);
+                }
+            }
+            if (iter->state() == node_type::node_state::init) {
+                return *empty_place;
             }
             ++dist;
-            if (dist > max_dist_ && empty_iter != nodes_.end()) {
-                return {&(*empty_iter), dist};
+            if (dist > max_dist_ && empty_place) {
+                return *empty_place;
             }
             ++iter;
             if (iter == nodes_.end()) {
@@ -863,6 +868,9 @@ private:
             if (iter->state() == node_type::node_state::filled &&
                 extract_key_(iter->value()) == key) {
                 return iter - nodes_.begin();
+            }
+            if (iter->state() == node_type::node_state::init) {
+                return std::nullopt;
             }
             ++dist;
             if (dist > max_dist_) {
