@@ -33,6 +33,7 @@
 
 #include "hash_tables/hashes/default_hash.h"
 #include "hash_tables/utility/move_if_nothrow_move_constructible.h"
+#include "hash_tables/utility/round_up_to_power_of_two.h"
 #include "hash_tables/utility/value_storage.h"
 
 namespace hash_tables::tables {
@@ -129,10 +130,8 @@ public:
      */
     template <typename... Args>
     void assign(Args&&... args) {
-        // TODO: Consider better implementation.
         assert(state_ == node_state::filled);
-        clear();
-        emplace(std::forward<Args>(args)...);
+        value() = value_type(std::forward<Args>(args)...);
     }
 
     /*!
@@ -727,12 +726,12 @@ private:
      */
     [[nodiscard]] static auto determine_num_node_from_min_num_node(
         size_type min_num_node) -> size_type {
-        // TODO: Consider better implementation.
-        size_type num_node = default_num_nodes;
-        while (num_node < min_num_node) {
-            num_node <<= 1U;
+        size_type required_num_nodes =
+            utility::round_up_to_power_of_two(min_num_node);
+        if (required_num_nodes < default_num_nodes) {
+            required_num_nodes = default_num_nodes;
         }
-        return num_node;
+        return required_num_nodes;
     }
 
     /*!
@@ -809,18 +808,23 @@ private:
         const size_type start_node_ind = desired_node_ind(key);
         auto iter = nodes_.begin() + start_node_ind;
         size_type dist = 0;
-        auto empty_iter = nodes_.end();
+        std::optional<std::tuple<node_type*, size_type>> empty_place;
         while (true) {
             if (iter->state() == node_type::node_state::filled) {
                 if (extract_key_(iter->value()) == key) {
                     return {&(*iter), dist};
                 }
             } else {
-                empty_iter = iter;
+                if (!empty_place) {
+                    empty_place.emplace(&(*iter), dist);
+                }
+            }
+            if (iter->state() == node_type::node_state::init) {
+                return *empty_place;
             }
             ++dist;
-            if (dist > max_dist_ && empty_iter != nodes_.end()) {
-                return {&(*empty_iter), dist};
+            if (dist > max_dist_ && empty_place) {
+                return *empty_place;
             }
             ++iter;
             if (iter == nodes_.end()) {
@@ -864,6 +868,9 @@ private:
             if (iter->state() == node_type::node_state::filled &&
                 extract_key_(iter->value()) == key) {
                 return iter - nodes_.begin();
+            }
+            if (iter->state() == node_type::node_state::init) {
+                return std::nullopt;
             }
             ++dist;
             if (dist > max_dist_) {
@@ -910,8 +917,11 @@ private:
     //! Function to check whether keys are equal.
     key_equal_type key_equal_;
 
+    //! Default maximum load factor.
+    static constexpr float default_max_load_factor = 0.2F;
+
     //! Maximum load factor.
-    float max_load_factor_{0.2F};  // NOLINT
+    float max_load_factor_{default_max_load_factor};
 
     //! Current maximum distance from the place determined by hash number.
     size_type max_dist_{0};
