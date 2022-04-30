@@ -7,7 +7,8 @@ import subprocess
 THIS_DIR = Path(__file__).parent.absolute()
 
 SOURCE_PATHS = [
-    # THIS_DIR.parent / "tests" / "units",
+    THIS_DIR.parent / "tests" / "units",
+    THIS_DIR.parent / "tests" / "integ",
 ]
 
 UNITY_SRC_SUFFIX = "unity_source.cpp"

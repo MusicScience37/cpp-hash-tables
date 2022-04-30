@@ -1,0 +1,2 @@
+add_executable(hash_tables_bench_tables_create_pairs create_pairs.cpp)
+target_add_to_benchmark(hash_tables_bench_tables_create_pairs)

@@ -35,7 +35,7 @@ license_scanning:
 .retry setting:
   retry:
     max: 2
-    when: runner_system_failure
+    when: always
 
 sync pipenv:
   extends: .retry setting
@@ -108,8 +108,7 @@ pre-commit:
   script:
     - pipenv run pre-commit run --all-files
 
-# TODO
-.static analysis:
+static analysis:
   extends: .retry setting
   stage: Check
   needs:
@@ -239,8 +238,7 @@ pre-commit:
     - pipenv run conan install --build missing -o cpp-hash-tables:requirements_for_tests=True -s build_type=Debug ..
     - cd ../
 
-# TODO
-.clang coverage:
+clang coverage:
   extends: .clang-debug-test-base
   stage: Test with Clang
   image: musicscience37/clang-ci:clang14-v4.3
@@ -251,6 +249,7 @@ pre-commit:
       -DCMAKE_BUILD_TYPE=Debug
       -DHASH_TABLES_TESTING:BOOL=ON
       -DHASH_TABLES_WRITE_JUNIT:BOOL=ON
+      -DHASH_TABLES_ENABLE_INTEG_TESTS:BOOL=OFF
       "-DCMAKE_CXX_FLAGS=-fprofile-instr-generate -fcoverage-mapping"
       "-DCMAKE_MODULE_LINKER_FLAGS=-fprofile-instr-generate -fcoverage-mapping"
     - cd $BUILD_DIR
@@ -262,8 +261,7 @@ pre-commit:
     - scripts/collect_llvm_coverage.sh build_clang_coverage
     - bash <(curl -s https://codecov.io/bash) || echo "Codecov did not collect coverage reports"
 
-# TODO
-.gcc coverage:
+gcc coverage:
   extends: .debug-test-base
   stage: Test with GCC
   image: musicscience37/gcc-ci:gcc10-v4.1
@@ -274,6 +272,7 @@ pre-commit:
       -DCMAKE_BUILD_TYPE=Debug
       -DHASH_TABLES_TESTING:BOOL=ON
       -DHASH_TABLES_WRITE_JUNIT:BOOL=ON
+      -DHASH_TABLES_ENABLE_INTEG_TESTS:BOOL=OFF
       "-DCMAKE_CXX_FLAGS=--coverage"
       "-DCMAKE_MODULE_LINKER_FLAGS=--coverage"
     - cd $BUILD_DIR
@@ -283,40 +282,35 @@ pre-commit:
     - scripts/collect_gcc_coverage.sh build_gcc_coverage
   coverage: '/Total:\|\s*(\d+\.?\d+?)%/'
 
-# TODO
-.gcc-10-debug:
+gcc-10-debug:
   extends: .debug-test-base
   stage: Test with GCC
   image: musicscience37/gcc-ci:gcc10-v4.1
   variables:
     BUILD_DIR: build_gcc10_debug
 
-# TODO
-.gcc-10-release:
+gcc-10-release:
   extends: .release-test-base
   stage: Test with GCC
   image: musicscience37/gcc-ci:gcc10-v4.1
   variables:
     BUILD_DIR: build_gcc10_release
 
-# TODO
-.clang-14-debug:
+clang-14-debug:
   extends: .clang-debug-test-base
   stage: Test with Clang
   image: musicscience37/clang-ci:clang14-v4.3
   variables:
     BUILD_DIR: build_clang12_debug
 
-# TODO
-.clang-14-release:
+clang-14-release:
   extends: .clang-release-test-base
   stage: Test with Clang
   image: musicscience37/clang-ci:clang14-v4.3
   variables:
     BUILD_DIR: build_clang12_release
 
-# TODO
-.clang-14-asan-ubsan:
+clang-14-asan-ubsan:
   extends: .clang-debug-test-base
   stage: Test with Clang
   image: musicscience37/clang-ci:clang14-v4.3
@@ -333,8 +327,7 @@ pre-commit:
     - cmake --build .
     - ctest -V
 
-# TODO
-.clang-14-tsan:
+clang-14-tsan:
   extends: .clang-debug-test-base
   stage: Test with Clang
   image: musicscience37/clang-ci:clang14-v4.3
@@ -351,8 +344,7 @@ pre-commit:
     - cmake --build .
     - ctest -V
 
-# TODO
-.msvc-release:
+msvc-release:
   extends: .release-test-base
   tags:
     - shared-windows
@@ -362,7 +354,7 @@ pre-commit:
   needs: []
   dependencies: []
   variables:
-    BUILD_DIR: build_msvc
+    BUILD_DIR: build_msvc_release
   before_script:
     - Import-Module "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
     - choco install cmake -y --installargs 'ADD_CMAKE_TO_PATH=System'
@@ -388,9 +380,34 @@ pre-commit:
     - cd $BUILD_DIR
     - cmake --build . --config Release --parallel
     - ctest -V --build-config Release
-  retry:
-    max: 2
-    when: always
+
+msvc-debug:
+  extends: msvc-release
+  variables:
+    BUILD_DIR: build_msvc_debug
+  before_script:
+    - Import-Module "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
+    - choco install cmake -y --installargs 'ADD_CMAKE_TO_PATH=System'
+    - choco install python --version=3.9.12 -y
+    - RefreshEnv
+    - pip install pipenv
+    - pipenv sync
+    - mkdir $BUILD_DIR
+    - cd $BUILD_DIR
+    - pipenv run conan profile new --detect default
+    - pipenv run conan remote add gitlab https://gitlab.com/api/v4/packages/conan
+    - pipenv run conan install --build missing -o cpp-hash-tables:requirements_for_tests=True -s build_type=Debug ..
+    - cd ../
+  script:
+    - cmake -S ./ -B $BUILD_DIR
+      -DCMAKE_BUILD_TYPE=Debug
+      -DHASH_TABLES_TESTING:BOOL=ON
+      -DHASH_TABLES_BUILD_EXAMPLES=ON
+      -DHASH_TABLES_TEST_EXAMPLES=ON
+      -DHASH_TABLES_WRITE_JUNIT:BOOL=ON
+    - cd $BUILD_DIR
+    - cmake --build . --config Debug --parallel
+    - ctest -V --build-config Debug
 
 doc:
   extends: .retry setting

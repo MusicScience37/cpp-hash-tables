@@ -43,10 +43,10 @@ conan_basic_setup()
 # find packages installed with Conan
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_BINARY_DIR})
 list(APPEND CMAKE_PREFIX_PATH ${CMAKE_BINARY_DIR})
-find_package(fmt REQUIRED)
 if(HASH_TABLES_TESTING)
     find_package(Catch2 REQUIRED)
     find_package(trompeloeil REQUIRED)
+    find_package(cpp_stat_bench REQUIRED)
 endif()
 
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
@@ -57,12 +57,16 @@ include(pipenv)
 
 set(HASH_TABLES_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
+add_library(hash_tables INTERFACE)
+target_include_directories(hash_tables
+                           INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+
 if(HASH_TABLES_BUILD_DOC)
     add_subdirectory(doc)
 endif()
 
 if(HASH_TABLES_TESTING)
-    # add_subdirectory(tests)
+    add_subdirectory(tests)
 endif()
 
 if(HASH_TABLES_BUILD_EXAMPLES)
