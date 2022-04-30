@@ -33,6 +33,7 @@
 
 #include "hash_tables/hashes/default_hash.h"
 #include "hash_tables/utility/move_if_nothrow_move_constructible.h"
+#include "hash_tables/utility/round_up_to_power_of_two.h"
 #include "hash_tables/utility/value_storage.h"
 
 namespace hash_tables::tables {
@@ -725,12 +726,12 @@ private:
      */
     [[nodiscard]] static auto determine_num_node_from_min_num_node(
         size_type min_num_node) -> size_type {
-        // TODO: Consider better implementation.
-        size_type num_node = default_num_nodes;
-        while (num_node < min_num_node) {
-            num_node <<= 1U;
+        size_type required_num_nodes =
+            utility::round_up_to_power_of_two(min_num_node);
+        if (required_num_nodes < default_num_nodes) {
+            required_num_nodes = default_num_nodes;
         }
-        return num_node;
+        return required_num_nodes;
     }
 
     /*!
