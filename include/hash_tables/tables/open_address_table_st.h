@@ -917,8 +917,11 @@ private:
     //! Function to check whether keys are equal.
     key_equal_type key_equal_;
 
+    //! Default maximum load factor.
+    static constexpr float default_max_load_factor = 0.2F;
+
     //! Maximum load factor.
-    float max_load_factor_{0.2F};  // NOLINT
+    float max_load_factor_{default_max_load_factor};
 
     //! Current maximum distance from the place determined by hash number.
     size_type max_dist_{0};
