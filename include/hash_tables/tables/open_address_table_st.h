@@ -27,7 +27,7 @@
 #include <optional>
 #include <stdexcept>
 #include <tuple>
-#include <type_traits>
+#include <type_traits>  // IWYU pragma: keep
 #include <utility>
 #include <vector>
 

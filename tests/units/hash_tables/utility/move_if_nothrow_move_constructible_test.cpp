@@ -20,6 +20,7 @@
 #include "hash_tables/utility/move_if_nothrow_move_constructible.h"
 
 #include <stdexcept>
+#include <string>
 #include <type_traits>
 
 #include <catch2/catch_test_macros.hpp>

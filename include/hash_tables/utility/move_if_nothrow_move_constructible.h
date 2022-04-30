@@ -20,7 +20,6 @@
 #pragma once
 
 #include <type_traits>
-#include <utility>
 
 namespace hash_tables::utility {
 

@@ -19,11 +19,14 @@
  */
 #include "hash_tables/tables/open_address_table_st.h"
 
+#include <string>
 #include <unordered_set>
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 
+#include "hash_tables/hashes/std_hash.h"
 #include "hash_tables_test/extract_key_functions/extract_first_element.h"
 #include "hash_tables_test/hashes/fixed_hash.h"
 

@@ -19,6 +19,9 @@
  */
 #include "hash_tables/extract_key_functions/extract_first_from_pair.h"
 
+#include <string>
+#include <utility>
+
 #include <catch2/catch_test_macros.hpp>
 
 // NOLINTNEXTLINE

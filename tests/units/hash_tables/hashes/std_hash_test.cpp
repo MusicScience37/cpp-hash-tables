@@ -19,6 +19,8 @@
  */
 #include "hash_tables/hashes/std_hash.h"
 
+#include <string>
+
 #include <catch2/catch_test_macros.hpp>
 
 // NOLINTNEXTLINE

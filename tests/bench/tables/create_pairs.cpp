@@ -17,12 +17,22 @@
  * \file
  * \brief Test to create pairs in tables.
  */
+#include <cassert>
+#include <cstddef>
+#include <memory>
 #include <string>
+#include <type_traits>
+#include <utility>
+#include <vector>
 
+#include <fmt/core.h>
+#include <stat_bench/bench/invocation_context.h>
 #include <stat_bench/benchmark_macros.h>
+#include <stat_bench/param/parameter_value_vector.h>
 #include <stat_bench/util/do_not_optimize.h>
 
 #include "hash_tables/extract_key_functions/extract_first_from_pair.h"
+#include "hash_tables/hashes/std_hash.h"
 #include "hash_tables/tables/open_address_table_st.h"
 #include "hash_tables_test/create_random_int_vector.h"
 

@@ -19,6 +19,7 @@
  */
 #include "hash_tables/utility/value_storage.h"
 
+#include <string>
 #include <type_traits>
 
 #include <catch2/catch_test_macros.hpp>
