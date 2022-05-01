@@ -34,6 +34,7 @@ add_custom_target(
     COMMENT "Generate Sphinx HTML API documentation for ${FULL_PROJECT_NAME}"
     WORKING_DIRECTORY ${HASH_TABLES_SOURCE_DIR})
 
+add_dependencies(hash_tables_doc_sphinx_html hash_tables_doc_doxygen_xml)
 add_dependencies(hash_tables_doc hash_tables_doc_sphinx_html)
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/start_auto_build.sh.in
