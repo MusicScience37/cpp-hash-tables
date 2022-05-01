@@ -8,7 +8,7 @@ endif()
 
 project(
     hash_tables
-    VERSION 0.0.0
+    VERSION 0.1.0
     DESCRIPTION "Hash tables in C++."
     LANGUAGES CXX)
 set(FULL_PROJECT_NAME "cpp-hash-tables")
