@@ -55,7 +55,25 @@ mathjax_config = {
     },
 }
 
+# -- Options for breathe -----------------------------------------------------
+
+extensions += ["breathe"]
+
+# this variable must be set from command line
+breathe_projects = {"hash_tables": ""}
+
+breathe_default_project = "hash_tables"
+
+breathe_default_members = ("members",)
+
+breathe_domain_by_extension = {
+    "h": "cpp",
+}
+
 # -- Options for HTML output -------------------------------------------------
 
 html_theme = "sphinx_rtd_theme"
 html_static_path = ["_static"]
+html_theme_options = {
+    "style_nav_header_background": "#B24700",
+}
