@@ -42,6 +42,9 @@ namespace hash_tables::maps {
  * \tparam Hash Type of the hash function.
  * \tparam KeyEqual Type of the function to check whether keys are equal.
  * \tparam Allocator Type of allocators.
+ *
+ * \thread_safety Safe if only functions without modifications of data are
+ * called.
  */
 template <typename KeyType, typename MappedType,
     typename Hash = hashes::default_hash<KeyType>,
