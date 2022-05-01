@@ -19,10 +19,11 @@
  */
 #pragma once
 
+#include <cstddef>
 #include <functional>
 #include <memory>
 #include <tuple>
-#include <type_traits>
+#include <type_traits>  // IWYU pragma: keep
 #include <utility>
 
 #include "hash_tables/extract_key_functions/extract_first_from_pair.h"
