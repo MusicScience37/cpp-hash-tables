@@ -19,6 +19,9 @@
  */
 #include "hash_tables/utility/round_up_to_power_of_two.h"
 
+#include <cstddef>
+#include <string>
+
 #include <catch2/catch_test_macros.hpp>
 
 // NOLINTNEXTLINE

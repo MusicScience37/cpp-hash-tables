@@ -69,14 +69,9 @@ class hash_map<KeyType, MappedType, \nHash, KeyEqual, Allocator> {
     ------
     .. constructor ..
     + hash_table()
-    .. access to basic information ..
-    + hash() : hash_type
-    + key_equal() : key_equal_type
-    + allocator() : allocator_type
-    + size() : size_type
-    + empty() : bool
-    + max_size() : size_type
     .. create / update values ..
+    + insert(const value_type& value) : bool
+    + insert(value_type&& value) : bool
     + emplace(const key_type& key, Args&& ... args) : bool
     + emplace(key_type&& key, Args&& ... args) : bool
     + emplace_or_assign(const key_type& key, Args&& ... args) : bool
@@ -84,6 +79,7 @@ class hash_map<KeyType, MappedType, \nHash, KeyEqual, Allocator> {
     + assign(const key_type& key, Args&& ... args) : bool
     .. read values ..
     + at(const key_type& key) : mapped_type
+    + get_or_create(const key_type& key, Args&& ... args) : mapped_type
     + operator[](const key_type& key) : mapped_type
     + try_get(const key_type& key) : mapped_type*
     + has(const key_type& key) : bool
@@ -92,8 +88,15 @@ class hash_map<KeyType, MappedType, \nHash, KeyEqual, Allocator> {
     + clear() : void
     + erase(const key_type& key) : bool
     + erase_if(const Function& function) : void
-    .. functions related to internal data ..
+    .. handle size ..
+    + size() : size_type
+    + empty() : bool
+    + max_size() : size_type
     + reserve(size_t size) : void
+    .. access to internal information ..
+    + hash() : hash_type
+    + key_equal() : key_equal_type
+    + allocator() : allocator_type
     + rehash(<implementation-defined-arguments>) : void
     + load_factor() : float
     + max_load_factor() : float

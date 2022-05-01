@@ -40,6 +40,14 @@ namespace hash_tables {
     namespace hashes {}
 
     /*!
+     * \dir include/hash_tables/extract_key_functions
+     * \brief Directory of functions to extract keys from values.
+     */
+
+    //! Namespace of functions to extract keys from values.
+    namespace extract_key_functions {}
+
+    /*!
      * \dir include/hash_tables/tables
      * \brief Directory of hash tables.
      */
@@ -51,6 +59,14 @@ namespace hash_tables {
         namespace internal {}
 
     }  // namespace tables
+
+    /*!
+     * \dir include/hash_tables/maps
+     * \brief Directory of maps from keys to values.
+     */
+
+    //! Namespace of maps from keys to values.
+    namespace maps {}
 
     /*!
      * \dir include/hash_tables/utility

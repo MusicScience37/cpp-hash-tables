@@ -190,6 +190,9 @@ private:
  * \tparam Hash Type of the hash function.
  * \tparam KeyEqual Type of the function to check whether keys are equal.
  * \tparam Allocator Type of allocators.
+ *
+ * \thread_safety Safe if only functions without modifications of data are
+ * called.
  */
 template <typename ValueType, typename KeyType, typename ExtractKey,
     typename Hash = hashes::default_hash<KeyType>,
@@ -256,10 +259,10 @@ public:
      */
     open_address_table_st(open_address_table_st&&)
 #ifndef HASH_TABLES_DOCUMENTATION
-        noexcept(std::is_nothrow_move_assignable_v<extract_key_type>&&   //
-                std::is_nothrow_move_assignable_v<hash_type>&&           //
-                    std::is_nothrow_move_assignable_v<key_equal_type>&&  //
-                        std::is_nothrow_move_assignable_v<std::vector<
+        noexcept(std::is_nothrow_move_constructible_v<extract_key_type>&&   //
+                std::is_nothrow_move_constructible_v<hash_type>&&           //
+                    std::is_nothrow_move_constructible_v<key_equal_type>&&  //
+                        std::is_nothrow_move_constructible_v<std::vector<
                             internal::open_address_table_st_node<value_type>,
                             typename std::allocator_traits<allocator_type>::
                                 template rebind_alloc<
@@ -283,10 +286,10 @@ public:
      */
     auto operator=(open_address_table_st&&)
 #ifndef HASH_TABLES_DOCUMENTATION
-        noexcept(std::is_nothrow_swappable_v<extract_key_type>&&   //
-                std::is_nothrow_swappable_v<hash_type>&&           //
-                    std::is_nothrow_swappable_v<key_equal_type>&&  //
-                        std::is_nothrow_swappable_v<std::vector<
+        noexcept(std::is_nothrow_move_assignable_v<extract_key_type>&&   //
+                std::is_nothrow_move_assignable_v<hash_type>&&           //
+                    std::is_nothrow_move_assignable_v<key_equal_type>&&  //
+                        std::is_nothrow_move_assignable_v<std::vector<
                             internal::open_address_table_st_node<value_type>,
                             typename std::allocator_traits<allocator_type>::
                                 template rebind_alloc<
@@ -519,7 +522,7 @@ public:
     /*!
      * \brief Delete all values.
      */
-    void clear() {
+    void clear() noexcept {
         for (auto& node : nodes_) {
             node.clear();
         }
