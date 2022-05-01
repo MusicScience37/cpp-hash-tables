@@ -225,7 +225,7 @@ public:
     template <typename... Args>
     auto emplace_or_assign(key_type&& key, Args&&... args) -> bool {
         return table_.emplace_or_assign(key, std::piecewise_construct,
-            std::forward_as_tuple(key),
+            std::forward_as_tuple(std::move(key)),
             std::forward_as_tuple(std::forward<Args>(args)...));
     }
 
