@@ -2,7 +2,7 @@ from conans import ConanFile, CMake
 
 
 class CppHashTablesConan(ConanFile):
-    name = "cpp-hash-tables"
+    name = "cpp_hash_tables"
     version = "0.0.0"
     description = "Hash tables in C++."
     homepage = "https://gitlab.com/MusicScience37/cpp-hash-tables"
