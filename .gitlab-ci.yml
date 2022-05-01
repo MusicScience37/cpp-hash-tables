@@ -296,13 +296,6 @@ gcc-10-release:
   variables:
     BUILD_DIR: build_gcc10_release
 
-clang-14-debug:
-  extends: .clang-debug-test-base
-  stage: Test with Clang
-  image: musicscience37/clang-ci:clang14-v4.3
-  variables:
-    BUILD_DIR: build_clang12_debug
-
 clang-14-release:
   extends: .clang-release-test-base
   stage: Test with Clang
@@ -323,23 +316,6 @@ clang-14-asan-ubsan:
       -DHASH_TABLES_TESTING:BOOL=ON
       -DHASH_TABLES_WRITE_JUNIT:BOOL=ON
       -DHASH_TABLES_ENABLE_AUSAN:BOOL=ON
-    - cd $BUILD_DIR
-    - cmake --build .
-    - ctest -V
-
-clang-14-tsan:
-  extends: .clang-debug-test-base
-  stage: Test with Clang
-  image: musicscience37/clang-ci:clang14-v4.3
-  variables:
-    BUILD_DIR: build_clang_tsan
-  script:
-    - cmake -S ./ -B $BUILD_DIR
-      -DCMAKE_BUILD_TYPE=Debug
-      -DHASH_TABLES_TESTING:BOOL=ON
-      -DHASH_TABLES_WRITE_JUNIT:BOOL=ON
-      -DCMAKE_CXX_FLAGS=-fsanitize=thread
-      -DCMAKE_MODULE_LINKER_FLAGS=-fsanitize=thread
     - cd $BUILD_DIR
     - cmake --build .
     - ctest -V
@@ -380,34 +356,6 @@ msvc-release:
     - cd $BUILD_DIR
     - cmake --build . --config Release --parallel
     - ctest -V --build-config Release
-
-msvc-debug:
-  extends: msvc-release
-  variables:
-    BUILD_DIR: build_msvc_debug
-  before_script:
-    - Import-Module "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
-    - choco install cmake -y --installargs 'ADD_CMAKE_TO_PATH=System'
-    - choco install python --version=3.9.12 -y
-    - RefreshEnv
-    - pip install pipenv
-    - pipenv sync
-    - mkdir $BUILD_DIR
-    - cd $BUILD_DIR
-    - pipenv run conan profile new --detect default
-    - pipenv run conan remote add gitlab https://gitlab.com/api/v4/packages/conan
-    - pipenv run conan install --build missing -o cpp-hash-tables:requirements_for_tests=True -s build_type=Debug ..
-    - cd ../
-  script:
-    - cmake -S ./ -B $BUILD_DIR
-      -DCMAKE_BUILD_TYPE=Debug
-      -DHASH_TABLES_TESTING:BOOL=ON
-      -DHASH_TABLES_BUILD_EXAMPLES=ON
-      -DHASH_TABLES_TEST_EXAMPLES=ON
-      -DHASH_TABLES_WRITE_JUNIT:BOOL=ON
-    - cd $BUILD_DIR
-    - cmake --build . --config Debug --parallel
-    - ctest -V --build-config Debug
 
 doc:
   extends: .retry setting
