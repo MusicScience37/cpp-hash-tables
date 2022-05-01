@@ -66,7 +66,7 @@ prepare lock files:
     - pipenv run conan profile new --detect default
     - pipenv run conan profile update settings.compiler.libcxx=libc++ default
     - pipenv run conan remote add gitlab https://gitlab.com/api/v4/packages/conan
-    - pipenv run conan install --build missing -o cpp-hash-tables:requirements_for_tests=True -s build_type=Debug .
+    - pipenv run conan install --build missing -o cpp_hash_tables:requirements_for_tests=True -s build_type=Debug .
   cache:
     key:
       prefix: pipenv-linux-prepare
@@ -131,7 +131,7 @@ static analysis:
     - pipenv run conan profile new --detect default
     - pipenv run conan profile update settings.compiler.libcxx=libstdc++11 default
     - pipenv run conan remote add gitlab https://gitlab.com/api/v4/packages/conan
-    - pipenv run conan install --build missing -o cpp-hash-tables:requirements_for_tests=True ..
+    - pipenv run conan install --build missing -o cpp_hash_tables:requirements_for_tests=True ..
     - cd ../
     - cmake -S ./ -B build_static_analysis
       -DHASH_TABLES_ENABLE_CLANG_TIDY:BOOL=ON
@@ -170,7 +170,7 @@ static analysis:
     - pipenv run conan profile new --detect default
     - pipenv run conan profile update settings.compiler.libcxx=libstdc++11 default
     - pipenv run conan remote add gitlab https://gitlab.com/api/v4/packages/conan
-    - pipenv run conan install --build missing -o cpp-hash-tables:requirements_for_tests=True -s build_type=Release ..
+    - pipenv run conan install --build missing -o cpp_hash_tables:requirements_for_tests=True -s build_type=Release ..
     - cd ../
   script:
     - cmake -S ./ -B $BUILD_DIR
@@ -203,7 +203,7 @@ static analysis:
     - pipenv run conan profile new --detect default
     - pipenv run conan profile update settings.compiler.libcxx=libstdc++11 default
     - pipenv run conan remote add gitlab https://gitlab.com/api/v4/packages/conan
-    - pipenv run conan install --build missing -o cpp-hash-tables:requirements_for_tests=True -s build_type=Debug ..
+    - pipenv run conan install --build missing -o cpp_hash_tables:requirements_for_tests=True -s build_type=Debug ..
     - cd ../
   script:
     - cmake -S ./ -B $BUILD_DIR
@@ -224,7 +224,7 @@ static analysis:
     - pipenv run conan profile new --detect default
     - pipenv run conan profile update settings.compiler.libcxx=libc++ default
     - pipenv run conan remote add gitlab https://gitlab.com/api/v4/packages/conan
-    - pipenv run conan install --build missing -o cpp-hash-tables:requirements_for_tests=True -s build_type=Release ..
+    - pipenv run conan install --build missing -o cpp_hash_tables:requirements_for_tests=True -s build_type=Release ..
     - cd ../
 
 .clang-debug-test-base:
@@ -235,7 +235,7 @@ static analysis:
     - pipenv run conan profile new --detect default
     - pipenv run conan profile update settings.compiler.libcxx=libc++ default
     - pipenv run conan remote add gitlab https://gitlab.com/api/v4/packages/conan
-    - pipenv run conan install --build missing -o cpp-hash-tables:requirements_for_tests=True -s build_type=Debug ..
+    - pipenv run conan install --build missing -o cpp_hash_tables:requirements_for_tests=True -s build_type=Debug ..
     - cd ../
 
 clang coverage:
@@ -342,7 +342,7 @@ msvc-release:
     - cd $BUILD_DIR
     - pipenv run conan profile new --detect default
     - pipenv run conan remote add gitlab https://gitlab.com/api/v4/packages/conan
-    - pipenv run conan install --build missing -o cpp-hash-tables:requirements_for_tests=True -s build_type=Release ..
+    - pipenv run conan install --build missing -o cpp_hash_tables:requirements_for_tests=True -s build_type=Release ..
     - cd ../
   script:
     - cmake -S ./ -B $BUILD_DIR
@@ -410,7 +410,7 @@ doc:
     - pipenv run conan profile new --detect default
     - pipenv run conan profile update settings.compiler.libcxx=libc++ default
     - pipenv run conan remote add gitlab https://gitlab.com/api/v4/packages/conan
-    - pipenv run conan install --build missing -o cpp-hash-tables:requirements_for_tests=True ..
+    - pipenv run conan install --build missing -o cpp_hash_tables:requirements_for_tests=True ..
     - cd ../
     - cmake -S ./ -B build_doc
       -DHASH_TABLES_BUILD_DOC:BOOL=ON
