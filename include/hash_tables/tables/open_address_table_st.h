@@ -811,7 +811,7 @@ private:
         std::optional<std::tuple<node_type*, size_type>> empty_place;
         while (true) {
             if (iter->state() == node_type::node_state::filled) {
-                if (extract_key_(iter->value()) == key) {
+                if (key_equal_(extract_key_(iter->value()), key)) {
                     return {&(*iter), dist};
                 }
             } else {
@@ -866,7 +866,7 @@ private:
         size_type dist = 0;
         while (true) {
             if (iter->state() == node_type::node_state::filled &&
-                extract_key_(iter->value()) == key) {
+                key_equal_(extract_key_(iter->value()), key)) {
                 return iter - nodes_.begin();
             }
             if (iter->state() == node_type::node_state::init) {
