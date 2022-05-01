@@ -25,8 +25,6 @@
 #include <type_traits>
 #include <utility>
 
-#include <__utility/piecewise_construct.h>
-
 #include "hash_tables/extract_key_functions/extract_first_from_pair.h"
 #include "hash_tables/hashes/default_hash.h"
 #include "hash_tables/tables/open_address_table_st.h"
