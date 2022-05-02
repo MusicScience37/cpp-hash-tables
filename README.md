@@ -11,6 +11,7 @@ Hash tables in C++.
 ## Repositories
 
 - Main in GitLab: [https://gitlab.com/MusicScience37/cpp-hash-tables](https://gitlab.com/MusicScience37/cpp-hash-tables)
+- Mirror in GitHub: [https://github.com/MusicScience37/cpp-hash-tables](https://github.com/MusicScience37/cpp-hash-tables)
 
 ## Documentation
 
