@@ -32,6 +32,7 @@
     "NOLINTNEXTLINE",
     "pipenv",
     "Pipfile",
+    "pprof",
     "profraw",
     "SAST",
     "toctree",
