@@ -15,7 +15,7 @@
  */
 /*!
  * \file
- * \brief Benchmark to create pairs in tables.
+ * \brief Benchmark to find pairs in tables.
  */
 #include <cassert>
 #include <cstddef>
@@ -76,20 +76,24 @@ protected:
 };
 
 // NOLINTNEXTLINE
-STAT_BENCH_CASE_F(fixture, "create_pairs", "open_address_st") {
+STAT_BENCH_CASE_F(fixture, "find_pairs", "open_address_st") {
+    hash_tables::tables::open_address_table_st<value_type, key_type,
+        extract_key>
+        table;
+    table.max_load_factor(max_load_factor_);
+    table.reserve(size_);
+    for (std::size_t i = 0; i < size_; ++i) {
+        const auto& key = keys_.at(i);
+        const auto& second_value = second_values_.at(i);
+        table.emplace(key, key, second_value);
+    }
+    assert(table.size() == size_);  // NOLINT
+
     STAT_BENCH_MEASURE() {
-        hash_tables::tables::open_address_table_st<value_type, key_type,
-            extract_key>
-            table;
-        table.max_load_factor(max_load_factor_);
-        table.reserve(size_);
         for (std::size_t i = 0; i < size_; ++i) {
             const auto& key = keys_.at(i);
-            const auto& second_value = second_values_.at(i);
-            table.emplace(key, key, second_value);
+            stat_bench::util::do_not_optimize(table.at(keys_.at(i)));
         }
-        assert(table.size() == size_);  // NOLINT
-        stat_bench::util::do_not_optimize(table);
     };
 }
 

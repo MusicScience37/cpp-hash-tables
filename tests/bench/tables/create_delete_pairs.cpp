@@ -15,7 +15,7 @@
  */
 /*!
  * \file
- * \brief Benchmark to create pairs in tables.
+ * \brief Benchmark to create and delete pairs in tables.
  */
 #include <cassert>
 #include <cstddef>
@@ -76,7 +76,7 @@ protected:
 };
 
 // NOLINTNEXTLINE
-STAT_BENCH_CASE_F(fixture, "create_pairs", "open_address_st") {
+STAT_BENCH_CASE_F(fixture, "create_delete_pairs", "open_address_st") {
     STAT_BENCH_MEASURE() {
         hash_tables::tables::open_address_table_st<value_type, key_type,
             extract_key>
@@ -89,6 +89,11 @@ STAT_BENCH_CASE_F(fixture, "create_pairs", "open_address_st") {
             table.emplace(key, key, second_value);
         }
         assert(table.size() == size_);  // NOLINT
+        stat_bench::util::do_not_optimize(table);
+        for (std::size_t i = 0; i < size_; ++i) {
+            const auto& key = keys_.at(i);
+            table.erase(key);
+        }
         stat_bench::util::do_not_optimize(table);
     };
 }
