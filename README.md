@@ -4,7 +4,7 @@
 [![C++ standard](https://img.shields.io/badge/standard-C%2B%2B17-blue?logo=c%2B%2B)](https://en.cppreference.com/w/cpp/compiler_support/17)
 [![pipeline status](https://gitlab.com/MusicScience37/cpp-hash-tables/badges/develop/pipeline.svg)](https://gitlab.com/MusicScience37/cpp-hash-tables/-/commits/develop)
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit)
-[![codecov](https://codecov.io/gl/MusicScience37/cpp-hash-tables/branch/develop/graph/badge.svg?token=SC8WDCFSJT)](https://codecov.io/gl/MusicScience37/cpp-hash-tables)
+[![codecov](https://codecov.io/gl/MusicScience37/cpp-hash-tables/branch/develop/graph/badge.svg?token=ZTN5W5W5AO)](https://codecov.io/gl/MusicScience37/cpp-hash-tables)
 
 Hash tables in C++.
 
