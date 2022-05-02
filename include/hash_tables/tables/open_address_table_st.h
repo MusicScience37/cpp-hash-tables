@@ -247,7 +247,8 @@ public:
               node_allocator_type(std::move(allocator))),
           extract_key_(std::move(extract_key)),
           hash_(std::move(hash)),
-          key_equal_(std::move(key_equal)) {}
+          key_equal_(std::move(key_equal)),
+          desired_node_ind_mask_(nodes_.size() - 1U) {}
 
     /*!
      * \brief Copy constructor.
@@ -681,6 +682,7 @@ public:
             }
         }
         std::swap(nodes_, new_table.nodes_);
+        std::swap(desired_node_ind_mask_, new_table.desired_node_ind_mask_);
     }
 
     /*!
@@ -746,7 +748,7 @@ private:
     [[nodiscard]] auto desired_node_ind(const key_type& key) const
         -> size_type {
         const size_type hash_number = hash_(key);
-        return hash_number & (nodes_.size() - 1);
+        return hash_number & desired_node_ind_mask_;
     }
 
     /*!
@@ -928,6 +930,9 @@ private:
 
     //! Current maximum distance from the place determined by hash number.
     size_type max_dist_{0};
+
+    //! Bit mask to get node index determined by hash number.
+    size_type desired_node_ind_mask_{};
 };
 
 }  // namespace hash_tables::tables
