@@ -1,2 +1,5 @@
 add_executable(hash_tables_bench_maps_create_pairs create_pairs.cpp)
 target_add_to_benchmark(hash_tables_bench_maps_create_pairs)
+
+add_executable(hash_tables_bench_maps_find_pairs find_pairs.cpp)
+target_add_to_benchmark(hash_tables_bench_maps_find_pairs)
