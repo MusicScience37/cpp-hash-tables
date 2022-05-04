@@ -26,6 +26,7 @@
 #include <shared_mutex>
 #include <stdexcept>
 
+#include "hash_tables/exceptions.h"
 #include "hash_tables/hashes/default_hash.h"
 #include "hash_tables/utility/cache_line.h"
 #include "hash_tables/utility/round_up_to_power_of_two.h"
@@ -194,7 +195,7 @@ public:
         if (iter != bucket.nodes.end()) {
             return *iter;
         }
-        throw std::out_of_range("Key not found.");
+        throw key_not_found();
     }
 
     ///@}

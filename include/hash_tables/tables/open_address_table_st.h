@@ -31,6 +31,7 @@
 #include <utility>
 #include <vector>
 
+#include "hash_tables/exceptions.h"
 #include "hash_tables/hashes/default_hash.h"
 #include "hash_tables/utility/move_if_nothrow_move_constructible.h"
 #include "hash_tables/utility/round_up_to_power_of_two.h"
@@ -900,7 +901,7 @@ private:
         -> size_type {
         const auto node_ind = find_node_ind_for(key);
         if (!node_ind) {
-            throw std::out_of_range("Key not found.");
+            throw key_not_found();
         }
         return *node_ind;
     }
