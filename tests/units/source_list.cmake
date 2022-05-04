@@ -5,6 +5,7 @@ set(SOURCE_FILES
     hash_tables/hashes/std_hash_test.cpp
     hash_tables/maps/open_address_map_st_test.cpp
     hash_tables/tables/open_address_table_st_test.cpp
+    hash_tables/tables/separate_shared_chain_table_mt_test.cpp
     hash_tables/utility/atomic_shared_ptr_test.cpp
     hash_tables/utility/move_if_nothrow_move_constructible_test.cpp
     hash_tables/utility/round_up_to_power_of_two_test.cpp
