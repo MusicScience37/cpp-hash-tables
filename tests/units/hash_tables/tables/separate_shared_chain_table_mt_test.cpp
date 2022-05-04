@@ -19,6 +19,7 @@
  */
 #include "hash_tables/tables/separate_shared_chain_table_mt.h"
 
+#include <optional>
 #include <string>
 #include <tuple>
 #include <unordered_set>
@@ -266,6 +267,23 @@ TEMPLATE_TEST_CASE("hash_tables::tables::separate_shared_chain_table_mt", "",
         CHECK(const_table.at(key2) == value2);
     }
 
+    SECTION("get_to") {
+        table_type table;
+        const auto value1 = std::string("abc");
+        const char key1 = extract_key_type()(value1);
+        const auto value2 = std::string("bcdef");
+        const char key2 = extract_key_type()(value2);
+        CHECK_NOTHROW(table.emplace(key1, value1));
+        CHECK_NOTHROW(table.emplace(key2, value2));
+
+        const auto& const_table = table;
+        std::optional<value_type> res;
+        CHECK_NOTHROW(const_table.get_to(res, key1));
+        CHECK(res == value1);
+        CHECK_NOTHROW(const_table.get_to(res, key2));
+        CHECK(res == value2);
+    }
+
     SECTION("get_or_create") {
         table_type table;
         const auto value1 = std::string("abc");
@@ -281,6 +299,24 @@ TEMPLATE_TEST_CASE("hash_tables::tables::separate_shared_chain_table_mt", "",
         CHECK(table.size() == 2);
     }
 
+    SECTION("get_or_create_to") {
+        table_type table;
+        const auto value1 = std::string("abc");
+        const char key1 = extract_key_type()(value1);
+        const auto value2 = std::string("bcdef");
+        const char key2 = extract_key_type()(value2);
+        CHECK_NOTHROW(table.emplace(key1, value1));
+        CHECK(table.size() == 1);
+
+        std::optional<value_type> res;
+        CHECK_NOTHROW(table.get_or_create_to(res, key1, "af"));
+        CHECK(res == value1);
+        CHECK(table.size() == 1);
+        CHECK_NOTHROW(table.get_or_create_to(res, key2, value2.c_str()));
+        CHECK(res == value2);
+        CHECK(table.size() == 2);
+    }
+
     SECTION("try_get") {
         table_type table;
         const auto value1 = std::string("abc");
@@ -292,6 +328,22 @@ TEMPLATE_TEST_CASE("hash_tables::tables::separate_shared_chain_table_mt", "",
         const auto& const_table = table;
         CHECK(const_table.try_get(key1) == value1);
         CHECK(const_table.try_get(key2) == std::nullopt);
+    }
+
+    SECTION("try_get_to") {
+        table_type table;
+        const auto value1 = std::string("abc");
+        const char key1 = extract_key_type()(value1);
+        const auto value2 = std::string("bcdef");
+        const char key2 = extract_key_type()(value2);
+        CHECK_NOTHROW(table.emplace(key1, value1));
+
+        const auto& const_table = table;
+        std::optional<value_type> res;
+        CHECK(const_table.try_get_to(res, key1));
+        CHECK(res == value1);
+        CHECK_FALSE(const_table.try_get(key2));
+        CHECK(res == value1);
     }
 
     SECTION("has") {
