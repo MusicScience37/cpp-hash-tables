@@ -23,7 +23,6 @@
 #include <atomic>
 #include <cstddef>
 #include <functional>
-#include <list>
 #include <memory>
 #include <mutex>
 #include <optional>
@@ -509,7 +508,7 @@ private:
     //! Struct of buckets.
     struct alignas(utility::cache_line) bucket_type {
         //! Nodes.
-        std::list<value_type, allocator_type> nodes;
+        std::vector<value_type, allocator_type> nodes;
 
         //! Mutex.
         std::shared_mutex mutex{};
