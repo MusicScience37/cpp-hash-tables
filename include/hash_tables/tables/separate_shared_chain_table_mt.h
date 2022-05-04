@@ -317,7 +317,7 @@ public:
             auto& bucket = *bucket_ptr;
             std::shared_lock<std::shared_mutex> lock(bucket.mutex);
             for (auto& node : bucket.nodes) {
-                function(static_cast<value_type&>(node));
+                std::invoke(function, static_cast<value_type&>(node));
             }
         }
     }
@@ -334,9 +334,77 @@ public:
             auto& bucket = *bucket_ptr;
             std::shared_lock<std::shared_mutex> lock(bucket.mutex);
             for (auto& node : bucket.nodes) {
-                function(static_cast<const value_type&>(node));
+                std::invoke(function, static_cast<const value_type&>(node));
             }
         }
+    }
+
+    ///@}
+
+    /*!
+     * \name Delete values.
+     */
+    ///@{
+
+    /*!
+     * \brief Delete all values.
+     */
+    void clear() {
+        for (auto& bucket_ptr : buckets_) {
+            auto& bucket = *bucket_ptr;
+            std::unique_lock<std::shared_mutex> lock(bucket.mutex);
+            size_type erased_size = bucket.nodes.size();
+            bucket.nodes.clear();
+            size_ -= erased_size;
+        }
+    }
+
+    /*!
+     * \brief Delete a value.
+     *
+     * \param[in] key Key.
+     * \retval true Deleted the value.
+     * \retval false Failed to deleted the value because the key not found.
+     */
+    auto erase(const key_type& key) -> bool {
+        auto& bucket = bucket_for(key);
+        std::unique_lock<std::shared_mutex> lock(bucket.mutex);
+        const auto iter = std::find_if(bucket.nodes.begin(), bucket.nodes.end(),
+            value_has_key_equal_to(key));
+        if (iter != bucket.nodes.end()) {
+            bucket.nodes.erase(iter);
+            --size_;
+            return true;
+        }
+        return false;
+    }
+
+    /*!
+     * \brief Delete values which satisfy a condition.
+     *
+     * \tparam Function Type of the function.
+     * \param[in] function Function to check the condition.
+     * \return Number of removed values.
+     */
+    template <typename Function>
+    auto erase_if(const Function& function) -> size_type {
+        size_type erased_count = 0;
+        for (auto& bucket_ptr : buckets_) {
+            auto& bucket = *bucket_ptr;
+            std::unique_lock<std::shared_mutex> lock(bucket.mutex);
+            for (auto iter = bucket.nodes.begin();
+                 iter != bucket.nodes.end();) {
+                if (std::invoke(
+                        function, static_cast<const value_type&>(*iter))) {
+                    iter = bucket.nodes.erase(iter);
+                    --size_;
+                    ++erased_count;
+                } else {
+                    ++iter;
+                }
+            }
+        }
+        return erased_count;
     }
 
     ///@}

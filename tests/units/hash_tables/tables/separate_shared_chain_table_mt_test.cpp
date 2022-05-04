@@ -343,4 +343,108 @@ TEMPLATE_TEST_CASE("hash_tables::tables::separate_shared_chain_table_mt", "",
         });
         CHECK(args == std::unordered_set<std::string>{value1, value2});
     }
+
+    SECTION("clear") {
+        table_type table;
+
+        const auto value1 = std::string("abc");
+        const char key1 = extract_key_type()(value1);
+        CHECK(table.insert(value1));
+        const auto value2 = std::string("bcd");
+        const char key2 = extract_key_type()(value2);
+        CHECK(table.insert(value2));
+
+        CHECK(table.has(key1));
+        CHECK(table.has(key2));
+        CHECK(table.size() == 2);
+
+        CHECK_NOTHROW(table.clear());
+
+        CHECK_FALSE(table.has(key1));
+        CHECK_FALSE(table.has(key2));
+        CHECK(table.size() == 0);  // NOLINT
+    }
+
+    SECTION("erase") {
+        SECTION("successfull") {
+            table_type table;
+
+            const auto value1 = std::string("abc");
+            const char key1 = extract_key_type()(value1);
+            CHECK(table.insert(value1));
+            const auto value2 = std::string("bcd");
+            const char key2 = extract_key_type()(value2);
+            CHECK(table.insert(value2));
+
+            CHECK(table.has(key1));
+            CHECK(table.has(key2));
+            CHECK(table.size() == 2);
+
+            CHECK(table.erase(key1));
+
+            CHECK_FALSE(table.has(key1));
+            CHECK(table.has(key2));
+            CHECK(table.size() == 1);
+        }
+
+        SECTION("key not found") {
+            table_type table;
+
+            const auto value1 = std::string("abc");
+            const char key1 = extract_key_type()(value1);
+            const auto value2 = std::string("bcd");
+            const char key2 = extract_key_type()(value2);
+            CHECK(table.insert(value2));
+
+            CHECK_FALSE(table.has(key1));
+            CHECK(table.has(key2));
+            CHECK(table.size() == 1);
+
+            CHECK_FALSE(table.erase(key1));
+
+            CHECK_FALSE(table.has(key1));
+            CHECK(table.has(key2));
+            CHECK(table.size() == 1);
+        }
+    }
+
+    SECTION("erase_if") {
+        table_type table;
+
+        const auto value1 = std::string("abc");
+        const char key1 = extract_key_type()(value1);
+        CHECK(table.insert(value1));
+        const auto value2 = std::string("bcd");
+        const char key2 = extract_key_type()(value2);
+        CHECK(table.insert(value2));
+
+        CHECK(table.has(key1));
+        CHECK(table.has(key2));
+        CHECK(table.size() == 2);
+
+        CHECK(table.erase_if([&value1](const std::string& val) {
+            return val == value1;
+        }) == 1);
+
+        CHECK_FALSE(table.has(key1));
+        CHECK(table.has(key2));
+        CHECK(table.size() == 1);
+    }
+
+    SECTION("load_factor") {
+        table_type table;
+        CHECK(table.load_factor() == 0.0F);
+
+        CHECK(table.insert("abc"));
+        CHECK(table.size() == 1);
+        CHECK(table.load_factor() ==
+            static_cast<float>(table.size()) /
+                static_cast<float>(table.num_buckets()));
+
+        CHECK(table.insert("def"));
+        CHECK(table.size() == 2);
+        CHECK(table.load_factor() ==
+            static_cast<float>(table.size()) /
+                static_cast<float>(table.num_buckets()));
+    }
 }
