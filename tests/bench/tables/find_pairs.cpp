@@ -99,7 +99,7 @@ STAT_BENCH_CASE_F(fixture, "find_pairs", "open_address_st") {
 }
 
 // NOLINTNEXTLINE
-STAT_BENCH_CASE_F(fixture, "find_pairs", "separate_shared_chain_mt") {
+STAT_BENCH_CASE_F(fixture, "find_pairs", "shared_chain_mt") {
     const auto min_num_buckets =
         static_cast<std::size_t>(static_cast<float>(size_) / max_load_factor_);
     hash_tables::tables::separate_shared_chain_table_mt<value_type, key_type,

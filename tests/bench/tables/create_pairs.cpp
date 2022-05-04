@@ -95,7 +95,7 @@ STAT_BENCH_CASE_F(fixture, "create_pairs", "open_address_st") {
 }
 
 // NOLINTNEXTLINE
-STAT_BENCH_CASE_F(fixture, "create_pairs", "separate_shared_chain_mt") {
+STAT_BENCH_CASE_F(fixture, "create_pairs", "shared_chain_mt") {
     STAT_BENCH_MEASURE() {
         const auto min_num_buckets = static_cast<std::size_t>(
             static_cast<float>(size_) / max_load_factor_);
