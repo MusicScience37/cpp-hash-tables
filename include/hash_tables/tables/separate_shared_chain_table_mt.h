@@ -23,6 +23,7 @@
 #include <list>
 #include <memory>
 #include <mutex>
+#include <optional>
 #include <shared_mutex>
 #include <stdexcept>
 
@@ -174,6 +175,56 @@ public:
         return false;
     }
 
+    /*!
+     * \brief Insert a value from the arguments of its constructor if not exist,
+     * or assign to an existing value.
+     *
+     * \tparam Args Type of arguments of the constructor.
+     * \param[in] key Key of the value. (Assumed to be equal to the key of the
+     * value constructed from arguments.)
+     * \param[in] args Arguments of the constructor.
+     * \retval true Value is inserted.
+     * \retval false Value is assigned to an existing value.
+     */
+    template <typename... Args>
+    auto emplace_or_assign(const key_type& key, Args&&... args) -> bool {
+        auto& bucket = bucket_for(key);
+        std::unique_lock<std::shared_mutex> lock(bucket.mutex);
+        const auto iter = std::find_if(bucket.nodes.begin(), bucket.nodes.end(),
+            value_has_key_equal_to(key));
+        if (iter != bucket.nodes.end()) {
+            *iter = value_type(std::forward<Args>(args)...);
+            return false;
+        }
+        bucket.nodes.emplace_back(std::forward<Args>(args)...);
+        ++size_;
+        return true;
+    }
+
+    /*!
+     * \brief Assign a value to an existing key from the arguments of its
+     * constructor.
+     *
+     * \tparam Args Type of arguments of the constructor.
+     * \param[in] key Key of the value. (Assumed to be equal to the key of the
+     * value constructed from arguments.)
+     * \param[in] args Arguments of the constructor.
+     * \retval true Value is assigned.
+     * \retval false Value is not assigned due to non-existing key.
+     */
+    template <typename... Args>
+    auto assign(const key_type& key, Args&&... args) -> bool {
+        auto& bucket = bucket_for(key);
+        std::unique_lock<std::shared_mutex> lock(bucket.mutex);
+        const auto iter = std::find_if(bucket.nodes.begin(), bucket.nodes.end(),
+            value_has_key_equal_to(key));
+        if (iter != bucket.nodes.end()) {
+            *iter = value_type(std::forward<Args>(args)...);
+            return true;
+        }
+        return false;
+    }
+
     ///@}
 
     /*!
@@ -196,6 +247,96 @@ public:
             return *iter;
         }
         throw key_not_found();
+    }
+
+    /*!
+     * \brief Get a value constructing it if not found.
+     *
+     * \tparam Args Type of arguments of the constructor.
+     * \param[in] key Key.
+     * \param[in] args Arguments of the constructor.
+     * \return Value.
+     */
+    template <typename... Args>
+    [[nodiscard]] auto get_or_create(const key_type& key, Args&&... args)
+        -> value_type {
+        auto& bucket = bucket_for(key);
+        std::unique_lock<std::shared_mutex> lock(bucket.mutex);
+        const auto iter = std::find_if(bucket.nodes.begin(), bucket.nodes.end(),
+            value_has_key_equal_to(key));
+        if (iter != bucket.nodes.end()) {
+            return *iter;
+        }
+        auto& value = bucket.nodes.emplace_back(std::forward<Args>(args)...);
+        ++size_;
+        return value;
+    }
+
+    /*!
+     * \brief Get a value if found.
+     *
+     * \param[in] key Key.
+     * \return Pointer to the value if found, otherwise nullptr.
+     */
+    [[nodiscard]] auto try_get(const key_type& key) const
+        -> std::optional<value_type> {
+        auto& bucket = bucket_for(key);
+        std::shared_lock<std::shared_mutex> lock(bucket.mutex);
+        const auto iter = std::find_if(bucket.nodes.begin(), bucket.nodes.end(),
+            value_has_key_equal_to(key));
+        if (iter != bucket.nodes.end()) {
+            return *iter;
+        }
+        return std::nullopt;
+    }
+
+    /*!
+     * \brief Check whether a key exists.
+     *
+     * \param[in] key Key.
+     * \retval true Key exists.
+     * \retval false Key doesn't exists.
+     */
+    [[nodiscard]] auto has(const key_type& key) const -> bool {
+        auto& bucket = bucket_for(key);
+        std::shared_lock<std::shared_mutex> lock(bucket.mutex);
+        const auto iter = std::find_if(bucket.nodes.begin(), bucket.nodes.end(),
+            value_has_key_equal_to(key));
+        return iter != bucket.nodes.end();
+    }
+
+    /*!
+     * \brief Call a function with all values.
+     *
+     * \tparam Function Type of the function.
+     * \param[in] function Function.
+     */
+    template <typename Function>
+    void for_all(const Function& function) {
+        for (auto& bucket_ptr : buckets_) {
+            auto& bucket = *bucket_ptr;
+            std::shared_lock<std::shared_mutex> lock(bucket.mutex);
+            for (auto& node : bucket.nodes) {
+                function(static_cast<value_type&>(node));
+            }
+        }
+    }
+
+    /*!
+     * \brief Call a function with all values.
+     *
+     * \tparam Function Type of the function.
+     * \param[in] function Function.
+     */
+    template <typename Function>
+    void for_all(const Function& function) const {
+        for (auto& bucket_ptr : buckets_) {
+            auto& bucket = *bucket_ptr;
+            std::shared_lock<std::shared_mutex> lock(bucket.mutex);
+            for (auto& node : bucket.nodes) {
+                function(static_cast<const value_type&>(node));
+            }
+        }
     }
 
     ///@}
