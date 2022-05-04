@@ -559,7 +559,7 @@ private:
      */
     [[nodiscard]] auto value_has_key_equal_to(const key_type& key) const {
         return [this, &key](const value_type& value) -> bool {
-            return extract_key_(value) == key;
+            return key_equal_(extract_key_(value), key);
         };
     }
 
