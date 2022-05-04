@@ -253,6 +253,26 @@ public:
     }
 
     /*!
+     * \brief Get a value.
+     *
+     * \tparam ValueOutput Type of the value for output.
+     * \param[in] key Key.
+     * \param[out] value Value.
+     */
+    template <typename ValueOutput>
+    void get_to(ValueOutput& value, const key_type& key) const {
+        auto& bucket = bucket_for(key);
+        std::shared_lock<std::shared_mutex> lock(bucket.mutex);
+        const auto iter = std::find_if(bucket.nodes.begin(), bucket.nodes.end(),
+            value_has_key_equal_to(key));
+        if (iter != bucket.nodes.end()) {
+            value = *iter;
+            return;
+        }
+        throw key_not_found();
+    }
+
+    /*!
      * \brief Get a value constructing it if not found.
      *
      * \tparam Args Type of arguments of the constructor.
@@ -276,10 +296,36 @@ public:
     }
 
     /*!
+     * \brief Get a value constructing it if not found.
+     *
+     * \tparam ValueOutput Type of the value for output.
+     * \tparam Args Type of arguments of the constructor.
+     * \param[in] key Key.
+     * \param[out] value Value.
+     * \param[in] args Arguments of the constructor.
+     */
+    template <typename ValueOutput, typename... Args>
+    void get_or_create_to(
+        ValueOutput& value, const key_type& key, Args&&... args) {
+        auto& bucket = bucket_for(key);
+        std::unique_lock<std::shared_mutex> lock(bucket.mutex);
+        const auto iter = std::find_if(bucket.nodes.begin(), bucket.nodes.end(),
+            value_has_key_equal_to(key));
+        if (iter != bucket.nodes.end()) {
+            value = *iter;
+            return;
+        }
+        const auto& value_temp =
+            bucket.nodes.emplace_back(std::forward<Args>(args)...);
+        ++size_;
+        value = value_temp;
+    }
+
+    /*!
      * \brief Get a value if found.
      *
      * \param[in] key Key.
-     * \return Pointer to the value if found, otherwise nullptr.
+     * \return Value if found, otherwise null.
      */
     [[nodiscard]] auto try_get(const key_type& key) const
         -> std::optional<value_type> {
@@ -291,6 +337,28 @@ public:
             return *iter;
         }
         return std::nullopt;
+    }
+
+    /*!
+     * \brief Get a value if found.
+     *
+     * \tparam ValueOutput Type of the value for output.
+     * \param[in] key Key.
+     * \param[out] value Value.
+     * \retval true Value was found and assigned to value.
+     * \retval false Value was not found.
+     */
+    template <typename ValueOutput>
+    auto try_get_to(ValueOutput& value, const key_type& key) const -> bool {
+        auto& bucket = bucket_for(key);
+        std::shared_lock<std::shared_mutex> lock(bucket.mutex);
+        const auto iter = std::find_if(bucket.nodes.begin(), bucket.nodes.end(),
+            value_has_key_equal_to(key));
+        if (iter != bucket.nodes.end()) {
+            value = *iter;
+            return true;
+        }
+        return false;
     }
 
     /*!
