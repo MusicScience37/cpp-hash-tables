@@ -21,6 +21,7 @@
 
 #include <atomic>
 #include <memory>
+#include <utility>
 
 namespace hash_tables::utility {
 

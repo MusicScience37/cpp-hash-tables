@@ -20,6 +20,7 @@
 #include "hash_tables/tables/separate_shared_chain_table_mt.h"
 
 #include <string>
+#include <tuple>
 #include <unordered_set>
 
 #include <catch2/catch_message.hpp>

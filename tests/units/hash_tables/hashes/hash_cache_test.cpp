@@ -19,6 +19,8 @@
  */
 #include "hash_tables/hashes/hash_cache.h"
 
+#include <string>
+
 #include <catch2/catch_test_macros.hpp>
 
 #include "hash_tables/hashes/default_hash.h"

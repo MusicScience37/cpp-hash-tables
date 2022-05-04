@@ -20,12 +20,15 @@
 #pragma once
 
 #include <algorithm>
+#include <cstddef>
+#include <functional>
 #include <list>
 #include <memory>
 #include <mutex>
 #include <optional>
 #include <shared_mutex>
-#include <stdexcept>
+#include <utility>
+#include <vector>
 
 #include "hash_tables/exceptions.h"
 #include "hash_tables/hashes/default_hash.h"

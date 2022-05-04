@@ -21,6 +21,7 @@
 
 #include <atomic>
 #include <memory>
+#include <ostream>
 #include <string>
 
 #include <catch2/catch_test_macros.hpp>

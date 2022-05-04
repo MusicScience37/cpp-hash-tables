@@ -19,11 +19,11 @@
  */
 #include <cassert>
 #include <cstddef>
+#include <functional>
 #include <memory>
 #include <string>
 #include <type_traits>
 #include <unordered_map>
-#include <utility>
 #include <vector>
 
 #include <fmt/core.h>
