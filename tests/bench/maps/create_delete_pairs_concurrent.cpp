@@ -15,17 +15,14 @@
  */
 /*!
  * \file
- * \brief Benchmark to create and delete pairs in tables concurrently.
+ * \brief Test to create and delete pairs in maps.
  */
-#include <algorithm>
 #include <cassert>
 #include <cstddef>
 #include <memory>
-#include <mutex>
-#include <shared_mutex>
 #include <string>
 #include <type_traits>
-#include <utility>
+#include <unordered_map>
 #include <vector>
 
 #include <fmt/core.h>
@@ -34,23 +31,24 @@
 #include <stat_bench/param/parameter_value_vector.h>
 #include <stat_bench/util/do_not_optimize.h>
 
-#include "hash_tables/extract_key_functions/extract_first_from_pair.h"
 #include "hash_tables/hashes/std_hash.h"
-#include "hash_tables/tables/open_address_table_st.h"
-#include "hash_tables/tables/separate_shared_chain_table_mt.h"
+#include "hash_tables/maps/open_address_map_st.h"
+#include "hash_tables/maps/separate_shared_chain_map_mt.h"
 #include "hash_tables_test/create_random_int_vector.h"
 
 using key_type = int;
-using value_type = std::pair<int, std::string>;
-using extract_key =
-    hash_tables::extract_key_functions::extract_first_from_pair<value_type>;
+using mapped_type = std::string;
 
 class fixture : public stat_bench::FixtureBase {
 public:
     fixture() {
-        // NOLINTNEXTLINE
-        add_param<std::size_t>("size")->add(100)->add(1000);
-        // NOLINTNEXTLINE
+        add_param<std::size_t>("size")
+            ->add(100)   // NOLINT
+            ->add(1000)  // NOLINT
+#ifdef NDEBUG
+            ->add(10000)  // NOLINT
+#endif
+            ;
         add_threads_param()->add(1)->add(2)->add(4);
     }
 
@@ -72,16 +70,12 @@ protected:
     std::vector<key_type> keys_{};
 
     // NOLINTNEXTLINE(cppcoreguidelines-non-private-member-variables-in-classes)
-    std::vector<std::string> second_values_{};
+    std::vector<mapped_type> second_values_{};
 };
 
 // NOLINTNEXTLINE
-STAT_BENCH_CASE_F(
-    fixture, "create_delete_pairs_concurrent", "mutex_open_address_st") {
-    const auto min_num_buckets = size_ * 2;
-    hash_tables::tables::open_address_table_st<value_type, key_type,
-        extract_key>
-        table{min_num_buckets};
+STAT_BENCH_CASE_F(fixture, "create_delete_pairs", "mutex_unordered_map") {
+    std::unordered_map<key_type, mapped_type> map{2U * size_};
     std::mutex mutex;
 
     const std::size_t num_threads = STAT_BENCH_CONTEXT_NAME.threads();
@@ -95,26 +89,23 @@ STAT_BENCH_CASE_F(
             const auto& key = keys_.at(i);
             const auto& second_value = second_values_.at(i);
             std::unique_lock<std::mutex> lock(mutex);
-            table.emplace(key, key, second_value);
+            map.emplace(key, second_value);
         }
         for (std::size_t i = begin_ind; i < end_ind; ++i) {
             const auto& key = keys_.at(i);
             std::unique_lock<std::mutex> lock(mutex);
-            table.erase(key);
+            map.erase(key);
         }
     };
 
-    assert(table.empty());  // NOLINT
-    stat_bench::util::do_not_optimize(table);
+    stat_bench::util::do_not_optimize(map);
 }
 
 // NOLINTNEXTLINE
-STAT_BENCH_CASE_F(
-    fixture, "create_delete_pairs_concurrent", "shared_chain_mt") {
-    const auto min_num_buckets = size_ * 2;
-    hash_tables::tables::separate_shared_chain_table_mt<value_type, key_type,
-        extract_key>
-        table{min_num_buckets};
+STAT_BENCH_CASE_F(fixture, "create_delete_pairs", "mutex_open_address_st") {
+    hash_tables::maps::open_address_map_st<key_type, mapped_type> map{
+        2U * size_};
+    std::mutex mutex;
 
     const std::size_t num_threads = STAT_BENCH_CONTEXT_NAME.threads();
     const std::size_t size_per_thread = (size_ + num_threads - 1) / num_threads;
@@ -126,16 +117,43 @@ STAT_BENCH_CASE_F(
         for (std::size_t i = begin_ind; i < end_ind; ++i) {
             const auto& key = keys_.at(i);
             const auto& second_value = second_values_.at(i);
-            table.emplace(key, key, second_value);
+            std::unique_lock<std::mutex> lock(mutex);
+            map.emplace(key, second_value);
         }
         for (std::size_t i = begin_ind; i < end_ind; ++i) {
             const auto& key = keys_.at(i);
-            table.erase(key);
+            std::unique_lock<std::mutex> lock(mutex);
+            map.erase(key);
         }
     };
 
-    assert(table.empty());  // NOLINT
-    stat_bench::util::do_not_optimize(table);
+    stat_bench::util::do_not_optimize(map);
+}
+
+// NOLINTNEXTLINE
+STAT_BENCH_CASE_F(fixture, "create_delete_pairs", "shared_chain_mt") {
+    hash_tables::maps::separate_shared_chain_map_mt<key_type, mapped_type> map{
+        2U * size_};
+
+    const std::size_t num_threads = STAT_BENCH_CONTEXT_NAME.threads();
+    const std::size_t size_per_thread = (size_ + num_threads - 1) / num_threads;
+
+    STAT_BENCH_MEASURE_INDEXED(thread_ind, /*sample_ind*/, /*iteration_ind*/) {
+        const std::size_t begin_ind = thread_ind * size_per_thread;
+        const std::size_t end_ind =
+            std::min((thread_ind + 1) * size_per_thread, size_);
+        for (std::size_t i = begin_ind; i < end_ind; ++i) {
+            const auto& key = keys_.at(i);
+            const auto& second_value = second_values_.at(i);
+            map.emplace(key, second_value);
+        }
+        for (std::size_t i = begin_ind; i < end_ind; ++i) {
+            const auto& key = keys_.at(i);
+            map.erase(key);
+        }
+    };
+
+    stat_bench::util::do_not_optimize(map);
 }
 
 STAT_BENCH_MAIN
