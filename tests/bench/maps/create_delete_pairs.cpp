@@ -33,6 +33,7 @@
 
 #include "hash_tables/hashes/std_hash.h"
 #include "hash_tables/maps/open_address_map_st.h"
+#include "hash_tables/maps/separate_shared_chain_map_mt.h"
 #include "hash_tables_test/create_random_int_vector.h"
 
 using key_type = int;
@@ -74,9 +75,10 @@ protected:
 
 // NOLINTNEXTLINE
 STAT_BENCH_CASE_F(fixture, "create_delete_pairs", "unordered_map") {
+    std::unordered_map<key_type, mapped_type> map;
+    map.reserve(size_);
+
     STAT_BENCH_MEASURE() {
-        std::unordered_map<key_type, mapped_type> map;
-        map.reserve(size_);
         for (std::size_t i = 0; i < size_; ++i) {
             const auto& key = keys_.at(i);
             const auto& second_value = second_values_.at(i);
@@ -94,9 +96,31 @@ STAT_BENCH_CASE_F(fixture, "create_delete_pairs", "unordered_map") {
 
 // NOLINTNEXTLINE
 STAT_BENCH_CASE_F(fixture, "create_delete_pairs", "open_address_st") {
+    hash_tables::maps::open_address_map_st<key_type, mapped_type> map;
+    map.reserve(size_);
+
     STAT_BENCH_MEASURE() {
-        hash_tables::maps::open_address_map_st<key_type, mapped_type> map;
-        map.reserve(size_);
+        for (std::size_t i = 0; i < size_; ++i) {
+            const auto& key = keys_.at(i);
+            const auto& second_value = second_values_.at(i);
+            map.emplace(key, second_value);
+        }
+        assert(map.size() == size_);  // NOLINT
+        stat_bench::util::do_not_optimize(map);
+        for (std::size_t i = 0; i < size_; ++i) {
+            const auto& key = keys_.at(i);
+            map.erase(key);
+        }
+        stat_bench::util::do_not_optimize(map);
+    };
+}
+
+// NOLINTNEXTLINE
+STAT_BENCH_CASE_F(fixture, "create_delete_pairs", "shared_chain_mt") {
+    hash_tables::maps::separate_shared_chain_map_mt<key_type, mapped_type> map{
+        2U * size_};
+
+    STAT_BENCH_MEASURE() {
         for (std::size_t i = 0; i < size_; ++i) {
             const auto& key = keys_.at(i);
             const auto& second_value = second_values_.at(i);
