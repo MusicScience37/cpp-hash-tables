@@ -20,6 +20,7 @@
 #pragma once
 
 #include <algorithm>
+#include <atomic>
 #include <cstddef>
 #include <functional>
 #include <list>
@@ -567,7 +568,7 @@ private:
     std::vector<bucket_ptr_type, bucket_allocator_type> buckets_;
 
     //! Number of values.
-    size_type size_{0};
+    std::atomic<size_type> size_{0};
 
     //! Function to extract keys from values.
     extract_key_type extract_key_;
