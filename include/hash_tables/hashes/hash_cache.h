@@ -19,6 +19,8 @@
  */
 #pragma once
 
+#include <cstddef>
+
 #include "hash_tables/hashes/default_hash.h"
 #include "hash_tables/hashes/std_hash.h"
 

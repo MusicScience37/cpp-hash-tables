@@ -20,14 +20,12 @@
 #include <cstddef>
 #include <ostream>
 #include <string>
-#include <utility>
 #include <vector>
 
 #include <catch2/catch_message.hpp>
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 
-#include "hash_tables/extract_key_functions/extract_first_from_pair.h"
 #include "hash_tables/maps/open_address_map_st.h"
 #include "hash_tables_test/create_random_int_vector.h"
 
