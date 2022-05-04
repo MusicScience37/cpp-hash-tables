@@ -17,6 +17,7 @@
  * \file
  * \brief Benchmark to find pairs in tables.
  */
+#include <algorithm>
 #include <cassert>
 #include <cstddef>
 #include <memory>

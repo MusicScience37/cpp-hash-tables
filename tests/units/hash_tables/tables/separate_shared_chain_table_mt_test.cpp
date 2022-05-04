@@ -20,6 +20,7 @@
 #include "hash_tables/tables/separate_shared_chain_table_mt.h"
 
 #include <optional>
+#include <ostream>
 #include <string>
 #include <tuple>
 #include <unordered_set>
