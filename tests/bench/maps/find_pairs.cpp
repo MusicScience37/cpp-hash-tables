@@ -15,14 +15,14 @@
  */
 /*!
  * \file
- * \brief Benchmark to create pairs in tables.
+ * \brief Test to find pairs in maps.
  */
 #include <cassert>
 #include <cstddef>
 #include <memory>
 #include <string>
 #include <type_traits>
-#include <utility>
+#include <unordered_map>
 #include <vector>
 
 #include <fmt/core.h>
@@ -31,29 +31,29 @@
 #include <stat_bench/param/parameter_value_vector.h>
 #include <stat_bench/util/do_not_optimize.h>
 
-#include "hash_tables/extract_key_functions/extract_first_from_pair.h"
 #include "hash_tables/hashes/std_hash.h"
-#include "hash_tables/tables/open_address_table_st.h"
-#include "hash_tables/tables/separate_shared_chain_table_mt.h"
+#include "hash_tables/maps/open_address_map_st.h"
+#include "hash_tables/maps/separate_shared_chain_map_mt.h"
 #include "hash_tables_test/create_random_int_vector.h"
 
 using key_type = int;
-using value_type = std::pair<int, std::string>;
-using extract_key =
-    hash_tables::extract_key_functions::extract_first_from_pair<value_type>;
+using mapped_type = std::string;
 
 class fixture : public stat_bench::FixtureBase {
 public:
     fixture() {
-        // NOLINTNEXTLINE
-        add_param<std::size_t>("size")->add(10)->add(100)->add(1000);
-        // NOLINTNEXTLINE
-        add_param<float>("load")->add(0.1)->add(0.2)->add(0.5)->add(0.8);
+        add_param<std::size_t>("size")
+            ->add(10)    // NOLINT
+            ->add(100)   // NOLINT
+            ->add(1000)  // NOLINT
+#ifdef NDEBUG
+            ->add(10000)  // NOLINT
+#endif
+            ;
     }
 
     void setup(stat_bench::bench::InvocationContext& context) override {
         size_ = context.get_param<std::size_t>("size");
-        max_load_factor_ = context.get_param<float>("load");
         keys_ = hash_tables_test::create_random_int_vector<key_type>(size_);
         second_values_.clear();
         second_values_.reserve(keys_.size());
@@ -67,48 +67,66 @@ protected:
     std::size_t size_{};
 
     // NOLINTNEXTLINE(cppcoreguidelines-non-private-member-variables-in-classes)
-    float max_load_factor_{};
-
-    // NOLINTNEXTLINE(cppcoreguidelines-non-private-member-variables-in-classes)
     std::vector<key_type> keys_{};
 
     // NOLINTNEXTLINE(cppcoreguidelines-non-private-member-variables-in-classes)
-    std::vector<std::string> second_values_{};
+    std::vector<mapped_type> second_values_{};
 };
 
 // NOLINTNEXTLINE
-STAT_BENCH_CASE_F(fixture, "create_pairs", "open_address_st") {
+STAT_BENCH_CASE_F(fixture, "find_pairs", "unordered_map") {
+    std::unordered_map<key_type, mapped_type> map;
+    map.reserve(size_);
+    for (std::size_t i = 0; i < size_; ++i) {
+        const auto& key = keys_.at(i);
+        const auto& second_value = second_values_.at(i);
+        map.try_emplace(key, second_value);
+    }
+    assert(map.size() == size_);  // NOLINT
+
     STAT_BENCH_MEASURE() {
-        hash_tables::tables::open_address_table_st<value_type, key_type,
-            extract_key>
-            table;
-        table.max_load_factor(max_load_factor_);
-        table.reserve(size_);
         for (std::size_t i = 0; i < size_; ++i) {
             const auto& key = keys_.at(i);
-            const auto& second_value = second_values_.at(i);
-            table.emplace(key, key, second_value);
-        }
-        assert(table.size() == size_);  // NOLINT
-        stat_bench::util::do_not_optimize(table);
+            stat_bench::util::do_not_optimize(map.at(key));
+        };
     };
 }
 
 // NOLINTNEXTLINE
-STAT_BENCH_CASE_F(fixture, "create_pairs", "shared_chain_mt") {
+STAT_BENCH_CASE_F(fixture, "find_pairs", "open_address_st") {
+    hash_tables::maps::open_address_map_st<key_type, mapped_type> map;
+    map.reserve(size_);
+    for (std::size_t i = 0; i < size_; ++i) {
+        const auto& key = keys_.at(i);
+        const auto& second_value = second_values_.at(i);
+        map.emplace(key, second_value);
+    }
+    assert(map.size() == size_);  // NOLINT
+
     STAT_BENCH_MEASURE() {
-        const auto min_num_buckets = static_cast<std::size_t>(
-            static_cast<float>(size_) / max_load_factor_);
-        hash_tables::tables::separate_shared_chain_table_mt<value_type,
-            key_type, extract_key>
-            table{min_num_buckets};
         for (std::size_t i = 0; i < size_; ++i) {
             const auto& key = keys_.at(i);
-            const auto& second_value = second_values_.at(i);
-            table.emplace(key, key, second_value);
-        }
-        assert(table.size() == size_);  // NOLINT
-        stat_bench::util::do_not_optimize(table);
+            stat_bench::util::do_not_optimize(map.at(key));
+        };
+    };
+}
+
+// NOLINTNEXTLINE
+STAT_BENCH_CASE_F(fixture, "find_pairs", "shared_chain_mt") {
+    hash_tables::maps::separate_shared_chain_map_mt<key_type, mapped_type> map{
+        2U * size_};
+    for (std::size_t i = 0; i < size_; ++i) {
+        const auto& key = keys_.at(i);
+        const auto& second_value = second_values_.at(i);
+        map.emplace(key, second_value);
+    }
+    assert(map.size() == size_);  // NOLINT
+
+    STAT_BENCH_MEASURE() {
+        for (std::size_t i = 0; i < size_; ++i) {
+            const auto& key = keys_.at(i);
+            stat_bench::util::do_not_optimize(map.at(key));
+        };
     };
 }
 

@@ -8,11 +8,11 @@ endif()
 
 project(
     hash_tables
-    VERSION 0.1.0
+    VERSION 0.2.0
     DESCRIPTION "Hash tables in C++."
     LANGUAGES CXX)
 set(FULL_PROJECT_NAME "cpp-hash-tables")
-message(STATUS "cpp-hash-tables version ${PROJECT_VERSION}")
+message(STATUS "${FULL_PROJECT_NAME} version ${PROJECT_VERSION}")
 message(STATUS "build type: ${CMAKE_BUILD_TYPE}")
 
 set(BUILDNAME
@@ -22,9 +22,11 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/CTestCustom.cmake
                ${CMAKE_BINARY_DIR}/CTestCustom.cmake)
 include(CTest)
 
-option(HASH_TABLES_BUILD_DOC "build documentation of cpp-hash-tables" OFF)
-option(HASH_TABLES_TESTING "enable tests of cpp-hash-tables" OFF)
-option(HASH_TABLES_BUILD_EXAMPLES "build examples of cpp-hash-tables" OFF)
+option(HASH_TABLES_BUILD_DOC "build documentation of ${FULL_PROJECT_NAME}" OFF)
+option(HASH_TABLES_TESTING "enable tests of ${FULL_PROJECT_NAME}" OFF)
+option(HASH_TABLES_BUILD_EXAMPLES "build examples of ${FULL_PROJECT_NAME}" OFF)
+option(HASH_TABLES_ENABLE_PROFILING "enable profiling of ${FULL_PROJECT_NAME}"
+       OFF)
 
 set(CMAKE_CXX_STANDARD
     17
@@ -71,4 +73,8 @@ endif()
 
 if(HASH_TABLES_BUILD_EXAMPLES)
     # add_subdirectory(examples)
+endif()
+
+if(HASH_TABLES_TESTING AND HASH_TABLES_ENABLE_PROFILING)
+    add_subdirectory(profiling)
 endif()

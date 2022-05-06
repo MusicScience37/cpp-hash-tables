@@ -15,10 +15,11 @@
  */
 /*!
  * \file
- * \brief Test to create pairs in maps.
+ * \brief Test to create and delete pairs with string keys in maps.
  */
 #include <cassert>
 #include <cstddef>
+#include <functional>
 #include <memory>
 #include <string>
 #include <type_traits>
@@ -31,13 +32,13 @@
 #include <stat_bench/param/parameter_value_vector.h>
 #include <stat_bench/util/do_not_optimize.h>
 
+#include "hash_tables/hashes/hash_cache.h"
 #include "hash_tables/hashes/std_hash.h"
 #include "hash_tables/maps/open_address_map_st.h"
-#include "hash_tables/maps/separate_shared_chain_map_mt.h"
 #include "hash_tables_test/create_random_int_vector.h"
 
-using key_type = int;
-using mapped_type = std::string;
+using key_type = std::string;
+using mapped_type = int;
 
 class fixture : public stat_bench::FixtureBase {
 public:
@@ -54,11 +55,11 @@ public:
 
     void setup(stat_bench::bench::InvocationContext& context) override {
         size_ = context.get_param<std::size_t>("size");
-        keys_ = hash_tables_test::create_random_int_vector<key_type>(size_);
-        second_values_.clear();
-        second_values_.reserve(keys_.size());
-        for (const auto& key : keys_) {
-            second_values_.push_back(std::to_string(key));
+        second_values_ = hash_tables_test::create_random_int_vector<int>(size_);
+        keys_.clear();
+        keys_.reserve(second_values_.size());
+        for (const auto& second_value : second_values_) {
+            keys_.push_back(std::to_string(second_value));
         }
     }
 
@@ -74,7 +75,7 @@ protected:
 };
 
 // NOLINTNEXTLINE
-STAT_BENCH_CASE_F(fixture, "create_pairs", "unordered_map") {
+STAT_BENCH_CASE_F(fixture, "create_delete_with_string_keys", "unordered_map") {
     STAT_BENCH_MEASURE() {
         std::unordered_map<key_type, mapped_type> map;
         map.reserve(size_);
@@ -85,11 +86,17 @@ STAT_BENCH_CASE_F(fixture, "create_pairs", "unordered_map") {
         }
         assert(map.size() == size_);  // NOLINT
         stat_bench::util::do_not_optimize(map);
+        for (std::size_t i = 0; i < size_; ++i) {
+            const auto& key = keys_.at(i);
+            map.erase(key);
+        }
+        stat_bench::util::do_not_optimize(map);
     };
 }
 
 // NOLINTNEXTLINE
-STAT_BENCH_CASE_F(fixture, "create_pairs", "open_address_st") {
+STAT_BENCH_CASE_F(
+    fixture, "create_delete_with_string_keys", "open_address_st") {
     STAT_BENCH_MEASURE() {
         hash_tables::maps::open_address_map_st<key_type, mapped_type> map;
         map.reserve(size_);
@@ -100,20 +107,33 @@ STAT_BENCH_CASE_F(fixture, "create_pairs", "open_address_st") {
         }
         assert(map.size() == size_);  // NOLINT
         stat_bench::util::do_not_optimize(map);
+        for (std::size_t i = 0; i < size_; ++i) {
+            const auto& key = keys_.at(i);
+            map.erase(key);
+        }
+        stat_bench::util::do_not_optimize(map);
     };
 }
 
 // NOLINTNEXTLINE
-STAT_BENCH_CASE_F(fixture, "create_pairs", "shared_chain_mt") {
+STAT_BENCH_CASE_F(
+    fixture, "create_delete_with_string_keys", "open_address_st_cache") {
     STAT_BENCH_MEASURE() {
-        hash_tables::maps::separate_shared_chain_map_mt<key_type, mapped_type>
-            map{2U * size_};
+        hash_tables::maps::open_address_map_st<
+            hash_tables::hashes::hash_cache<key_type>, mapped_type>
+            map;
+        map.reserve(size_);
         for (std::size_t i = 0; i < size_; ++i) {
             const auto& key = keys_.at(i);
             const auto& second_value = second_values_.at(i);
             map.emplace(key, second_value);
         }
         assert(map.size() == size_);  // NOLINT
+        stat_bench::util::do_not_optimize(map);
+        for (std::size_t i = 0; i < size_; ++i) {
+            const auto& key = keys_.at(i);
+            map.erase(key);
+        }
         stat_bench::util::do_not_optimize(map);
     };
 }

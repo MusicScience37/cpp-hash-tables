@@ -20,15 +20,14 @@
 #include <cstddef>
 #include <ostream>
 #include <string>
-#include <utility>
 #include <vector>
 
 #include <catch2/catch_message.hpp>
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 
-#include "hash_tables/extract_key_functions/extract_first_from_pair.h"
 #include "hash_tables/maps/open_address_map_st.h"
+#include "hash_tables/maps/separate_shared_chain_map_mt.h"
 #include "hash_tables_test/create_random_int_vector.h"
 
 using key_type = int;
@@ -36,7 +35,8 @@ using mapped_type = std::string;
 
 // NOLINTNEXTLINE
 TEMPLATE_TEST_CASE("create and delete many pairs in maps", "",
-    (hash_tables::maps::open_address_map_st<key_type, mapped_type>)) {
+    (hash_tables::maps::open_address_map_st<key_type, mapped_type>),
+    (hash_tables::maps::separate_shared_chain_map_mt<key_type, mapped_type>)) {
     SECTION("test") {
         constexpr std::size_t size = 1000;
         const auto keys =

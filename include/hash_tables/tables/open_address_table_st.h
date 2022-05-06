@@ -31,6 +31,7 @@
 #include <utility>
 #include <vector>
 
+#include "hash_tables/exceptions.h"
 #include "hash_tables/hashes/default_hash.h"
 #include "hash_tables/utility/move_if_nothrow_move_constructible.h"
 #include "hash_tables/utility/round_up_to_power_of_two.h"
@@ -247,7 +248,8 @@ public:
               node_allocator_type(std::move(allocator))),
           extract_key_(std::move(extract_key)),
           hash_(std::move(hash)),
-          key_equal_(std::move(key_equal)) {}
+          key_equal_(std::move(key_equal)),
+          desired_node_ind_mask_(nodes_.size() - 1U) {}
 
     /*!
      * \brief Copy constructor.
@@ -681,6 +683,7 @@ public:
             }
         }
         std::swap(nodes_, new_table.nodes_);
+        std::swap(desired_node_ind_mask_, new_table.desired_node_ind_mask_);
     }
 
     /*!
@@ -746,7 +749,7 @@ private:
     [[nodiscard]] auto desired_node_ind(const key_type& key) const
         -> size_type {
         const size_type hash_number = hash_(key);
-        return hash_number & (nodes_.size() - 1);
+        return hash_number & desired_node_ind_mask_;
     }
 
     /*!
@@ -898,7 +901,7 @@ private:
         -> size_type {
         const auto node_ind = find_node_ind_for(key);
         if (!node_ind) {
-            throw std::out_of_range("Key not found.");
+            throw key_not_found();
         }
         return *node_ind;
     }
@@ -921,13 +924,16 @@ private:
     key_equal_type key_equal_;
 
     //! Default maximum load factor.
-    static constexpr float default_max_load_factor = 0.2F;
+    static constexpr float default_max_load_factor = 0.5F;
 
     //! Maximum load factor.
     float max_load_factor_{default_max_load_factor};
 
     //! Current maximum distance from the place determined by hash number.
     size_type max_dist_{0};
+
+    //! Bit mask to get node index determined by hash number.
+    size_type desired_node_ind_mask_{};
 };
 
 }  // namespace hash_tables::tables
