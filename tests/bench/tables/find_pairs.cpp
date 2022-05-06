@@ -15,7 +15,7 @@
  */
 /*!
  * \file
- * \brief Benchmark to create pairs in tables.
+ * \brief Benchmark to find pairs in tables.
  */
 #include <cassert>
 #include <cstddef>
@@ -77,38 +77,46 @@ protected:
 };
 
 // NOLINTNEXTLINE
-STAT_BENCH_CASE_F(fixture, "create_pairs", "open_address_st") {
+STAT_BENCH_CASE_F(fixture, "find_pairs", "open_address_st") {
+    hash_tables::tables::open_address_table_st<value_type, key_type,
+        extract_key>
+        table;
+    table.max_load_factor(max_load_factor_);
+    table.reserve(size_);
+    for (std::size_t i = 0; i < size_; ++i) {
+        const auto& key = keys_.at(i);
+        const auto& second_value = second_values_.at(i);
+        table.emplace(key, key, second_value);
+    }
+    assert(table.size() == size_);  // NOLINT
+
     STAT_BENCH_MEASURE() {
-        hash_tables::tables::open_address_table_st<value_type, key_type,
-            extract_key>
-            table;
-        table.max_load_factor(max_load_factor_);
-        table.reserve(size_);
         for (std::size_t i = 0; i < size_; ++i) {
             const auto& key = keys_.at(i);
-            const auto& second_value = second_values_.at(i);
-            table.emplace(key, key, second_value);
+            stat_bench::util::do_not_optimize(table.at(keys_.at(i)));
         }
-        assert(table.size() == size_);  // NOLINT
-        stat_bench::util::do_not_optimize(table);
     };
 }
 
 // NOLINTNEXTLINE
-STAT_BENCH_CASE_F(fixture, "create_pairs", "shared_chain_mt") {
+STAT_BENCH_CASE_F(fixture, "find_pairs", "shared_chain_mt") {
+    const auto min_num_buckets =
+        static_cast<std::size_t>(static_cast<float>(size_) / max_load_factor_);
+    hash_tables::tables::separate_shared_chain_table_mt<value_type, key_type,
+        extract_key>
+        table{min_num_buckets};
+    for (std::size_t i = 0; i < size_; ++i) {
+        const auto& key = keys_.at(i);
+        const auto& second_value = second_values_.at(i);
+        table.emplace(key, key, second_value);
+    }
+    assert(table.size() == size_);  // NOLINT
+
     STAT_BENCH_MEASURE() {
-        const auto min_num_buckets = static_cast<std::size_t>(
-            static_cast<float>(size_) / max_load_factor_);
-        hash_tables::tables::separate_shared_chain_table_mt<value_type,
-            key_type, extract_key>
-            table{min_num_buckets};
         for (std::size_t i = 0; i < size_; ++i) {
             const auto& key = keys_.at(i);
-            const auto& second_value = second_values_.at(i);
-            table.emplace(key, key, second_value);
+            stat_bench::util::do_not_optimize(table.at(keys_.at(i)));
         }
-        assert(table.size() == size_);  // NOLINT
-        stat_bench::util::do_not_optimize(table);
     };
 }
 

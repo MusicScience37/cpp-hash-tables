@@ -44,14 +44,14 @@ public:
      * \param[in] key Key.
      * \return Hash number.
      */
-    [[nodiscard]] auto operator()(const KeyType& key) const
+    [[nodiscard]] auto operator()(const key_type& key) const
         -> hash_number_type {
         return hash_(key);
     }
 
 private:
     //! Actual hash function.
-    std::hash<KeyType> hash_{};
+    std::hash<key_type> hash_{};
 };
 
 }  // namespace hash_tables::hashes

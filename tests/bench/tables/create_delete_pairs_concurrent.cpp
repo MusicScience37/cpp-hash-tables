@@ -15,11 +15,14 @@
  */
 /*!
  * \file
- * \brief Benchmark to create pairs in tables.
+ * \brief Benchmark to create and delete pairs in tables concurrently.
  */
+#include <algorithm>
 #include <cassert>
 #include <cstddef>
 #include <memory>
+#include <mutex>
+#include <shared_mutex>
 #include <string>
 #include <type_traits>
 #include <utility>
@@ -46,14 +49,13 @@ class fixture : public stat_bench::FixtureBase {
 public:
     fixture() {
         // NOLINTNEXTLINE
-        add_param<std::size_t>("size")->add(10)->add(100)->add(1000);
+        add_param<std::size_t>("size")->add(100)->add(1000);
         // NOLINTNEXTLINE
-        add_param<float>("load")->add(0.1)->add(0.2)->add(0.5)->add(0.8);
+        add_threads_param()->add(1)->add(2)->add(4);
     }
 
     void setup(stat_bench::bench::InvocationContext& context) override {
         size_ = context.get_param<std::size_t>("size");
-        max_load_factor_ = context.get_param<float>("load");
         keys_ = hash_tables_test::create_random_int_vector<key_type>(size_);
         second_values_.clear();
         second_values_.reserve(keys_.size());
@@ -67,9 +69,6 @@ protected:
     std::size_t size_{};
 
     // NOLINTNEXTLINE(cppcoreguidelines-non-private-member-variables-in-classes)
-    float max_load_factor_{};
-
-    // NOLINTNEXTLINE(cppcoreguidelines-non-private-member-variables-in-classes)
     std::vector<key_type> keys_{};
 
     // NOLINTNEXTLINE(cppcoreguidelines-non-private-member-variables-in-classes)
@@ -77,39 +76,66 @@ protected:
 };
 
 // NOLINTNEXTLINE
-STAT_BENCH_CASE_F(fixture, "create_pairs", "open_address_st") {
-    STAT_BENCH_MEASURE() {
-        hash_tables::tables::open_address_table_st<value_type, key_type,
-            extract_key>
-            table;
-        table.max_load_factor(max_load_factor_);
-        table.reserve(size_);
-        for (std::size_t i = 0; i < size_; ++i) {
+STAT_BENCH_CASE_F(
+    fixture, "create_delete_pairs_concurrent", "mutex_open_address_st") {
+    const auto min_num_buckets = size_ * 2;
+    hash_tables::tables::open_address_table_st<value_type, key_type,
+        extract_key>
+        table{min_num_buckets};
+    std::mutex mutex;
+
+    const std::size_t num_threads = STAT_BENCH_CONTEXT_NAME.threads();
+    const std::size_t size_per_thread = (size_ + num_threads - 1) / num_threads;
+
+    STAT_BENCH_MEASURE_INDEXED(thread_ind, /*sample_ind*/, /*iteration_ind*/) {
+        const std::size_t begin_ind = thread_ind * size_per_thread;
+        const std::size_t end_ind =
+            std::min((thread_ind + 1) * size_per_thread, size_);
+        for (std::size_t i = begin_ind; i < end_ind; ++i) {
             const auto& key = keys_.at(i);
             const auto& second_value = second_values_.at(i);
+            std::unique_lock<std::mutex> lock(mutex);
             table.emplace(key, key, second_value);
         }
-        assert(table.size() == size_);  // NOLINT
-        stat_bench::util::do_not_optimize(table);
+        for (std::size_t i = begin_ind; i < end_ind; ++i) {
+            const auto& key = keys_.at(i);
+            std::unique_lock<std::mutex> lock(mutex);
+            table.erase(key);
+        }
     };
+
+    assert(table.empty());  // NOLINT
+    stat_bench::util::do_not_optimize(table);
 }
 
 // NOLINTNEXTLINE
-STAT_BENCH_CASE_F(fixture, "create_pairs", "shared_chain_mt") {
-    STAT_BENCH_MEASURE() {
-        const auto min_num_buckets = static_cast<std::size_t>(
-            static_cast<float>(size_) / max_load_factor_);
-        hash_tables::tables::separate_shared_chain_table_mt<value_type,
-            key_type, extract_key>
-            table{min_num_buckets};
-        for (std::size_t i = 0; i < size_; ++i) {
+STAT_BENCH_CASE_F(
+    fixture, "create_delete_pairs_concurrent", "shared_chain_mt") {
+    const auto min_num_buckets = size_ * 2;
+    hash_tables::tables::separate_shared_chain_table_mt<value_type, key_type,
+        extract_key>
+        table{min_num_buckets};
+
+    const std::size_t num_threads = STAT_BENCH_CONTEXT_NAME.threads();
+    const std::size_t size_per_thread = (size_ + num_threads - 1) / num_threads;
+
+    STAT_BENCH_MEASURE_INDEXED(thread_ind, /*sample_ind*/, /*iteration_ind*/) {
+        const std::size_t begin_ind = thread_ind * size_per_thread;
+        const std::size_t end_ind =
+            std::min((thread_ind + 1) * size_per_thread, size_);
+        for (std::size_t i = begin_ind; i < end_ind; ++i) {
             const auto& key = keys_.at(i);
             const auto& second_value = second_values_.at(i);
             table.emplace(key, key, second_value);
         }
-        assert(table.size() == size_);  // NOLINT
-        stat_bench::util::do_not_optimize(table);
+        for (std::size_t i = begin_ind; i < end_ind; ++i) {
+            const auto& key = keys_.at(i);
+            table.erase(key);
+        }
     };
+
+    assert(table.empty());  // NOLINT
+    stat_bench::util::do_not_optimize(table);
 }
 
 STAT_BENCH_MAIN

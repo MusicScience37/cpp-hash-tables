@@ -1,0 +1,1 @@
+add_profiling(hash_tables_prof_maps_open_address_map_st open_address_map_st.cpp)

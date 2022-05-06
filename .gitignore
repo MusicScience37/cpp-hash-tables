@@ -647,3 +647,7 @@ FodyWeavers.xsd
 
 # VS Code - CMake tools
 !/.vscode/cmake-variants.yaml
+
+# Profiling
+*.prof
+/profiling/results/

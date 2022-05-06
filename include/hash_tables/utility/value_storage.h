@@ -108,7 +108,7 @@ public:
 
 private:
     //! Storage for a value.
-    alignas(alignof(value_type)) char storage_[sizeof(value_type)]{};  // NOLINT
+    alignas(alignof(value_type)) char storage_[sizeof(value_type)];  // NOLINT
 };
 
 }  // namespace hash_tables::utility
