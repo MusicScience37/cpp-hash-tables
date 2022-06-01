@@ -445,6 +445,27 @@ public:
     }
 
     /*!
+     * \brief Get a value constructing using a factory function it if not found.
+     *
+     * \tparam Function Type of the factory function.
+     * \param[in] key Key.
+     * \param[in] function Factory function.
+     * \return Value.
+     */
+    template <typename Function>
+    [[nodiscard]] auto get_or_create_with_factory(
+        const key_type& key, Function&& function) -> value_type& {
+        reserve(size_ + 1U);
+        const auto [node_ptr, dist] = prepare_place_for(key);
+        if (node_ptr->state() != node_type::node_state::filled) {
+            node_ptr->emplace(std::invoke(std::forward<Function>(function)));
+            update_max_dist_if_needed(dist);
+            ++size_;
+        }
+        return node_ptr->value();
+    }
+
+    /*!
      * \brief Get a value if found.
      *
      * \param[in] key Key.
@@ -490,7 +511,7 @@ public:
      * \param[in] function Function.
      */
     template <typename Function>
-    void for_all(const Function& function) {
+    void for_all(Function&& function) {
         for (auto& node : nodes_) {
             if (node.state() == node_type::node_state::filled) {
                 std::invoke(function, static_cast<value_type&>(node.value()));
@@ -505,7 +526,7 @@ public:
      * \param[in] function Function.
      */
     template <typename Function>
-    void for_all(const Function& function) const {
+    void for_all(Function&& function) const {
         for (const auto& node : nodes_) {
             if (node.state() == node_type::node_state::filled) {
                 std::invoke(
@@ -556,7 +577,7 @@ public:
      * \return Number of removed values.
      */
     template <typename Function>
-    auto erase_if(const Function& function) -> size_type {
+    auto erase_if(Function&& function) -> size_type {
         size_type removed = 0;
         for (auto& node : nodes_) {
             if (node.state() == node_type::node_state::filled) {
