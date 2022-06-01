@@ -296,6 +296,25 @@ public:
     }
 
     /*!
+     * \brief Get a value constructing using a factory function if not found.
+     *
+     * \tparam Function Type of the factory function.
+     * \param[in] key Key.
+     * \param[in] function Factory function.
+     * \return Mapped value.
+     */
+    template <typename Function>
+    auto get_or_create_with_factory(const key_type& key, Function&& function)
+        -> mapped_type& {
+        return table_
+            .get_or_create_with_factory(key,
+                [&key, &function] {
+                    return value_type(key, std::invoke(function));
+                })
+            .second;
+    }
+
+    /*!
      * \brief Get a value constructing it using default constructor if not
      * found.
      *
