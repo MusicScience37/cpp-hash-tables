@@ -381,7 +381,7 @@ public:
      * \param[in] function Function.
      */
     template <typename Function>
-    void for_all(const Function& function) {
+    void for_all(Function&& function) {
         table_.for_all([&function](value_type& value) {
             std::invoke(function, static_cast<const key_type&>(value.first),
                 static_cast<mapped_type&>(value.second));
@@ -395,7 +395,7 @@ public:
      * \param[in] function Function.
      */
     template <typename Function>
-    void for_all(const Function& function) const {
+    void for_all(Function&& function) const {
         table_.for_all([&function](const value_type& value) {
             std::invoke(function, static_cast<const key_type&>(value.first),
                 static_cast<const mapped_type&>(value.second));
@@ -431,7 +431,7 @@ public:
      * \return Number of removed values.
      */
     template <typename Function>
-    auto erase_if(const Function& function) -> size_type {
+    auto erase_if(Function&& function) -> size_type {
         return table_.erase_if([&function](const value_type& value) {
             return std::invoke(function,
                 static_cast<const key_type&>(value.first),
