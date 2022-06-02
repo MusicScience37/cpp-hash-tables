@@ -2,6 +2,7 @@ message("Configure documentation of ${FULL_PROJECT_NAME}")
 
 add_custom_target(hash_tables_doc)
 
+set(HASH_TABLES_DOXYGEN_XML_PATH ${CMAKE_CURRENT_BINARY_DIR}/xml)
 set(HASH_TABLES_HTML_ROOT ${CMAKE_CURRENT_BINARY_DIR}/html)
 
 add_subdirectory(doxygen)

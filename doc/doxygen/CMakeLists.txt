@@ -4,6 +4,7 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in
                ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
 
 file(MAKE_DIRECTORY ${HASH_TABLES_HTML_ROOT}/api)
+file(MAKE_DIRECTORY ${HASH_TABLES_DOXYGEN_XML_PATH})
 
 add_custom_target(
     hash_tables_doc_doxygen ALL

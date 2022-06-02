@@ -28,6 +28,7 @@ class hash_table<ValueType, KeyType, \nExtractKey, Hash, KeyEqual, Allocator> {
     .. read values ..
     + at(const key_type& key) : value_type
     + get_or_create(const key_type& key, Args&& ... args) : value_type
+    + get_or_create_with_factory(const key_type& key, const Function& function) : value_type
     + try_get(const key_type& key) : value_type*
     + has(const key_type& key) : bool
     + for_all(const Function& function) : void
@@ -80,6 +81,7 @@ class hash_map<KeyType, MappedType, \nHash, KeyEqual, Allocator> {
     .. read values ..
     + at(const key_type& key) : mapped_type
     + get_or_create(const key_type& key, Args&& ... args) : mapped_type
+    + get_or_create_with_factory(const key_type& key, const Function& function) : mapped_type
     + operator[](const key_type& key) : mapped_type
     + try_get(const key_type& key) : mapped_type*
     + has(const key_type& key) : bool

@@ -1,5 +1,11 @@
 # Change Log
 
+## v0.3.0 (on development)
+
+### New Features
+
+- Support of factory function when creating values conditionally ([Issue #13](https://gitlab.com/MusicScience37/cpp-hash-tables/-/issues/13)).
+
 ## v0.2.0 (2022/5/6)
 
 Concurrent hash table and map, and some improvements.
