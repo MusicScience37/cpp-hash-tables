@@ -91,7 +91,7 @@ TEMPLATE_TEST_CASE("hash_tables::tables::open_address_table_st", "",
     }
 
     SECTION("insert (const reference)") {
-        SECTION("successfull") {
+        SECTION("successful") {
             table_type table;
 
             const auto value = std::string("abc");
@@ -134,7 +134,7 @@ TEMPLATE_TEST_CASE("hash_tables::tables::open_address_table_st", "",
     }
 
     SECTION("insert (rvalue reference)") {
-        SECTION("successfull") {
+        SECTION("successful") {
             table_type table;
 
             const auto value = std::string("abc");
@@ -177,7 +177,7 @@ TEMPLATE_TEST_CASE("hash_tables::tables::open_address_table_st", "",
     }
 
     SECTION("emplace") {
-        SECTION("successfull") {
+        SECTION("successful") {
             table_type table;
 
             const auto value = std::string("abc");
@@ -220,7 +220,7 @@ TEMPLATE_TEST_CASE("hash_tables::tables::open_address_table_st", "",
     }
 
     SECTION("emplace_or_assign") {
-        SECTION("successfull") {
+        SECTION("successful") {
             table_type table;
 
             const auto value = std::string("abc");
@@ -263,7 +263,7 @@ TEMPLATE_TEST_CASE("hash_tables::tables::open_address_table_st", "",
     }
 
     SECTION("assign") {
-        SECTION("successfull") {
+        SECTION("successful") {
             table_type table;
 
             const auto value1 = std::string("abc");
@@ -328,6 +328,23 @@ TEMPLATE_TEST_CASE("hash_tables::tables::open_address_table_st", "",
         CHECK(table.get_or_create(key1, "af") == value1);
         CHECK(table.size() == 1);
         CHECK(table.get_or_create(key2, value2.c_str()) == value2);
+        CHECK(table.size() == 2);
+    }
+
+    SECTION("get_or_create_with_factory") {
+        table_type table;
+        const auto value1 = std::string("abc");
+        const char key1 = extract_key_type()(value1);
+        const auto value2 = std::string("bcdef");
+        const char key2 = extract_key_type()(value2);
+        CHECK_NOTHROW(table.emplace(key1, value1));
+        CHECK(table.size() == 1);
+
+        CHECK(table.get_or_create_with_factory(
+                  key1, [] { return std::string("af"); }) == value1);
+        CHECK(table.size() == 1);
+        CHECK(table.get_or_create_with_factory(
+                  key2, [&value2] { return std::string(value2); }) == value2);
         CHECK(table.size() == 2);
     }
 
@@ -435,7 +452,7 @@ TEMPLATE_TEST_CASE("hash_tables::tables::open_address_table_st", "",
     }
 
     SECTION("erase") {
-        SECTION("successfull") {
+        SECTION("successful") {
             table_type table;
 
             const auto value1 = std::string("abc");

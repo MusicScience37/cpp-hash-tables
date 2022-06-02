@@ -300,8 +300,8 @@ public:
      *
      * \tparam ValueOutput Type of the value for output.
      * \tparam Args Type of arguments of the constructor.
-     * \param[in] key Key.
      * \param[out] value Value.
+     * \param[in] key Key.
      * \param[in] args Arguments of the constructor.
      */
     template <typename ValueOutput, typename... Args>
@@ -317,6 +317,56 @@ public:
         }
         const auto& value_temp =
             bucket.nodes.emplace_back(std::forward<Args>(args)...);
+        ++size_;
+        value = value_temp;
+    }
+
+    /*!
+     * \brief Get a value constructing using a factory function it if not found.
+     *
+     * \tparam Function Type of the factory function.
+     * \param[in] key Key.
+     * \param[in] function Factory function.
+     * \return Value.
+     */
+    template <typename Function>
+    [[nodiscard]] auto get_or_create_with_factory(
+        const key_type& key, Function&& function) -> value_type {
+        auto& bucket = bucket_for(key);
+        std::unique_lock<std::shared_mutex> lock(bucket.mutex);
+        const auto iter = std::find_if(bucket.nodes.begin(), bucket.nodes.end(),
+            value_has_key_equal_to(key));
+        if (iter != bucket.nodes.end()) {
+            return *iter;
+        }
+        auto& value = bucket.nodes.emplace_back(
+            std::invoke(std::forward<Function>(function)));
+        ++size_;
+        return value;
+    }
+
+    /*!
+     * \brief Get a value constructing using a factory function it if not found.
+     *
+     * \tparam ValueOutput Type of the value for output.
+     * \tparam Function Type of the factory function.
+     * \param[out] value Value.
+     * \param[in] key Key.
+     * \param[in] function Factory function.
+     */
+    template <typename ValueOutput, typename Function>
+    void get_or_create_with_factory_to(
+        ValueOutput& value, const key_type& key, Function&& function) {
+        auto& bucket = bucket_for(key);
+        std::unique_lock<std::shared_mutex> lock(bucket.mutex);
+        const auto iter = std::find_if(bucket.nodes.begin(), bucket.nodes.end(),
+            value_has_key_equal_to(key));
+        if (iter != bucket.nodes.end()) {
+            value = *iter;
+            return;
+        }
+        const auto& value_temp = bucket.nodes.emplace_back(
+            std::invoke(std::forward<Function>(function)));
         ++size_;
         value = value_temp;
     }
@@ -383,7 +433,7 @@ public:
      * \param[in] function Function.
      */
     template <typename Function>
-    void for_all(const Function& function) {
+    void for_all(Function&& function) {
         for (auto& bucket_ptr : buckets_) {
             auto& bucket = *bucket_ptr;
             std::shared_lock<std::shared_mutex> lock(bucket.mutex);
@@ -400,7 +450,7 @@ public:
      * \param[in] function Function.
      */
     template <typename Function>
-    void for_all(const Function& function) const {
+    void for_all(Function&& function) const {
         for (auto& bucket_ptr : buckets_) {
             auto& bucket = *bucket_ptr;
             std::shared_lock<std::shared_mutex> lock(bucket.mutex);
@@ -458,7 +508,7 @@ public:
      * \return Number of removed values.
      */
     template <typename Function>
-    auto erase_if(const Function& function) -> size_type {
+    auto erase_if(Function&& function) -> size_type {
         size_type erased_count = 0;
         for (auto& bucket_ptr : buckets_) {
             auto& bucket = *bucket_ptr;
