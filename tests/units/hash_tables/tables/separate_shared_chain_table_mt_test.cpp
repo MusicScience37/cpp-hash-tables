@@ -318,6 +318,43 @@ TEMPLATE_TEST_CASE("hash_tables::tables::separate_shared_chain_table_mt", "",
         CHECK(table.size() == 2);
     }
 
+    SECTION("get_or_create_with_factory") {
+        table_type table;
+        const auto value1 = std::string("abc");
+        const char key1 = extract_key_type()(value1);
+        const auto value2 = std::string("bcdef");
+        const char key2 = extract_key_type()(value2);
+        CHECK_NOTHROW(table.emplace(key1, value1));
+        CHECK(table.size() == 1);
+
+        CHECK(table.get_or_create_with_factory(
+                  key1, [] { return std::string("af"); }) == value1);
+        CHECK(table.size() == 1);
+        CHECK(table.get_or_create_with_factory(
+                  key2, [&value2] { return std::string(value2); }) == value2);
+        CHECK(table.size() == 2);
+    }
+
+    SECTION("get_or_create_with_factory_to") {
+        table_type table;
+        const auto value1 = std::string("abc");
+        const char key1 = extract_key_type()(value1);
+        const auto value2 = std::string("bcdef");
+        const char key2 = extract_key_type()(value2);
+        CHECK_NOTHROW(table.emplace(key1, value1));
+        CHECK(table.size() == 1);
+
+        std::optional<value_type> res;
+        CHECK_NOTHROW(table.get_or_create_with_factory_to(
+            res, key1, [] { return std::string("af"); }));
+        CHECK(res == value1);
+        CHECK(table.size() == 1);
+        CHECK_NOTHROW(table.get_or_create_with_factory_to(
+            res, key2, [&value2] { return std::string(value2); }));
+        CHECK(res == value2);
+        CHECK(table.size() == 2);
+    }
+
     SECTION("try_get") {
         table_type table;
         const auto value1 = std::string("abc");

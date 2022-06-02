@@ -3,7 +3,7 @@ from conans import ConanFile
 
 class CppHashTablesConan(ConanFile):
     name = "cpp_hash_tables"
-    version = "0.2.0"
+    version = "0.3.0"
     description = "Hash tables in C++."
     homepage = "https://gitlab.com/MusicScience37/cpp-hash-tables"
     url = "https://gitlab.com/MusicScience37/cpp-hash-tables.git"
@@ -27,7 +27,7 @@ class CppHashTablesConan(ConanFile):
     def build_requirements(self):
         if self.options.requirements_for_tests:
             self.build_requires(
-                "catch2/3.0.0pre4@MusicScience37+conan-extra-packages/stable"
+                "catch2/3.0.1@MusicScience37+conan-extra-packages/stable"
             )
             self.build_requires("trompeloeil/42")
             self.build_requires(

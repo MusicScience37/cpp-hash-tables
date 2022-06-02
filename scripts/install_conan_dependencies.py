@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """Helper script to install dependent Conan packages.
 """
 
