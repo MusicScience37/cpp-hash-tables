@@ -1,6 +1,6 @@
 # Change Log
 
-## v0.3.0 (on development)
+## v0.3.0 (2022/6/2)
 
 ### New Features
 
