@@ -40,7 +40,7 @@ license_scanning:
 sync pipenv:
   extends: .retry setting
   stage: Prepare
-  image: musicscience37/clang-ci:clang14-v5.0
+  image: musicscience37/clang-ci:clang14
   script:
     - mkdir -p .venv
     - pipenv sync --dev
@@ -60,7 +60,7 @@ prepare lock files:
   extends: .retry setting
   stage: Prepare
   needs: []
-  image: musicscience37/clang-ci:clang14-v5.0
+  image: musicscience37/clang-ci:clang14
   script:
     - pipenv sync --dev
     - pipenv run conan profile new --detect default
@@ -83,7 +83,7 @@ line count:
   extends: .retry setting
   stage: Prepare
   dependencies: []
-  image: registry.gitlab.com/musicscience37/cloc-docker:v2-0
+  image: registry.gitlab.com/musicscience37/cloc-docker
   script:
     - mkdir -p line_count
     - cloc ./
@@ -104,7 +104,7 @@ pre-commit:
     - sync pipenv
   dependencies:
     - sync pipenv
-  image: musicscience37/clang-ci:clang14-v5.0
+  image: musicscience37/clang-ci:clang14
   script:
     - pipenv run pre-commit run --all-files
 
@@ -115,7 +115,7 @@ static analysis:
     - sync pipenv
   dependencies:
     - sync pipenv
-  image: musicscience37/clang-ci:clang14-v5.0
+  image: musicscience37/clang-ci:clang14
   variables:
     GIT_SUBMODULE_STRATEGY: recursive
   before_script:
@@ -241,7 +241,7 @@ static analysis:
 clang coverage:
   extends: .clang-debug-test-base
   stage: Test with Clang
-  image: musicscience37/clang-ci:clang14-v5.0
+  image: musicscience37/clang-ci:clang14
   variables:
     BUILD_DIR: build_clang_coverage
   script:
@@ -264,7 +264,7 @@ clang coverage:
 gcc coverage:
   extends: .debug-test-base
   stage: Test with GCC
-  image: musicscience37/gcc-ci:gcc10-v5.0
+  image: musicscience37/gcc-ci:gcc10
   variables:
     BUILD_DIR: build_gcc_coverage
   script:
@@ -285,28 +285,28 @@ gcc coverage:
 gcc-10-debug:
   extends: .debug-test-base
   stage: Test with GCC
-  image: musicscience37/gcc-ci:gcc10-v5.0
+  image: musicscience37/gcc-ci:gcc10
   variables:
     BUILD_DIR: build_gcc10_debug
 
 gcc-10-release:
   extends: .release-test-base
   stage: Test with GCC
-  image: musicscience37/gcc-ci:gcc10-v5.0
+  image: musicscience37/gcc-ci:gcc10
   variables:
     BUILD_DIR: build_gcc10_release
 
 clang-14-release:
   extends: .clang-release-test-base
   stage: Test with Clang
-  image: musicscience37/clang-ci:clang14-v5.0
+  image: musicscience37/clang-ci:clang14
   variables:
     BUILD_DIR: build_clang12_release
 
 clang-14-asan-ubsan:
   extends: .clang-debug-test-base
   stage: Test with Clang
-  image: musicscience37/clang-ci:clang14-v5.0
+  image: musicscience37/clang-ci:clang14
   variables:
     BUILD_DIR: build_clang_asan_ubsan
     ASAN_OPTIONS: alloc_dealloc_mismatch=0
@@ -365,7 +365,7 @@ clang-14-conan:
     - sync pipenv
   dependencies:
     - sync pipenv
-  image: musicscience37/clang-ci:clang14-v5.0
+  image: musicscience37/clang-ci:clang14
   variables:
     CONAN_CHANNEL: "testing"
   script:
@@ -382,7 +382,7 @@ clang-14-conan-release:
     - sync pipenv
   dependencies:
     - sync pipenv
-  image: musicscience37/clang-ci:clang14-v5.0
+  image: musicscience37/clang-ci:clang14
   variables:
     CONAN_CHANNEL: "stable"
   script:
@@ -402,7 +402,7 @@ doc:
     - sync pipenv
   dependencies:
     - sync pipenv
-  image: musicscience37/sphinx-doxygen:clang14-v5.0
+  image: musicscience37/sphinx-doxygen:clang14
   variables:
     GIT_SUBMODULE_STRATEGY: recursive
   script:
