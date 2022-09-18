@@ -4,7 +4,9 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 
 [packages]
-conan = "*"
+conan = "~=1.52.0"
+# Pin version to prevent import errors in Sphinx.
+jinja2 = "==3.0.3"
 
 [dev-packages]
 black = "*"
@@ -14,7 +16,7 @@ myst-parser = "*"
 pre-commit = "*"
 pylint = "*"
 breathe = "*"
-sphinx = "*"
+sphinx = ">=5.1.1"
 sphinx-autobuild = "*"
 sphinx-rtd-theme = "*"
 sphinxcontrib-plantuml = "*"
