@@ -1,6 +1,7 @@
 #include "hash_tables/extract_key_functions/extract_first_from_pair_test.cpp"  // NOLINT(bugprone-suspicious-include)
 #include "hash_tables/hashes/default_hash_test.cpp"  // NOLINT(bugprone-suspicious-include)
 #include "hash_tables/hashes/hash_cache_test.cpp"  // NOLINT(bugprone-suspicious-include)
+#include "hash_tables/hashes/mix_hash_numbers_test.cpp"  // NOLINT(bugprone-suspicious-include)
 #include "hash_tables/hashes/std_hash_test.cpp"  // NOLINT(bugprone-suspicious-include)
 #include "hash_tables/maps/open_address_map_st_test.cpp"  // NOLINT(bugprone-suspicious-include)
 #include "hash_tables/maps/separate_shared_chain_map_mt_test.cpp"  // NOLINT(bugprone-suspicious-include)
