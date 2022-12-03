@@ -296,12 +296,26 @@ gcc-10-release:
   variables:
     BUILD_DIR: build_gcc10_release
 
+gcc-12-debug:
+  extends: .debug-test-base
+  stage: Test with GCC
+  image: musicscience37/gcc-ci:gcc12
+  variables:
+    BUILD_DIR: build_gcc12_debug
+
 clang-14-release:
   extends: .clang-release-test-base
   stage: Test with Clang
   image: musicscience37/clang-ci:clang14
   variables:
-    BUILD_DIR: build_clang12_release
+    BUILD_DIR: build_clang14_release
+
+clang-15-debug:
+  extends: .clang-debug-test-base
+  stage: Test with Clang
+  image: musicscience37/clang-ci:clang15
+  variables:
+    BUILD_DIR: build_clang15_debug
 
 clang-14-asan-ubsan:
   extends: .clang-debug-test-base
