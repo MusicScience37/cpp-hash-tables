@@ -65,6 +65,7 @@ you will require following dependencies:
 - C++ 17 Compiler
   - Following compilers are tested in CI:
     - GCC 10
+    - GCC 12
     - Clang 14
     - MSVC 19
 

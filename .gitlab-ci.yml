@@ -34,7 +34,7 @@ license_scanning:
 
 .retry setting:
   retry:
-    max: 2
+    max: 1
     when: always
 
 sync pipenv:
@@ -296,12 +296,26 @@ gcc-10-release:
   variables:
     BUILD_DIR: build_gcc10_release
 
+gcc-12-debug:
+  extends: .debug-test-base
+  stage: Test with GCC
+  image: musicscience37/gcc-ci:gcc12
+  variables:
+    BUILD_DIR: build_gcc12_debug
+
 clang-14-release:
   extends: .clang-release-test-base
   stage: Test with Clang
   image: musicscience37/clang-ci:clang14
   variables:
-    BUILD_DIR: build_clang12_release
+    BUILD_DIR: build_clang14_release
+
+clang-15-debug:
+  extends: .clang-debug-test-base
+  stage: Test with Clang
+  image: musicscience37/clang-ci:clang15
+  variables:
+    BUILD_DIR: build_clang15_debug
 
 clang-14-asan-ubsan:
   extends: .clang-debug-test-base
@@ -331,20 +345,23 @@ msvc-release:
   dependencies: []
   variables:
     BUILD_DIR: build_msvc_release
+    CONAN_USER_HOME: C:\Users\gitlab_runner
   before_script:
+    - (mv ${CI_PROJECT_DIR}/.conan C:\Users\gitlab_runner -Force)
     - Import-Module "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
     - choco install cmake -y --installargs 'ADD_CMAKE_TO_PATH=System'
     - choco install python --version=3.10.8 -y
     - RefreshEnv
     - pip install pipenv
     - pipenv sync
+    - pipenv clean
+  script:
     - mkdir $BUILD_DIR
     - cd $BUILD_DIR
     - pipenv run conan profile new --detect default
     - pipenv run conan remote add gitlab https://gitlab.com/api/v4/packages/conan
     - pipenv run conan install --build missing -o cpp_hash_tables:requirements_for_tests=True -s build_type=Release ..
     - cd ../
-  script:
     - cmake -S ./ -B $BUILD_DIR
       -DCMAKE_BUILD_TYPE=Release
       -DHASH_TABLES_TESTING:BOOL=ON
@@ -356,6 +373,8 @@ msvc-release:
     - cd $BUILD_DIR
     - cmake --build . --config Release --parallel
     - ctest -V --build-config Release
+  after_script:
+    - (mv C:\Users\gitlab_runner\.conan ${CI_PROJECT_DIR} -Force)
   allow_failure: true
 
 clang-14-conan:
