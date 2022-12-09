@@ -346,6 +346,7 @@ msvc-release:
   variables:
     BUILD_DIR: build_msvc_release
     CONAN_USER_HOME: C:\Users\gitlab_runner
+    CONAN_USE_ALWAYS_SHORT_PATHS: 1
   before_script:
     - (mv ${CI_PROJECT_DIR}/.conan C:\Users\gitlab_runner -Force)
     - Import-Module "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
