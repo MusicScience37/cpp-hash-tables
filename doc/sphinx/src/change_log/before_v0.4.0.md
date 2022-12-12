@@ -1,4 +1,4 @@
-# Change Log
+# Change Log before v0.4.0
 
 ## v0.3.0 (2022/6/2)
 
