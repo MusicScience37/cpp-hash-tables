@@ -12,13 +12,13 @@ so no further installation is required.
 
 This library is packaged with [Conan](https://conan.io/),
 and available via
-[package registry in GitLab](https://gitlab.com/MusicScience37/cpp-hash-tables/-/packages).
+[package registry in GitLab](https://gitlab.com/MusicScience37Projects/utility-libraries/cpp-hash-tables/-/packages).
 
 To use this library,
 add the package
-`cpp_hash_tables/<version>@MusicScience37+cpp-hash-tables/stable`
+`cpp_hash_tables/<version>@MusicScience37/stable`
 with a version you want
 to your `conanfile.py` or `conanfile.txt`,
 and add the remote
-`https://gitlab.com/api/v4/packages/conan`
+`https://gitlab.com/api/v4/projects/35726343/packages/conan`
 to conan command.

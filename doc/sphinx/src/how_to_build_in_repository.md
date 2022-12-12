@@ -21,6 +21,7 @@ you will require following dependencies:
 - C++ 17 Compiler
   - Following compilers are tested in CI:
     - GCC 10
+    - GCC 12
     - Clang 14
     - MSVC 19
 
@@ -46,10 +47,10 @@ execute the following commands to build:
    pipenv shell
    ```
 
-2. Add the Conan remote in GitLab. (Once in an environment. Already done in devcontainer of VSCode.)
+2. Add a Conan remote in GitLab. (Once in an environment. Already done in devcontainer of VSCode.)
 
    ```bash
-   conan remote add gitlab https://gitlab.com/api/v4/packages/conan
+   conan remote add cpp-stat-bench https://gitlab.com/api/v4/projects/32226502/packages/conan
    ```
 
 3. Download and install required Conan packages.
