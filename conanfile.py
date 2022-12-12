@@ -5,8 +5,10 @@ class CppHashTablesConan(ConanFile):
     name = "cpp_hash_tables"
     version = "0.3.0"
     description = "Hash tables in C++."
-    homepage = "https://gitlab.com/MusicScience37/cpp-hash-tables"
-    url = "https://gitlab.com/MusicScience37/cpp-hash-tables.git"
+    homepage = (
+        "https://gitlab.com/MusicScience37Projects/utility-libraries/cpp-hash-tables"
+    )
+    url = "https://gitlab.com/MusicScience37Projects/utility-libraries/cpp-hash-tables.git"
     license = "Apache-2.0"
     author = "Kenta Kabashima (kenta_program37@hotmail.co.jp)"
     topics = ()

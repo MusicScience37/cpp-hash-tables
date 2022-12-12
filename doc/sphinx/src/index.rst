@@ -4,7 +4,7 @@ cpp-hash-tables
 Hash tables in C++.
 
 Developed at
-`https://gitlab.com/MusicScience37/cpp-hash-tables <https://gitlab.com/MusicScience37/cpp-hash-tables>`_.
+`https://gitlab.com/MusicScience37Projects/utility-libraries/cpp-hash-tables <https://gitlab.com/MusicScience37Projects/utility-libraries/cpp-hash-tables>`_.
 
 API reference can be viewed `here <api/index.html>`_.
 
