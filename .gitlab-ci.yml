@@ -9,7 +9,7 @@ stages:
   - release
 
 variables:
-  HASH_TABLES_VERSION: "0.3.0"
+  HASH_TABLES_VERSION: "0.4.1"
   CONAN_USER: "MusicScience37"
   SECURE_LOG_LEVEL: debug
   CPP_STAT_BENCH_CONAN_REGISTRY: "https://gitlab.com/api/v4/projects/32226502/packages/conan"
