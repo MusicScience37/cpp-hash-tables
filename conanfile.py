@@ -3,7 +3,7 @@ from conans import ConanFile
 
 class CppHashTablesConan(ConanFile):
     name = "cpp_hash_tables"
-    version = "0.3.0"
+    version = "0.4.1"
     description = "Hash tables in C++."
     homepage = (
         "https://gitlab.com/MusicScience37Projects/utility-libraries/cpp-hash-tables"
