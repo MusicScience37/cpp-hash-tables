@@ -4,7 +4,7 @@ pipenv sync --dev
 
 pipenv run conan profile new --detect default
 pipenv run conan profile update settings.compiler.libcxx=libc++ default
-pipenv run conan remote add gitlab https://gitlab.com/api/v4/packages/conan
+pipenv run conan remote add cpp-stat-bench https://gitlab.com/api/v4/projects/32226502/packages/conan
 
 git config --global --add safe.directory /workspaces/cpp-hash-tables
 pipenv run pre-commit install

@@ -1,21 +1,20 @@
 # cpp-hash-tables
 
-[![GitLab Release](https://img.shields.io/gitlab/v/release/35726343?sort=semver)](https://gitlab.com/MusicScience37/cpp-hash-tables/-/releases)
+[![GitLab Release](https://img.shields.io/gitlab/v/release/35726343?sort=semver)](https://gitlab.com/MusicScience37Projects/utility-libraries/cpp-hash-tables/-/releases)
 [![C++ standard](https://img.shields.io/badge/standard-C%2B%2B17-blue?logo=c%2B%2B)](https://en.cppreference.com/w/cpp/compiler_support/17)
-[![pipeline status](https://gitlab.com/MusicScience37/cpp-hash-tables/badges/develop/pipeline.svg)](https://gitlab.com/MusicScience37/cpp-hash-tables/-/commits/develop)
+[![pipeline status](https://gitlab.com/MusicScience37Projects/utility-libraries/cpp-hash-tables/badges/develop/pipeline.svg)](https://gitlab.com/MusicScience37Projects/utility-libraries/cpp-hash-tables/-/commits/develop)
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit)
-[![codecov](https://codecov.io/gl/MusicScience37/cpp-hash-tables/branch/develop/graph/badge.svg?token=ZTN5W5W5AO)](https://codecov.io/gl/MusicScience37/cpp-hash-tables)
 
 Hash tables in C++.
 
 ## Repositories
 
-- Main in GitLab: [https://gitlab.com/MusicScience37/cpp-hash-tables](https://gitlab.com/MusicScience37/cpp-hash-tables)
+- Main in GitLab: [https://gitlab.com/MusicScience37Projects/utility-libraries/cpp-hash-tables](https://gitlab.com/MusicScience37Projects/utility-libraries/cpp-hash-tables)
 - Mirror in GitHub: [https://github.com/MusicScience37/cpp-hash-tables](https://github.com/MusicScience37/cpp-hash-tables)
 
 ## Documentation
 
-- [Documentation build on develop branch](https://musicscience37.gitlab.io/cpp-hash-tables/)
+- [Documentation build on develop branch](https://musicscience37projects.gitlab.io/utility-libraries/cpp-hash-tables/)
 
 ## How to Use
 
@@ -31,15 +30,15 @@ so no further installation is required.
 
 This library is packaged with [Conan](https://conan.io/),
 and available via
-[package registry in GitLab](https://gitlab.com/MusicScience37/cpp-hash-tables/-/packages).
+[package registry in GitLab](https://gitlab.com/MusicScience37Projects/utility-libraries/cpp-hash-tables/-/packages).
 
 To use this library,
 add the package
-`cpp_hash_tables/<version>@MusicScience37+cpp-hash-tables/stable`
+`cpp_hash_tables/<version>@MusicScience37/stable`
 with a version you want
 to your `conanfile.py` or `conanfile.txt`,
 and add the remote
-`https://gitlab.com/api/v4/packages/conan`
+`https://gitlab.com/api/v4/projects/35726343/packages/conan`
 to conan command.
 
 ## How to Build in the Repository
@@ -91,10 +90,10 @@ execute the following commands to build:
    pipenv shell
    ```
 
-2. Add the Conan remote in GitLab. (Once in an environment. Already done in devcontainer of VSCode.)
+2. Add a Conan remote in GitLab. (Once in an environment. Already done in devcontainer of VSCode.)
 
    ```bash
-   conan remote add gitlab https://gitlab.com/api/v4/packages/conan
+   conan remote add cpp-stat-bench https://gitlab.com/api/v4/projects/32226502/packages/conan
    ```
 
 3. Download and install required Conan packages.
