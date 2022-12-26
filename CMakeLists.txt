@@ -55,7 +55,7 @@ set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 include(ConfigureClangTidy)
 include(CppWarningFlags)
 include(ConfigureSanitizer)
-include(pipenv)
+include(poetry)
 
 set(HASH_TABLES_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 

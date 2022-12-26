@@ -1,8 +1,6 @@
 {
   "build": { "dockerfile": "Dockerfile" },
   "containerEnv": {
-    "PIPENV_VENV_IN_PROJECT": "1",
-    "PIPENV_IGNORE_VIRTUALENVS": "1",
     "ASAN_OPTIONS": "alloc_dealloc_mismatch=0"
   },
   "extensions": [
