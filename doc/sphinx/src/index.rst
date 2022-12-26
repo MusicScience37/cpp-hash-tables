@@ -13,6 +13,7 @@ API reference can be viewed `here <api/index.html>`_.
     :caption: About
 
     license
+    change_log/index
 
 .. toctree::
     :maxdepth: 2

@@ -8,7 +8,7 @@ endif()
 
 project(
     hash_tables
-    VERSION 0.3.0
+    VERSION 0.4.1
     DESCRIPTION "Hash tables in C++."
     LANGUAGES CXX)
 set(FULL_PROJECT_NAME "cpp-hash-tables")
@@ -55,7 +55,7 @@ set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 include(ConfigureClangTidy)
 include(CppWarningFlags)
 include(ConfigureSanitizer)
-include(pipenv)
+include(poetry)
 
 set(HASH_TABLES_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 

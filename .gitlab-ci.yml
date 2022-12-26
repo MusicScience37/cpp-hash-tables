@@ -6,9 +6,10 @@ stages:
   - Test with MSVC
   - Build Documentation
   - Publish
+  - release
 
 variables:
-  HASH_TABLES_VERSION: "0.3.0"
+  HASH_TABLES_VERSION: "0.4.1"
   CONAN_USER: "MusicScience37"
   SECURE_LOG_LEVEL: debug
   CPP_STAT_BENCH_CONAN_REGISTRY: "https://gitlab.com/api/v4/projects/32226502/packages/conan"
@@ -39,18 +40,20 @@ license_scanning:
     max: 1
     when: always
 
-sync pipenv:
+sync poetry:
   extends: .retry setting
   stage: Prepare
   image: musicscience37/clang-ci:clang14
   script:
     - mkdir -p .venv
-    - pipenv sync --dev
+    - poetry config virtualenvs.in-project true
+    - poetry env use 3.10
+    - poetry install
   cache:
     key:
-      prefix: pipenv-linux
+      prefix: poetry-linux
       files:
-        - Pipfile.lock
+        - Poetry.lock
     paths:
       - .venv
   artifacts:
@@ -64,16 +67,18 @@ prepare lock files:
   needs: []
   image: musicscience37/clang-ci:clang14
   script:
-    - pipenv sync --dev
-    - pipenv run conan profile new --detect default
-    - pipenv run conan profile update settings.compiler.libcxx=libc++ default
-    - pipenv run conan remote add cpp-stat-bench $CPP_STAT_BENCH_CONAN_REGISTRY
-    - pipenv run conan install --build missing -o cpp_hash_tables:requirements_for_tests=True -s build_type=Debug .
+    - poetry config virtualenvs.in-project true
+    - poetry env use 3.10
+    - poetry install
+    - poetry run conan profile new --detect default
+    - poetry run conan profile update settings.compiler.libcxx=libc++ default
+    - poetry run conan remote add cpp-stat-bench $CPP_STAT_BENCH_CONAN_REGISTRY
+    - poetry run conan install --build missing -o cpp_hash_tables:requirements_for_tests=True -s build_type=Debug .
   cache:
     key:
-      prefix: pipenv-linux-prepare
+      prefix: poetry-linux-prepare
       files:
-        - Pipfile.lock
+        - Poetry.lock
     paths:
       - .venv
   artifacts:
@@ -103,20 +108,20 @@ line count:
 pre-commit:
   stage: Check
   needs:
-    - sync pipenv
+    - sync poetry
   dependencies:
-    - sync pipenv
+    - sync poetry
   image: musicscience37/clang-ci:clang14
   script:
-    - pipenv run pre-commit run --all-files
+    - poetry run pre-commit run --all-files
 
 static analysis:
   extends: .retry setting
   stage: Check
   needs:
-    - sync pipenv
+    - sync poetry
   dependencies:
-    - sync pipenv
+    - sync poetry
   image: musicscience37/clang-ci:clang14
   variables:
     GIT_SUBMODULE_STRATEGY: recursive
@@ -130,10 +135,10 @@ static analysis:
     - cd ../
   script:
     - cd build_static_analysis
-    - pipenv run conan profile new --detect default
-    - pipenv run conan profile update settings.compiler.libcxx=libstdc++11 default
-    - pipenv run conan remote add cpp-stat-bench $CPP_STAT_BENCH_CONAN_REGISTRY
-    - pipenv run conan install --build missing -o cpp_hash_tables:requirements_for_tests=True ..
+    - poetry run conan profile new --detect default
+    - poetry run conan profile update settings.compiler.libcxx=libstdc++11 default
+    - poetry run conan remote add cpp-stat-bench $CPP_STAT_BENCH_CONAN_REGISTRY
+    - poetry run conan install --build missing -o cpp_hash_tables:requirements_for_tests=True ..
     - cd ../
     - cmake -S ./ -B build_static_analysis
       -DHASH_TABLES_ENABLE_CLANG_TIDY:BOOL=ON
@@ -161,18 +166,18 @@ static analysis:
 .release-test-base:
   extends: .retry setting
   needs:
-    - sync pipenv
+    - sync poetry
   dependencies:
-    - sync pipenv
+    - sync poetry
   variables:
     GIT_SUBMODULE_STRATEGY: recursive
   before_script:
     - mkdir $BUILD_DIR
     - cd $BUILD_DIR
-    - pipenv run conan profile new --detect default
-    - pipenv run conan profile update settings.compiler.libcxx=libstdc++11 default
-    - pipenv run conan remote add cpp-stat-bench $CPP_STAT_BENCH_CONAN_REGISTRY
-    - pipenv run conan install --build missing -o cpp_hash_tables:requirements_for_tests=True -s build_type=Release ..
+    - poetry run conan profile new --detect default
+    - poetry run conan profile update settings.compiler.libcxx=libstdc++11 default
+    - poetry run conan remote add cpp-stat-bench $CPP_STAT_BENCH_CONAN_REGISTRY
+    - poetry run conan install --build missing -o cpp_hash_tables:requirements_for_tests=True -s build_type=Release ..
     - cd ../
   script:
     - cmake -S ./ -B $BUILD_DIR
@@ -202,10 +207,10 @@ static analysis:
   before_script:
     - mkdir $BUILD_DIR
     - cd $BUILD_DIR
-    - pipenv run conan profile new --detect default
-    - pipenv run conan profile update settings.compiler.libcxx=libstdc++11 default
-    - pipenv run conan remote add cpp-stat-bench $CPP_STAT_BENCH_CONAN_REGISTRY
-    - pipenv run conan install --build missing -o cpp_hash_tables:requirements_for_tests=True -s build_type=Debug ..
+    - poetry run conan profile new --detect default
+    - poetry run conan profile update settings.compiler.libcxx=libstdc++11 default
+    - poetry run conan remote add cpp-stat-bench $CPP_STAT_BENCH_CONAN_REGISTRY
+    - poetry run conan install --build missing -o cpp_hash_tables:requirements_for_tests=True -s build_type=Debug ..
     - cd ../
   script:
     - cmake -S ./ -B $BUILD_DIR
@@ -223,10 +228,10 @@ static analysis:
   before_script:
     - mkdir $BUILD_DIR
     - cd $BUILD_DIR
-    - pipenv run conan profile new --detect default
-    - pipenv run conan profile update settings.compiler.libcxx=libc++ default
-    - pipenv run conan remote add cpp-stat-bench $CPP_STAT_BENCH_CONAN_REGISTRY
-    - pipenv run conan install --build missing -o cpp_hash_tables:requirements_for_tests=True -s build_type=Release ..
+    - poetry run conan profile new --detect default
+    - poetry run conan profile update settings.compiler.libcxx=libc++ default
+    - poetry run conan remote add cpp-stat-bench $CPP_STAT_BENCH_CONAN_REGISTRY
+    - poetry run conan install --build missing -o cpp_hash_tables:requirements_for_tests=True -s build_type=Release ..
     - cd ../
 
 .clang-debug-test-base:
@@ -234,10 +239,10 @@ static analysis:
   before_script:
     - mkdir $BUILD_DIR
     - cd $BUILD_DIR
-    - pipenv run conan profile new --detect default
-    - pipenv run conan profile update settings.compiler.libcxx=libc++ default
-    - pipenv run conan remote add cpp-stat-bench $CPP_STAT_BENCH_CONAN_REGISTRY
-    - pipenv run conan install --build missing -o cpp_hash_tables:requirements_for_tests=True -s build_type=Debug ..
+    - poetry run conan profile new --detect default
+    - poetry run conan profile update settings.compiler.libcxx=libc++ default
+    - poetry run conan remote add cpp-stat-bench $CPP_STAT_BENCH_CONAN_REGISTRY
+    - poetry run conan install --build missing -o cpp_hash_tables:requirements_for_tests=True -s build_type=Debug ..
     - cd ../
 
 clang coverage:
@@ -354,15 +359,14 @@ msvc-release:
     - choco install cmake -y --installargs 'ADD_CMAKE_TO_PATH=System'
     - choco install python --version=3.10.8 -y
     - RefreshEnv
-    - pip install pipenv
-    - pipenv sync
-    - pipenv clean
+    - pip install poetry
+    - poetry install
   script:
     - mkdir $BUILD_DIR
     - cd $BUILD_DIR
-    - pipenv run conan profile new --detect default
-    - pipenv run conan remote add cpp-stat-bench $CPP_STAT_BENCH_CONAN_REGISTRY
-    - pipenv run conan install --build missing -o cpp_hash_tables:requirements_for_tests=True -s build_type=Release ..
+    - poetry run conan profile new --detect default
+    - poetry run conan remote add cpp-stat-bench $CPP_STAT_BENCH_CONAN_REGISTRY
+    - poetry run conan install --build missing -o cpp_hash_tables:requirements_for_tests=True -s build_type=Release ..
     - cd ../
     - cmake -S ./ -B $BUILD_DIR
       -DCMAKE_BUILD_TYPE=Release
@@ -383,37 +387,37 @@ clang-14-conan:
   extends: .retry setting
   stage: Test with Clang
   needs:
-    - sync pipenv
+    - sync poetry
   dependencies:
-    - sync pipenv
+    - sync poetry
   image: musicscience37/clang-ci:clang14
   variables:
     CONAN_CHANNEL: "testing"
   script:
-    - pipenv run conan profile new --detect default
-    - pipenv run conan profile update settings.compiler.libcxx=libc++ default
-    - pipenv run conan remote add cpp-stat-bench $CPP_STAT_BENCH_CONAN_REGISTRY
-    - pipenv run conan create --build missing --test-folder tests/conan_package -s build_type=Debug . ${CONAN_USER}/${CONAN_CHANNEL}
-    - pipenv run conan create --build missing --test-folder tests/conan_package -s build_type=Release . ${CONAN_USER}/${CONAN_CHANNEL}
+    - poetry run conan profile new --detect default
+    - poetry run conan profile update settings.compiler.libcxx=libc++ default
+    - poetry run conan remote add cpp-stat-bench $CPP_STAT_BENCH_CONAN_REGISTRY
+    - poetry run conan create --build missing --test-folder tests/conan_package -s build_type=Debug . ${CONAN_USER}/${CONAN_CHANNEL}
+    - poetry run conan create --build missing --test-folder tests/conan_package -s build_type=Release . ${CONAN_USER}/${CONAN_CHANNEL}
 
 clang-14-conan-release:
   extends: .retry setting
   stage: Publish
   needs:
-    - sync pipenv
+    - sync poetry
   dependencies:
-    - sync pipenv
+    - sync poetry
   image: musicscience37/clang-ci:clang14
   variables:
     CONAN_CHANNEL: "stable"
   script:
-    - pipenv run conan profile new --detect default
-    - pipenv run conan profile update settings.compiler.libcxx=libc++ default
-    - pipenv run conan remote add cpp-stat-bench $CPP_STAT_BENCH_CONAN_REGISTRY
-    - pipenv run conan remote add cpp-hash-tables $CPP_HASH_TABLES_CONAN_REGISTRY
-    - pipenv run conan create --build missing --test-folder tests/conan_package -s build_type=Debug . ${CONAN_USER}/${CONAN_CHANNEL}
-    - pipenv run conan create --build missing --test-folder tests/conan_package -s build_type=Release . ${CONAN_USER}/${CONAN_CHANNEL}
-    - CONAN_LOGIN_USERNAME=ci_user CONAN_PASSWORD=${CI_JOB_TOKEN} pipenv run conan upload -r cpp-hash-tables cpp_hash_tables/${HASH_TABLES_VERSION}@${CONAN_USER}/${CONAN_CHANNEL} --all
+    - poetry run conan profile new --detect default
+    - poetry run conan profile update settings.compiler.libcxx=libc++ default
+    - poetry run conan remote add cpp-stat-bench $CPP_STAT_BENCH_CONAN_REGISTRY
+    - poetry run conan remote add cpp-hash-tables $CPP_HASH_TABLES_CONAN_REGISTRY
+    - poetry run conan create --build missing --test-folder tests/conan_package -s build_type=Debug . ${CONAN_USER}/${CONAN_CHANNEL}
+    - poetry run conan create --build missing --test-folder tests/conan_package -s build_type=Release . ${CONAN_USER}/${CONAN_CHANNEL}
+    - CONAN_LOGIN_USERNAME=ci_user CONAN_PASSWORD=${CI_JOB_TOKEN} poetry run conan upload -r cpp-hash-tables cpp_hash_tables/${HASH_TABLES_VERSION}@${CONAN_USER}/${CONAN_CHANNEL} --all
   only:
     - tags
 
@@ -421,19 +425,19 @@ doc:
   extends: .retry setting
   stage: Build Documentation
   needs:
-    - sync pipenv
+    - sync poetry
   dependencies:
-    - sync pipenv
+    - sync poetry
   image: musicscience37/sphinx-doxygen:clang14
   variables:
     GIT_SUBMODULE_STRATEGY: recursive
   script:
     - mkdir build_doc
     - cd build_doc
-    - pipenv run conan profile new --detect default
-    - pipenv run conan profile update settings.compiler.libcxx=libc++ default
-    - pipenv run conan remote add cpp-stat-bench $CPP_STAT_BENCH_CONAN_REGISTRY
-    - pipenv run conan install --build missing -o cpp_hash_tables:requirements_for_tests=True ..
+    - poetry run conan profile new --detect default
+    - poetry run conan profile update settings.compiler.libcxx=libc++ default
+    - poetry run conan remote add cpp-stat-bench $CPP_STAT_BENCH_CONAN_REGISTRY
+    - poetry run conan install --build missing -o cpp_hash_tables:requirements_for_tests=True ..
     - cd ../
     - cmake -S ./ -B build_doc
       -DHASH_TABLES_BUILD_DOC:BOOL=ON
@@ -459,3 +463,15 @@ pages:
   artifacts:
     paths:
       - public
+
+release:
+  image: registry.gitlab.com/gitlab-org/release-cli:latest
+  stage: release
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^v/
+  script:
+    - echo "This is a release job."
+  release:
+    tag_name: $CI_COMMIT_TAG
+    name: "$CI_COMMIT_TAG"
+    description: "./doc/sphinx/src/change_log/${CI_COMMIT_TAG}.md"
