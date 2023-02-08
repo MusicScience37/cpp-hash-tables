@@ -60,9 +60,9 @@
   "doxdocgen.cpp.ctorText": "Constructor.",
   "doxdocgen.cpp.dtorText": "Destructor.",
   "cmake.ctest.parallelJobs": 2,
-  "C_Cpp.intelliSenseEngine": "Disabled",
-  "C_Cpp.autocomplete": "Disabled",
-  "C_Cpp.errorSquiggles": "Disabled",
+  "C_Cpp.intelliSenseEngine": "disabled",
+  "C_Cpp.autocomplete": "disabled",
+  "C_Cpp.errorSquiggles": "disabled",
   "esbonio.sphinx.confDir": "${workspaceFolder}/doc/sphinx/src",
   "restructuredtext.linter.disabledLinters": ["rstcheck", "rst-lint"],
   "esbonio.server.enabled": false,
@@ -70,5 +70,11 @@
     "**/.conan/**": true,
     "**/.venv/**": true
   },
-  "python.formatting.provider": "black"
+  "python.formatting.provider": "black",
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[yaml]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  }
 }

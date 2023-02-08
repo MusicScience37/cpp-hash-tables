@@ -28,11 +28,9 @@ class CppHashTablesConan(ConanFile):
 
     def build_requirements(self):
         if self.options.requirements_for_tests:
-            self.build_requires("catch2/3.1.0")
+            self.build_requires("catch2/3.3.1")
             self.build_requires("trompeloeil/43")
-            self.build_requires(
-                "cpp_stat_bench/0.8.0@MusicScience37+cpp-stat-bench/stable"
-            )
+            self.build_requires("cpp_stat_bench/0.10.0@MusicScience37/stable")
 
     def package(self):
         self.copy("*.h")

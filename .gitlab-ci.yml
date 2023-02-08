@@ -356,7 +356,10 @@ msvc-release:
   variables:
     BUILD_DIR: build_msvc_release
     CONAN_USER_HOME: C:\Users\gitlab_runner
+    # Workaround in https://docs.conan.io/en/latest/reference/conanfile/attributes.html?highlight=conan_use_always_short_paths#short-paths
     CONAN_USE_ALWAYS_SHORT_PATHS: 1
+    # workaround in https://github.com/python-poetry/poetry/issues/1917#issuecomment-1235998997
+    PYTHON_KEYRING_BACKEND: keyring.backends.null.Keyring
   before_script:
     - (mv ${CI_PROJECT_DIR}/.conan C:\Users\gitlab_runner -Force)
     - Import-Module "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
