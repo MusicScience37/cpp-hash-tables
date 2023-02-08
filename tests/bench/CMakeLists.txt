@@ -19,11 +19,7 @@ function(target_add_to_benchmark TARGET)
     endif()
 endfunction()
 
-# TODO
-
-# add_subdirectory(std)
-
-# add_subdirectory(utility)
+add_subdirectory(std)
 
 # add_subdirectory(tables)
 
