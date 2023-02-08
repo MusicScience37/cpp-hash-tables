@@ -67,7 +67,7 @@ public:
      * \return Value.
      */
     [[nodiscard]] auto release() -> MappedType {
-        return MappedType(std::move(mapped_value_.value()));
+        return std::move(mapped_value_.value());
     }
 
 private:
