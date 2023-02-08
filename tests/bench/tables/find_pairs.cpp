@@ -26,40 +26,37 @@
 #include <vector>
 
 #include <fmt/core.h>
-#include <stat_bench/bench/invocation_context.h>
 #include <stat_bench/benchmark_macros.h>
+#include <stat_bench/do_not_optimize.h>
+#include <stat_bench/invocation_context.h>
 #include <stat_bench/param/parameter_value_vector.h>
-#include <stat_bench/util/do_not_optimize.h>
 
 #include "hash_tables/extract_key_functions/extract_first_from_pair.h"
 #include "hash_tables/hashes/std_hash.h"
 #include "hash_tables/tables/open_address_table_st.h"
 #include "hash_tables/tables/separate_shared_chain_table_mt.h"
 #include "hash_tables_test/create_random_int_vector.h"
+#include "hash_tables_test/create_random_string_vector.h"
 
 using key_type = int;
 using value_type = std::pair<int, std::string>;
 using extract_key =
     hash_tables::extract_key_functions::extract_first_from_pair<value_type>;
 
-class fixture : public stat_bench::FixtureBase {
+class find_pairs_fixture : public stat_bench::FixtureBase {
 public:
-    fixture() {
+    find_pairs_fixture() {
         // NOLINTNEXTLINE
-        add_param<std::size_t>("size")->add(10)->add(100)->add(1000);
+        add_param<std::size_t>("size")->add(10)->add(1000);
         // NOLINTNEXTLINE
         add_param<float>("load")->add(0.1)->add(0.2)->add(0.5)->add(0.8);
     }
 
-    void setup(stat_bench::bench::InvocationContext& context) override {
+    void setup(stat_bench::InvocationContext& context) override {
         size_ = context.get_param<std::size_t>("size");
         max_load_factor_ = context.get_param<float>("load");
         keys_ = hash_tables_test::create_random_int_vector<key_type>(size_);
-        second_values_.clear();
-        second_values_.reserve(keys_.size());
-        for (const auto& key : keys_) {
-            second_values_.push_back(std::to_string(key));
-        }
+        second_values_ = hash_tables_test::create_random_string_vector(size_);
     }
 
 protected:
@@ -77,7 +74,7 @@ protected:
 };
 
 // NOLINTNEXTLINE
-STAT_BENCH_CASE_F(fixture, "find_pairs", "open_address_st") {
+STAT_BENCH_CASE_F(find_pairs_fixture, "find_pairs", "open_address_st") {
     hash_tables::tables::open_address_table_st<value_type, key_type,
         extract_key>
         table;
@@ -93,13 +90,13 @@ STAT_BENCH_CASE_F(fixture, "find_pairs", "open_address_st") {
     STAT_BENCH_MEASURE() {
         for (std::size_t i = 0; i < size_; ++i) {
             const auto& key = keys_.at(i);
-            stat_bench::util::do_not_optimize(table.at(keys_.at(i)));
+            stat_bench::do_not_optimize(table.at(keys_.at(i)));
         }
     };
 }
 
 // NOLINTNEXTLINE
-STAT_BENCH_CASE_F(fixture, "find_pairs", "shared_chain_mt") {
+STAT_BENCH_CASE_F(find_pairs_fixture, "find_pairs", "shared_chain_mt") {
     const auto min_num_buckets =
         static_cast<std::size_t>(static_cast<float>(size_) / max_load_factor_);
     hash_tables::tables::separate_shared_chain_table_mt<value_type, key_type,
@@ -115,9 +112,7 @@ STAT_BENCH_CASE_F(fixture, "find_pairs", "shared_chain_mt") {
     STAT_BENCH_MEASURE() {
         for (std::size_t i = 0; i < size_; ++i) {
             const auto& key = keys_.at(i);
-            stat_bench::util::do_not_optimize(table.at(keys_.at(i)));
+            stat_bench::do_not_optimize(table.at(keys_.at(i)));
         }
     };
 }
-
-STAT_BENCH_MAIN
