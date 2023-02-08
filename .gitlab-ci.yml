@@ -372,7 +372,6 @@ msvc-release:
       -DCMAKE_BUILD_TYPE=Release
       -DHASH_TABLES_TESTING:BOOL=ON
       -DHASH_TABLES_ENABLE_BENCH=ON
-      -DHASH_TABLES_TEST_BENCHMARKS=ON
       -DHASH_TABLES_BUILD_EXAMPLES=ON
       -DHASH_TABLES_TEST_EXAMPLES=ON
       -DHASH_TABLES_WRITE_JUNIT:BOOL=ON
@@ -381,7 +380,6 @@ msvc-release:
     - ctest -V --build-config Release
   after_script:
     - (mv C:\Users\gitlab_runner\.conan ${CI_PROJECT_DIR} -Force)
-  allow_failure: true
 
 clang-14-conan:
   extends: .retry setting
