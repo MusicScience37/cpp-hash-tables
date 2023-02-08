@@ -110,11 +110,11 @@ test release:
       - COMPILER_TYPE: ["gcc10", "gcc12"]
         IMAGE_PATH: "musicscience37/gcc-ci"
         CONAN_LIBCXX: libstdc++11
-        CXX_STANDARD: 14
+        CXX_STANDARD: 17
       - COMPILER_TYPE: ["clang14", "clang15"]
         IMAGE_PATH: "musicscience37/clang-ci"
         CONAN_LIBCXX: libc++
-        CXX_STANDARD: 14
+        CXX_STANDARD: 17
       - COMPILER_TYPE: ["clang14"]
         IMAGE_PATH: "musicscience37/clang-ci"
         CONAN_LIBCXX: libc++
@@ -165,11 +165,11 @@ test debug:
       - COMPILER_TYPE: ["gcc10"]
         IMAGE_PATH: "musicscience37/gcc-ci"
         CONAN_LIBCXX: libstdc++11
-        CXX_STANDARD: 14
+        CXX_STANDARD: 17
       - COMPILER_TYPE: ["clang14"]
         IMAGE_PATH: "musicscience37/clang-ci"
         CONAN_LIBCXX: libc++
-        CXX_STANDARD: 14
+        CXX_STANDARD: 17
   variables:
     BUILD_TYPE: Debug
     BUILD_DIR: build_${COMPILER_TYPE}_debug
@@ -192,7 +192,7 @@ clang coverage:
       - COMPILER_TYPE: "clang14"
         IMAGE_PATH: "musicscience37/clang-ci"
         CONAN_LIBCXX: libc++
-        CXX_STANDARD: 14
+        CXX_STANDARD: 17
   variables:
     BUILD_DIR: build_clang_coverage
   script:
@@ -219,7 +219,7 @@ clang-14-asan-ubsan:
       - COMPILER_TYPE: "clang14"
         IMAGE_PATH: "musicscience37/clang-ci"
         CONAN_LIBCXX: libc++
-        CXX_STANDARD: 14
+        CXX_STANDARD: 17
   variables:
     BUILD_DIR: build_clang_asan_ubsan
     ASAN_OPTIONS: alloc_dealloc_mismatch=0
@@ -332,7 +332,7 @@ static analysis:
       - COMPILER_TYPE: "clang14"
         IMAGE_PATH: "musicscience37/clang-ci"
         CONAN_LIBCXX: libc++
-        CXX_STANDARD: 14
+        CXX_STANDARD: 17
   variables:
     BUILD_TYPE: Debug
     BUILD_DIR: build_static_analysis
