@@ -1,11 +1,7 @@
 stages:
-  - Prepare
-  - Check
-  - Test with Clang
-  - Test with GCC
-  - Test with MSVC
-  - Build Documentation
-  - Publish
+  - prepare
+  - test
+  - deploy
   - release
 
 variables:
@@ -20,16 +16,13 @@ include:
   - template: Security/SAST.gitlab-ci.yml
   - template: Security/License-Scanning.gitlab-ci.yml
 sast:
-  stage: Check
   needs: []
 dependency_scanning:
-  stage: Check
   needs:
     - prepare lock files
   dependencies:
     - prepare lock files
 license_scanning:
-  stage: Check
   needs:
     - prepare lock files
   dependencies:
@@ -42,7 +35,7 @@ license_scanning:
 
 sync poetry:
   extends: .retry setting
-  stage: Prepare
+  stage: prepare
   image: musicscience37/clang-ci:clang14
   script:
     - mkdir -p .venv
@@ -63,7 +56,7 @@ sync poetry:
 
 prepare lock files:
   extends: .retry setting
-  stage: Prepare
+  stage: prepare
   needs: []
   image: musicscience37/clang-ci:clang14
   script:
@@ -88,7 +81,7 @@ prepare lock files:
 
 line count:
   extends: .retry setting
-  stage: Prepare
+  stage: prepare
   dependencies: []
   image: registry.gitlab.com/musicscience37projects/docker/cloc-docker
   script:
@@ -106,7 +99,7 @@ line count:
     expire_in: "1 mos"
 
 pre-commit:
-  stage: Check
+  stage: test
   needs:
     - sync poetry
   dependencies:
@@ -117,7 +110,7 @@ pre-commit:
 
 static analysis:
   extends: .retry setting
-  stage: Check
+  stage: test
   needs:
     - sync poetry
   dependencies:
@@ -251,7 +244,7 @@ static analysis:
 
 clang coverage:
   extends: .clang-debug-test-base
-  stage: Test with Clang
+  stage: test
   image: musicscience37/clang-ci:clang14
   variables:
     BUILD_DIR: build_clang_coverage
@@ -273,7 +266,7 @@ clang coverage:
 
 gcc coverage:
   extends: .debug-test-base
-  stage: Test with GCC
+  stage: test
   image: musicscience37/gcc-ci:gcc10
   variables:
     BUILD_DIR: build_gcc_coverage
@@ -294,42 +287,42 @@ gcc coverage:
 
 gcc-10-debug:
   extends: .debug-test-base
-  stage: Test with GCC
+  stage: test
   image: musicscience37/gcc-ci:gcc10
   variables:
     BUILD_DIR: build_gcc10_debug
 
 gcc-10-release:
   extends: .release-test-base
-  stage: Test with GCC
+  stage: test
   image: musicscience37/gcc-ci:gcc10
   variables:
     BUILD_DIR: build_gcc10_release
 
 gcc-12-debug:
   extends: .debug-test-base
-  stage: Test with GCC
+  stage: test
   image: musicscience37/gcc-ci:gcc12
   variables:
     BUILD_DIR: build_gcc12_debug
 
 clang-14-release:
   extends: .clang-release-test-base
-  stage: Test with Clang
+  stage: test
   image: musicscience37/clang-ci:clang14
   variables:
     BUILD_DIR: build_clang14_release
 
 clang-15-debug:
   extends: .clang-debug-test-base
-  stage: Test with Clang
+  stage: test
   image: musicscience37/clang-ci:clang15
   variables:
     BUILD_DIR: build_clang15_debug
 
 clang-14-asan-ubsan:
   extends: .clang-debug-test-base
-  stage: Test with Clang
+  stage: test
   image: musicscience37/clang-ci:clang14
   variables:
     BUILD_DIR: build_clang_asan_ubsan
@@ -350,7 +343,7 @@ msvc-release:
     - shared-windows
     - windows
     - windows-1809
-  stage: Test with MSVC
+  stage: test
   needs: []
   dependencies: []
   variables:
@@ -392,7 +385,7 @@ msvc-release:
 
 clang-14-conan:
   extends: .retry setting
-  stage: Test with Clang
+  stage: test
   needs:
     - sync poetry
   dependencies:
@@ -409,7 +402,7 @@ clang-14-conan:
 
 clang-14-conan-release:
   extends: .retry setting
-  stage: Publish
+  stage: deploy
   needs:
     - sync poetry
   dependencies:
@@ -430,7 +423,7 @@ clang-14-conan-release:
 
 doc:
   extends: .retry setting
-  stage: Build Documentation
+  stage: test
   needs:
     - sync poetry
   dependencies:
@@ -457,7 +450,7 @@ doc:
 
 pages:
   extends: .retry setting
-  stage: Publish
+  stage: deploy
   only:
     - develop
   needs:
