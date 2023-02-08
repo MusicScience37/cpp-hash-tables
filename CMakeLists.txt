@@ -52,7 +52,6 @@ if(HASH_TABLES_TESTING)
 endif()
 
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
-include(ConfigureClangTidy)
 include(CppWarningFlags)
 include(ConfigureSanitizer)
 include(poetry)
