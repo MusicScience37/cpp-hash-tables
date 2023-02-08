@@ -20,7 +20,5 @@ function(target_add_to_benchmark TARGET)
 endfunction()
 
 add_subdirectory(std)
-
 # add_subdirectory(tables)
-
-# add_subdirectory(maps)
+add_subdirectory(maps)
