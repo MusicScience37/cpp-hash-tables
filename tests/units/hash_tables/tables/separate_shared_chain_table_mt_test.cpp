@@ -56,7 +56,7 @@ TEMPLATE_TEST_CASE("hash_tables::tables::separate_shared_chain_table_mt", "",
     }
 
     SECTION("insert (const reference)") {
-        SECTION("successfull") {
+        SECTION("successful") {
             table_type table;
 
             const auto value = std::string("abc");
@@ -99,7 +99,7 @@ TEMPLATE_TEST_CASE("hash_tables::tables::separate_shared_chain_table_mt", "",
     }
 
     SECTION("insert (rvalue reference)") {
-        SECTION("successfull") {
+        SECTION("successful") {
             table_type table;
 
             const auto value = std::string("abc");
@@ -142,7 +142,7 @@ TEMPLATE_TEST_CASE("hash_tables::tables::separate_shared_chain_table_mt", "",
     }
 
     SECTION("emplace") {
-        SECTION("successfull") {
+        SECTION("successful") {
             table_type table;
 
             const auto value = std::string("abc");
@@ -185,7 +185,7 @@ TEMPLATE_TEST_CASE("hash_tables::tables::separate_shared_chain_table_mt", "",
     }
 
     SECTION("emplace_or_assign") {
-        SECTION("successfull") {
+        SECTION("successful") {
             table_type table;
 
             const auto value = std::string("abc");
@@ -228,7 +228,7 @@ TEMPLATE_TEST_CASE("hash_tables::tables::separate_shared_chain_table_mt", "",
     }
 
     SECTION("assign") {
-        SECTION("successfull") {
+        SECTION("successful") {
             table_type table;
 
             const auto value1 = std::string("abc");
@@ -253,6 +253,8 @@ TEMPLATE_TEST_CASE("hash_tables::tables::separate_shared_chain_table_mt", "",
             CHECK_THROWS(table.at(key));
         }
     }
+
+    // cSpell:ignore bcdef
 
     SECTION("at") {
         table_type table;
@@ -457,7 +459,7 @@ TEMPLATE_TEST_CASE("hash_tables::tables::separate_shared_chain_table_mt", "",
     }
 
     SECTION("erase") {
-        SECTION("successfull") {
+        SECTION("successful") {
             table_type table;
 
             const auto value1 = std::string("abc");

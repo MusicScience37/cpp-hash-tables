@@ -345,6 +345,31 @@ static analysis:
       -DCMAKE_CXX_STANDARD=$CXX_STANDARD
     - poetry run clang-tidy-checker -b ${BUILD_DIR}
 
+spell check:
+  stage: test
+  needs: []
+  image: node
+  script:
+    - npm install -g cspell
+    - cspell lint
+      "**/*.h"
+      "**/*.cpp"
+      "**/*.py"
+      "**/*.cmake"
+      "**/*.txt"
+      "**/*.md"
+      "**/*.rst"
+      "**/*.puml"
+      "**/*.bib"
+      "**/*.yaml"
+      "**/*.yml"
+      "**/*.json"
+      "**/*.toml"
+      "**/*.sh"
+      "**/*.bash"
+      --exclude "**/*.approved.*"
+  interruptible: true
+
 doc:
   stage: test
   needs:
