@@ -164,6 +164,7 @@ public:
      */
     template <typename... Args>
     auto emplace(key_type&& key, Args&&... args) -> bool {
+        // NOLINTNEXTLINE(bugprone-use-after-move,hicpp-invalid-access-moved): false positive
         return table_.emplace(key, std::piecewise_construct,
             std::forward_as_tuple(std::move(key)),
             std::forward_as_tuple(std::forward<Args>(args)...));
@@ -181,6 +182,7 @@ public:
      */
     template <typename... Args>
     auto emplace_or_assign(const key_type& key, Args&&... args) -> bool {
+        // NOLINTNEXTLINE(bugprone-use-after-move,hicpp-invalid-access-moved): false positive
         return table_.emplace_or_assign(key, std::piecewise_construct,
             std::forward_as_tuple(key),
             std::forward_as_tuple(std::forward<Args>(args)...));
@@ -198,6 +200,7 @@ public:
      */
     template <typename... Args>
     auto emplace_or_assign(key_type&& key, Args&&... args) -> bool {
+        // NOLINTNEXTLINE(bugprone-use-after-move,hicpp-invalid-access-moved): false positive
         return table_.emplace_or_assign(key, std::piecewise_construct,
             std::forward_as_tuple(std::move(key)),
             std::forward_as_tuple(std::forward<Args>(args)...));
@@ -215,6 +218,7 @@ public:
      */
     template <typename... Args>
     auto assign(const key_type& key, Args&&... args) -> bool {
+        // NOLINTNEXTLINE(bugprone-use-after-move,hicpp-invalid-access-moved): false positive
         return table_.assign(key, std::piecewise_construct,
             std::forward_as_tuple(std::move(key)),
             std::forward_as_tuple(std::forward<Args>(args)...));

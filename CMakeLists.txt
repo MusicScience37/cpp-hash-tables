@@ -32,6 +32,10 @@ set(CMAKE_CXX_STANDARD
     17
     CACHE STRING "C++ standard")
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS
+    ON
+    CACHE BOOL "export compile commands" FORCE)
+
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY $<1:${CMAKE_BINARY_DIR}/lib>)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY $<1:${CMAKE_BINARY_DIR}/lib>)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY $<1:${CMAKE_BINARY_DIR}/bin>)
@@ -52,7 +56,6 @@ if(HASH_TABLES_TESTING)
 endif()
 
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
-include(ConfigureClangTidy)
 include(CppWarningFlags)
 include(ConfigureSanitizer)
 include(poetry)
