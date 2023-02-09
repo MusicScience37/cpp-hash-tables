@@ -26,6 +26,7 @@
         "hbenl.vscode-test-explorer",
         "ms-azuretools.vscode-docker",
         "tomoki1207.pdf",
+        "tamasfe.even-better-toml",
         "redhat.vscode-yaml"
       ],
       "settings": {

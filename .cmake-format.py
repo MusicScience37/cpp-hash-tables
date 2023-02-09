@@ -91,7 +91,7 @@ with section("format"):
     # (without annotation).
     autosort = False
 
-    # By default, if cmake-format cannot successfully fit everything into the
+    # By default, if cmake-format cannot successfuly fit everything into the
     # desired linewidth it will apply the last, most agressive attempt that it
     # made. If this flag is True, however, cmake-format will print error, exit
     # with non-zero status code, and write-out nothing

@@ -289,6 +289,8 @@ TEMPLATE_TEST_CASE("hash_tables::tables::open_address_table_st", "",
         }
     }
 
+    // cSpell:ignore bcdef
+
     SECTION("at (non const)") {
         table_type table;
         const auto value1 = std::string("abc");

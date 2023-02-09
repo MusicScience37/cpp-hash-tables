@@ -8,7 +8,7 @@ class hash_table<ValueType, KeyType, \nExtractKey, Hash, KeyEqual, Allocator> {
     + using hash_type = Hash
     + using key_equal_type = KeyEqual
     + using allocator_type = Allocator
-    + uisng size_type = std::size_t
+    + using size_type = std::size_t
     ------
     .. common private members ..
     - size_ : size_type
@@ -60,7 +60,7 @@ class hash_map<KeyType, MappedType, \nHash, KeyEqual, Allocator> {
     + using hash_type = Hash
     + using key_equal_type = KeyEqual
     + using allocator_type = Allocator
-    + uisng size_type = std::size_t
+    + using size_type = std::size_t
     ------
     .. common private members ..
     - hash_ : hash_type

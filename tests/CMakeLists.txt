@@ -3,7 +3,7 @@ option(HASH_TABLES_WRITE_JUNIT
 if(HASH_TABLES_WRITE_JUNIT)
     set(HASH_TABLES_JUNIT_DIR
         "${CMAKE_BINARY_DIR}/junit"
-        CACHE PATH "directory to which JUnit XML files are outputed" FORCE)
+        CACHE PATH "directory to which JUnit XML files are written" FORCE)
     file(MAKE_DIRECTORY ${HASH_TABLES_JUNIT_DIR})
 endif()
 
