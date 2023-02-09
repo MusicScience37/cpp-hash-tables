@@ -1,14 +1,13 @@
 cmake_minimum_required(VERSION 3.12)
 
-if(DEFINED PROJECT_NAME)
-    set(HASH_TABLES_SUBPROJECT ON)
-else()
-    set(HASH_TABLES_SUBPROJECT OFF)
-endif()
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+include(ParseVersion)
+parse_version(${CMAKE_CURRENT_SOURCE_DIR}/include/hash_tables/version.h
+              HASH_TABLES)
 
 project(
     hash_tables
-    VERSION 0.4.1
+    VERSION ${HASH_TABLES_VERSION}
     DESCRIPTION "Hash tables in C++."
     LANGUAGES CXX)
 set(FULL_PROJECT_NAME "cpp-hash-tables")
@@ -55,7 +54,6 @@ if(HASH_TABLES_TESTING)
     find_package(cpp_stat_bench REQUIRED)
 endif()
 
-set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 include(CppWarningFlags)
 include(ConfigureSanitizer)
 include(poetry)
