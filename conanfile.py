@@ -27,7 +27,7 @@ class CppHashTablesConan(ConanFile):
 
     def set_version(self):
         contents = load(
-            os.path.join(self.recipe_folder, "include/stat_bench/version.h")
+            os.path.join(self.recipe_folder, "include/hash_tables/version.h")
         )
         major_version = re.search(r"VERSION_MAJOR (\d+)", contents).group(1)
         minor_version = re.search(r"VERSION_MINOR (\d+)", contents).group(1)
