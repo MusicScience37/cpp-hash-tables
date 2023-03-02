@@ -306,7 +306,7 @@ msvc-release:
     - choco install python --version=3.10.8 -y
     - RefreshEnv
     - pip install poetry
-    - poetry install
+    - poetry install --without dev
   script:
     - mkdir $BUILD_DIR
     - cd $BUILD_DIR
