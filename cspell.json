@@ -45,6 +45,7 @@
     "installargs",
     "integ",
     "interruptible",
+    "isystem",
     "IWYU",
     "Kabashima",
     "Kenta",
@@ -82,12 +83,14 @@
     "startuml",
     "toctree",
     "TOUPPER",
+    "tqdm",
     "trompeloeil",
     "tsan",
     "ubsan",
     "venv",
     "Virtualenv",
-    "Wextra"
+    "Wextra",
+    "Xiwyu"
   ],
   "ignoreWords": [],
   "import": []

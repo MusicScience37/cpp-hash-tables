@@ -28,6 +28,7 @@
 #include <fmt/core.h>
 #include <stat_bench/benchmark_macros.h>
 #include <stat_bench/do_not_optimize.h>
+#include <stat_bench/fixture_base.h>
 #include <stat_bench/invocation_context.h>
 #include <stat_bench/param/parameter_value_vector.h>
 
