@@ -19,6 +19,8 @@
  */
 #pragma once
 
+// IWYU pragma: no_include <string>
+
 #include <algorithm>
 #include <atomic>
 #include <cstddef>

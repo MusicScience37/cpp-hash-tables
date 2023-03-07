@@ -17,8 +17,10 @@
  * \file
  * \brief Test to find pairs in maps.
  */
+#include <algorithm>
 #include <cassert>
 #include <cstddef>
+#include <functional>
 #include <memory>
 #include <mutex>
 #include <string>
@@ -30,12 +32,13 @@
 #include <stat_bench/benchmark_macros.h>
 #include <stat_bench/current_invocation_context.h>
 #include <stat_bench/do_not_optimize.h>
+#include <stat_bench/fixture_base.h>
 #include <stat_bench/invocation_context.h>
 #include <stat_bench/param/parameter_value_vector.h>
 
 #include "hash_tables/hashes/std_hash.h"
-#include "hash_tables/maps/open_address_map_st.h"
 #include "hash_tables/maps/separate_shared_chain_map_mt.h"
+#include "hash_tables/tables/separate_shared_chain_table_mt.h"
 #include "hash_tables_test/create_random_int_vector.h"
 #include "hash_tables_test/create_random_string_vector.h"
 

@@ -25,6 +25,8 @@ sphinxcontrib-plantuml = "^0.24.1"
 mpmath = "^1.2.1"
 clang-tidy-checker = "^0.2.0"
 lcov-cobertura = "^2.0.2"
+click = "^8.1.3"
+tqdm = "^4.65.0"
 
 [build-system]
 requires = ["poetry-core"]

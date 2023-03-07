@@ -1,2 +1,2 @@
-add_executable(hash_tables_bench_std_mutex mutex.cpp)
+add_executable(hash_tables_bench_std_mutex mutex_bench.cpp)
 target_add_to_benchmark(hash_tables_bench_std_mutex)

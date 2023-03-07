@@ -17,11 +17,13 @@
  * \file
  * \brief Benchmark of mutexes.
  */
+#include <memory>
 #include <mutex>
 #include <shared_mutex>
 #include <type_traits>
 
 #include <stat_bench/benchmark_macros.h>
+#include <stat_bench/fixture_base.h>
 #include <stat_bench/param/parameter_value_vector.h>
 
 class fixture : public stat_bench::FixtureBase {
