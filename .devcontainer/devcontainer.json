@@ -1,12 +1,14 @@
 {
   "build": { "dockerfile": "Dockerfile" },
+  "runArgs": [
+    // Configuration for GDB.
+    "--cap-add=SYS_PTRACE", "--security-opt", "seccomp=unconfined"
+  ],
   "containerEnv": {
     "ASAN_OPTIONS": "alloc_dealloc_mismatch=0"
   },
   "customizations": {
-    // Configure properties specific to VS Code.
     "vscode": {
-      // Add the IDs of extensions you want installed when the container is created.
       "extensions": [
         "ms-vscode.cpptools",
         "llvm-vs-code-extensions.vscode-clangd",
