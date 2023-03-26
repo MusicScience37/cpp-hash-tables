@@ -63,10 +63,7 @@ class hash_map<KeyType, MappedType, \nHash, KeyEqual, Allocator> {
     + using size_type = std::size_t
     ------
     .. common private members ..
-    - hash_ : hash_type
-    - key_equal_ : key_equal_type
-    - allocator_ : allocator_type
-    - size_ : size_type
+    - table_ : hash_table
     ------
     .. constructor ..
     + hash_map()
@@ -116,10 +113,7 @@ class hash_set<KeyType, Hash, \nKeyEqual, Allocator> {
     + using size_type = std::size_t
     ------
     .. common private members ..
-    - hash_ : hash_type
-    - key_equal_ : key_equal_type
-    - allocator_ : allocator_type
-    - size_ : size_type
+    - table_ : hash_table
     ------
     .. constructor ..
     + hash_set()
@@ -127,7 +121,6 @@ class hash_set<KeyType, Hash, \nKeyEqual, Allocator> {
     + insert(const value_type& value) : bool
     + insert(value_type&& value) : bool
     + merge(const hash_set& other) : void
-    + merge(hash_set&& other) : void
     .. read values ..
     + has(const key_type& key) : bool
     + for_all(const Function& function) : void
