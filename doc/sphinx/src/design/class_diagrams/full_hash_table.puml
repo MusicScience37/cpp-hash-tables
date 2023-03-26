@@ -69,7 +69,7 @@ class hash_map<KeyType, MappedType, \nHash, KeyEqual, Allocator> {
     - size_ : size_type
     ------
     .. constructor ..
-    + hash_table()
+    + hash_map()
     .. create / update values ..
     + insert(const value_type& value) : bool
     + insert(value_type&& value) : bool
@@ -105,5 +105,50 @@ class hash_map<KeyType, MappedType, \nHash, KeyEqual, Allocator> {
     + max_load_factor(float value) : void
 }
 hash_map o-- hash_table
+
+class hash_set<KeyType, Hash, \nKeyEqual, Allocator> {
+    .. types ..
+    + using key_type = KeyType
+    + using value_type = key_type
+    + using hash_type = Hash
+    + using key_equal_type = KeyEqual
+    + using allocator_type = Allocator
+    + using size_type = std::size_t
+    ------
+    .. common private members ..
+    - hash_ : hash_type
+    - key_equal_ : key_equal_type
+    - allocator_ : allocator_type
+    - size_ : size_type
+    ------
+    .. constructor ..
+    + hash_set()
+    .. create / update values ..
+    + insert(const value_type& value) : bool
+    + insert(value_type&& value) : bool
+    + merge(const hash_set& other) : void
+    + merge(hash_set&& other) : void
+    .. read values ..
+    + has(const key_type& key) : bool
+    + for_all(const Function& function) : void
+    .. delete values ..
+    + clear() : void
+    + erase(const key_type& key) : bool
+    + erase_if(const Function& function) : void
+    .. handle size ..
+    + size() : size_type
+    + empty() : bool
+    + max_size() : size_type
+    + reserve(size_t size) : void
+    .. access to internal information ..
+    + hash() : hash_type
+    + key_equal() : key_equal_type
+    + allocator() : allocator_type
+    + rehash(<implementation-defined-arguments>) : void
+    + load_factor() : float
+    + max_load_factor() : float
+    + max_load_factor(float value) : void
+}
+hash_set o-- hash_table
 
 @enduml
