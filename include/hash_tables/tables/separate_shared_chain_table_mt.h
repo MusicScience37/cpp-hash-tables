@@ -487,7 +487,7 @@ public:
      *
      * \param[in] key Key.
      * \retval true Deleted the value.
-     * \retval false Failed to deleted the value because the key not found.
+     * \retval false Failed to delete the value because the key not found.
      */
     auto erase(const key_type& key) -> bool {
         auto& bucket = bucket_for(key);
