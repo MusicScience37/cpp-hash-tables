@@ -162,21 +162,7 @@ TEMPLATE_TEST_CASE("hash_tables::sets::open_address_set_st", "",
         CHECK_FALSE(const_set.has(key2));
     }
 
-    SECTION("for_all (non const)") {
-        set_type set;
-
-        const auto key1 = std::string("abc");
-        CHECK(set.insert(key1));
-        const auto key2 = std::string("def");
-        CHECK(set.insert(key2));
-
-        std::unordered_set<key_type> keys;
-        set.for_all(
-            [&keys](const key_type& key) { CHECK(keys.insert(key).second); });
-        CHECK(keys == std::unordered_set<key_type>{key1, key2});
-    }
-
-    SECTION("for_all (const)") {
+    SECTION("for_all") {
         set_type set;
 
         const auto key1 = std::string("abc");
