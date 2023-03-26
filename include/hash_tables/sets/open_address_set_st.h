@@ -160,6 +160,17 @@ public:
         other.for_all([this](const value_type& value) { this->insert(value); });
     }
 
+    /*!
+     * \brief Merge another set.
+     *
+     * \param[in] other Set to merge.
+     * \return This.
+     */
+    auto operator+=(const open_address_set_st& other) -> open_address_set_st& {
+        merge(other);
+        return *this;
+    }
+
     ///@}
 
     /*!
@@ -220,6 +231,36 @@ public:
     template <typename Function>
     auto erase_if(Function&& function) -> size_type {
         return table_.erase_if(function);
+    }
+
+    /*!
+     * \brief Delete values in another set.
+     *
+     * \param[in] other Another set.
+     */
+    void erase(const open_address_set_st& other) {
+        other.for_all([this](const value_type& value) { this->erase(value); });
+    }
+
+    /*!
+     * \brief Delete values in another set.
+     *
+     * \param[in] other Another set.
+     * \return This.
+     */
+    auto operator-=(const open_address_set_st& other) -> open_address_set_st& {
+        erase(other);
+        return *this;
+    }
+
+    /*!
+     * \brief Remove values not in the intersection with another set.
+     *
+     * \param[in] other Another set.
+     */
+    void keep_only_intersection_with(const open_address_set_st& other) {
+        erase_if(
+            [&other](const value_type& value) { return !other.has(value); });
     }
 
     ///@}
