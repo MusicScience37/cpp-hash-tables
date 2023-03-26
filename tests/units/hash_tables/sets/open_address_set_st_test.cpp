@@ -126,7 +126,7 @@ TEMPLATE_TEST_CASE("hash_tables::sets::open_address_set_st", "",
 
         set1.merge(set2);
 
-        CHECK(set1.size() == 2U);
+        CHECK(set1.size() == 3U);
         CHECK(set1.has("abc"));
         CHECK(set1.has("def"));
         CHECK(set1.has("ghi"));
