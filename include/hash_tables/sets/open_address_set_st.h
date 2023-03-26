@@ -19,8 +19,10 @@
  */
 #pragma once
 
+#include <cstddef>
 #include <functional>
 #include <memory>
+#include <utility>  // IWYU pragma: keep
 
 #include "hash_tables/extract_key_functions/identity.h"
 #include "hash_tables/hashes/default_hash.h"

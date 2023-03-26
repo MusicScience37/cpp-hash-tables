@@ -20,6 +20,7 @@
 #include "hash_tables/sets/open_address_set_st.h"
 
 #include <string>
+#include <tuple>
 #include <unordered_set>
 #include <utility>
 #include <vector>
