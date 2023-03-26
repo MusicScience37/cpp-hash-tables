@@ -20,6 +20,7 @@
 #pragma once
 
 #include <cstddef>
+#include <utility>
 
 namespace hash_tables::tables::internal {
 
@@ -63,28 +64,6 @@ public:
         return hash_number_;
     }
 
-    /*!
-     * \brief Compare with another object.
-     *
-     * \param[in] other Another object.
-     * \retval true This object is same with the given object.
-     * \retval false This object is not same with the given object.
-     */
-    auto operator==(const hashed_key_view& other) const noexcept -> bool {
-        return (hash_number_ == other.hash_number_) && (*key_ == *other.key_);
-    }
-
-    /*!
-     * \brief Compare with another object.
-     *
-     * \param[in] other Another object.
-     * \retval true This object is not same with the given object.
-     * \retval false This object is same with the given object.
-     */
-    auto operator!=(const hashed_key_view& other) const noexcept -> bool {
-        return !operator==(other);
-    }
-
 private:
     //! Key.
     const key_type* key_;
@@ -116,6 +95,85 @@ public:
     [[nodiscard]] auto operator()(const key_type& key) const {
         return key.hash_number();
     }
+};
+
+/*!
+ * \brief Class to compare hashed_key_view objects.
+ *
+ * \tparam ActualKeyType Type of actual keys.
+ * \tparam KeyEqual Type of the actual function to check whether keys are equal.
+ */
+template <typename ActualKeyType, typename ActualKeyEqual>
+class hashed_key_view_equal {
+public:
+    //! Type of keys.
+    using key_type = hashed_key_view<ActualKeyType>;
+
+    /*!
+     * \brief Constructor.
+     *
+     * \param[in] key_equal Actual function to check whether keys are equal.
+     */
+    explicit hashed_key_view_equal(const ActualKeyEqual& key_equal)
+        : key_equal_(key_equal) {}
+
+    /*!
+     * \brief Compare two keys.
+     *
+     * \param[in] left Left-hand-side key.
+     * \param[in] right Right-hand-side key.
+     * \retval true Two keys are equal.
+     * \retval false Two keys are not equal.
+     */
+    [[nodiscard]] auto operator()(
+        const key_type& left, const key_type& right) const {
+        return (left.hash_number() == right.hash_number()) &&
+            key_equal_(left.key(), right.key());
+    }
+
+private:
+    //! Actual function to check whether keys are equal.
+    ActualKeyEqual key_equal_;
+};
+
+/*!
+ * \brief Class to extract hashed_key_view objects from values.
+ *
+ * \tparam ActualValueType Type of actual values.
+ * \tparam ActualKeyType Type of actual keys.
+ * \tparam ActualExtractKey Type of the actual function to extract keys from
+ * values.
+ */
+template <typename ActualValueType, typename ActualKeyType,
+    typename ActualExtractKey>
+class extract_hashed_key_view {
+public:
+    //! Type of values. (Actual value and its hash number.)
+    using value_type = std::pair<ActualValueType, std::size_t>;
+
+    /*!
+     * \brief Constructor.
+     *
+     * \param[in] extract_key Actual function to extract keys from values.
+     */
+    explicit extract_hashed_key_view(const ActualExtractKey& extract_key)
+        : extract_key_(extract_key) {}
+
+    /*!
+     * \brief Extract a hashed_key_view object.
+     *
+     * \param[in] value Value.
+     * \return The hashed_key_view object.
+     */
+    [[nodiscard]] auto operator()(const value_type& value) const
+        -> hashed_key_view<ActualKeyType> {
+        return hashed_key_view<ActualKeyType>(
+            extract_key_(value.first), value.second);
+    }
+
+private:
+    //! Actual function to extract keys from values.
+    ActualExtractKey extract_key_;
 };
 
 }  // namespace hash_tables::tables::internal
