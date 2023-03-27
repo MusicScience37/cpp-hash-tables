@@ -475,6 +475,23 @@ public:
         }
     }
 
+    /*!
+     * \brief Reserve approximately enough place for values.
+     *
+     * \note Use of this function may be faster than reserve function for real
+     * application.
+     *
+     * \param[in] size Number of values.
+     */
+    void reserve_approx(size_type size) {
+        size_type approx_size_for_internal_tables =
+            size / internal_tables_.size();
+        approx_size_for_internal_tables += approx_size_for_internal_tables / 2U;
+        for (std::size_t i = 0; i < internal_tables_.size(); ++i) {
+            exclusive_table(i)->reserve(approx_size_for_internal_tables);
+        }
+    }
+
     ///@}
 
     /*!

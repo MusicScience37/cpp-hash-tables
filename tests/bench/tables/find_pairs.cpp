@@ -109,7 +109,7 @@ STAT_BENCH_CASE_F(find_pairs_fixture, "find_pairs", "multi_open_address_st") {
         extract_key>
         table;
     table.max_load_factor(max_load_factor_);
-    table.reserve(size_);
+    table.reserve_approx(size_);
     for (std::size_t i = 0; i < size_; ++i) {
         const auto& key = keys_.at(i);
         const auto& second_value = second_values_.at(i);
@@ -131,7 +131,7 @@ STAT_BENCH_CASE_F(find_pairs_fixture, "find_pairs", "multi_open_address_mt") {
         extract_key>
         table;
     table.max_load_factor(max_load_factor_);
-    table.reserve(size_);
+    table.reserve_approx(size_);
     for (std::size_t i = 0; i < size_; ++i) {
         const auto& key = keys_.at(i);
         const auto& second_value = second_values_.at(i);

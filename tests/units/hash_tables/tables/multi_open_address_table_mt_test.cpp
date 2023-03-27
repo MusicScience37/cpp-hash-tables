@@ -525,4 +525,11 @@ TEMPLATE_TEST_CASE("hash_tables::tables::multi_open_address_table_mt", "",
             CHECK(table.at(key) == value);
         }
     }
+
+    SECTION("reserve_approx") {
+        table_type table;
+
+        constexpr std::size_t size = 128;
+        CHECK_NOTHROW(table.reserve_approx(size));
+    }
 }
