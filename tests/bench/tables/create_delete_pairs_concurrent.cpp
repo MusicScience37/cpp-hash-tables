@@ -77,10 +77,9 @@ protected:
 // NOLINTNEXTLINE
 STAT_BENCH_CASE_F(create_delete_pairs_concurrent,
     "create_delete_pairs_concurrent", "mutex_open_address_st") {
-    const auto min_num_buckets = size_ * 2;
     hash_tables::tables::open_address_table_st<value_type, key_type,
         extract_key>
-        table{min_num_buckets};
+        table;
     std::mutex mutex;
 
     const std::size_t num_threads =
@@ -114,7 +113,6 @@ STAT_BENCH_CASE_F(create_delete_pairs_concurrent,
     hash_tables::tables::multi_open_address_table_mt<value_type, key_type,
         extract_key>
         table;
-    table.reserve(size_);
 
     const std::size_t num_threads =
         stat_bench::current_invocation_context().threads();
@@ -142,10 +140,9 @@ STAT_BENCH_CASE_F(create_delete_pairs_concurrent,
 // NOLINTNEXTLINE
 STAT_BENCH_CASE_F(create_delete_pairs_concurrent,
     "create_delete_pairs_concurrent", "shared_chain_mt") {
-    const auto min_num_buckets = size_ * 2;
     hash_tables::tables::separate_shared_chain_table_mt<value_type, key_type,
         extract_key>
-        table{min_num_buckets};
+        table;
 
     const std::size_t num_threads =
         stat_bench::current_invocation_context().threads();

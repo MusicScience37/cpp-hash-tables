@@ -583,10 +583,10 @@ private:
     struct alignas(utility::cache_line) internal_table_data_type {
     public:
         //! Table.
-        internal_table_type internal_table;
+        alignas(utility::cache_line) internal_table_type internal_table;
 
         //! Mutex.
-        std::shared_mutex mutex{};
+        alignas(utility::cache_line) std::mutex mutex{};
 
         /*!
          * \brief Constructor.
@@ -671,13 +671,13 @@ private:
      */
     [[nodiscard]] auto shared_table(size_type table_index)
         -> locked_internal_table<internal_table_type,
-            std::shared_lock<std::shared_mutex>> {
+            std::unique_lock<std::mutex>> {
         assert(table_index < internal_tables_.size());
         const internal_table_data_ptr_type& data =
             internal_tables_[table_index];
         return locked_internal_table<internal_table_type,
-            std::shared_lock<std::shared_mutex>>(data->internal_table,
-            std::shared_lock<std::shared_mutex>(data->mutex));
+            std::unique_lock<std::mutex>>(
+            data->internal_table, std::unique_lock<std::mutex>(data->mutex));
     }
 
     /*!
@@ -688,13 +688,13 @@ private:
      */
     [[nodiscard]] auto shared_table(size_type table_index) const
         -> locked_internal_table<const internal_table_type,
-            std::shared_lock<std::shared_mutex>> {
+            std::unique_lock<std::mutex>> {
         assert(table_index < internal_tables_.size());
         const internal_table_data_ptr_type& data =
             internal_tables_[table_index];
         return locked_internal_table<const internal_table_type,
-            std::shared_lock<std::shared_mutex>>(data->internal_table,
-            std::shared_lock<std::shared_mutex>(data->mutex));
+            std::unique_lock<std::mutex>>(
+            data->internal_table, std::unique_lock<std::mutex>(data->mutex));
     }
 
     /*!
@@ -705,13 +705,13 @@ private:
      */
     [[nodiscard]] auto exclusive_table(size_type table_index)
         -> locked_internal_table<internal_table_type,
-            std::unique_lock<std::shared_mutex>> {
+            std::unique_lock<std::mutex>> {
         assert(table_index < internal_tables_.size());
         const internal_table_data_ptr_type& data =
             internal_tables_[table_index];
         return locked_internal_table<internal_table_type,
-            std::unique_lock<std::shared_mutex>>(data->internal_table,
-            std::unique_lock<std::shared_mutex>(data->mutex));
+            std::unique_lock<std::mutex>>(
+            data->internal_table, std::unique_lock<std::mutex>(data->mutex));
     }
 
     //! Type of pointer of internal_table_data_type.
