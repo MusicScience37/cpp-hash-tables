@@ -20,7 +20,7 @@
 #pragma once
 
 #include <limits>
-#include <type_traits>
+#include <type_traits>  // IWYU pragma: keep
 
 namespace hash_tables::utility {
 
