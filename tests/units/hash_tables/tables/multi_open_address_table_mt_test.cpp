@@ -488,6 +488,12 @@ TEMPLATE_TEST_CASE("hash_tables::tables::multi_open_address_table_mt", "",
         CHECK(table.size() == 1);
     }
 
+    SECTION("max_size") {
+        table_type table;
+
+        CHECK(table.max_size() > 0U);
+    }
+
     SECTION("reserve") {
         table_type table;
 

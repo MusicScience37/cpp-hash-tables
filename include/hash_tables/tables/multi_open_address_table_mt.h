@@ -461,7 +461,7 @@ public:
      * \return Maximum number of values.
      */
     [[nodiscard]] auto max_size() const noexcept -> size_type {
-        return internal_tables_[0].max_size();
+        return internal_tables_[0]->internal_table.max_size();
     }
 
     /*!

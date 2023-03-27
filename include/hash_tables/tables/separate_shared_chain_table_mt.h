@@ -558,7 +558,7 @@ public:
      * \return Maximum number of values.
      */
     [[nodiscard]] auto max_size() const noexcept -> size_type {
-        return buckets_.at(0).nodes.max_size() * buckets_.size();
+        return buckets_.at(0)->nodes.max_size() * buckets_.size();
     }
 
     ///@}
