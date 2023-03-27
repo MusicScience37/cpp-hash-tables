@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 MusicScience37 (Kenta Kabashima)
+ * Copyright 2023 MusicScience37 (Kenta Kabashima)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,6 @@
 #include <memory>
 #include <tuple>
 #include <utility>
-
-#include <__utility/piecewise_construct.h>
 
 #include "hash_tables/hashes/default_hash.h"
 #include "hash_tables/tables/internal/hashed_key_view.h"
@@ -212,6 +210,48 @@ public:
             std::forward_as_tuple(internal_key.hash_number()));
     }
 
+    /*!
+     * \brief Insert a value from the arguments of its constructor if not exist,
+     * or assign to an existing value.
+     *
+     * \tparam Args Type of arguments of the constructor.
+     * \param[in] key Key of the value. (Assumed to be equal to the key of the
+     * value constructed from arguments.)
+     * \param[in] args Arguments of the constructor.
+     * \retval true Value is inserted.
+     * \retval false Value is assigned to an existing value.
+     */
+    template <typename... Args>
+    auto emplace_or_assign(const key_type& key, Args&&... args) -> bool {
+        const auto [internal_table_index, internal_key] =
+            prepare_for_search(key);
+        return internal_tables_[internal_table_index].emplace_or_assign(
+            internal_key, std::piecewise_construct,
+            std::forward_as_tuple(std::forward<Args>(args)...),
+            std::forward_as_tuple(internal_key.hash_number()));
+    }
+
+    /*!
+     * \brief Assign a value to an existing key from the arguments of its
+     * constructor.
+     *
+     * \tparam Args Type of arguments of the constructor.
+     * \param[in] key Key of the value. (Assumed to be equal to the key of the
+     * value constructed from arguments.)
+     * \param[in] args Arguments of the constructor.
+     * \retval true Value is assigned.
+     * \retval false Value is not assigned due to non-existing key.
+     */
+    template <typename... Args>
+    auto assign(const key_type& key, Args&&... args) -> bool {
+        const auto [internal_table_index, internal_key] =
+            prepare_for_search(key);
+        return internal_tables_[internal_table_index].assign(internal_key,
+            std::piecewise_construct,
+            std::forward_as_tuple(std::forward<Args>(args)...),
+            std::forward_as_tuple(internal_key.hash_number()));
+    }
+
     ///@}
 
     /*!
@@ -241,6 +281,175 @@ public:
         const auto [internal_table_index, internal_key] =
             prepare_for_search(key);
         return internal_tables_[internal_table_index].at(internal_key).first;
+    }
+
+    /*!
+     * \brief Get a value constructing it if not found.
+     *
+     * \tparam Args Type of arguments of the constructor.
+     * \param[in] key Key.
+     * \param[in] args Arguments of the constructor.
+     * \return Value.
+     */
+    template <typename... Args>
+    [[nodiscard]] auto get_or_create(const key_type& key, Args&&... args)
+        -> value_type& {
+        const auto [internal_table_index, internal_key] =
+            prepare_for_search(key);
+        return internal_tables_[internal_table_index]
+            .get_or_create(internal_key, std::piecewise_construct,
+                std::forward_as_tuple(std::forward<Args>(args)...),
+                std::forward_as_tuple(internal_key.hash_number()))
+            .first;
+    }
+
+    /*!
+     * \brief Get a value constructing using a factory function it if not found.
+     *
+     * \tparam Function Type of the factory function.
+     * \param[in] key Key.
+     * \param[in] function Factory function.
+     * \return Value.
+     */
+    template <typename Function>
+    [[nodiscard]] auto get_or_create_with_factory(
+        const key_type& key, Function&& function) -> value_type& {
+        const auto [internal_table_index, internal_key] =
+            prepare_for_search(key);
+        return internal_tables_[internal_table_index]
+            .get_or_create_with_factory(internal_key,
+                [internal_hash_number = internal_key.hash_number(), &function] {
+                    return std::make_pair(
+                        std::invoke(std::forward<Function>(function)),
+                        internal_hash_number);
+                })
+            .first;
+    }
+
+    /*!
+     * \brief Get a value if found.
+     *
+     * \param[in] key Key.
+     * \return Pointer to the value if found, otherwise nullptr.
+     */
+    [[nodiscard]] auto try_get(const key_type& key) -> value_type* {
+        const auto [internal_table_index, internal_key] =
+            prepare_for_search(key);
+        internal_value_type* ptr =
+            internal_tables_[internal_table_index].try_get(internal_key);
+        if (ptr == nullptr) {
+            return nullptr;
+        }
+        return &(ptr->first);
+    }
+
+    /*!
+     * \brief Get a value if found.
+     *
+     * \param[in] key Key.
+     * \return Pointer to the value if found, otherwise nullptr.
+     */
+    [[nodiscard]] auto try_get(const key_type& key) const -> const value_type* {
+        const auto [internal_table_index, internal_key] =
+            prepare_for_search(key);
+        const internal_value_type* ptr =
+            internal_tables_[internal_table_index].try_get(internal_key);
+        if (ptr == nullptr) {
+            return nullptr;
+        }
+        return &(ptr->first);
+    }
+
+    /*!
+     * \brief Check whether a key exists.
+     *
+     * \param[in] key Key.
+     * \retval true Key exists.
+     * \retval false Key doesn't exists.
+     */
+    [[nodiscard]] auto has(const key_type& key) const -> bool {
+        const auto [internal_table_index, internal_key] =
+            prepare_for_search(key);
+        return internal_tables_[internal_table_index].has(internal_key);
+    }
+
+    /*!
+     * \brief Call a function with all values.
+     *
+     * \tparam Function Type of the function.
+     * \param[in] function Function.
+     */
+    template <typename Function>
+    void for_all(Function&& function) {
+        for (auto& internal_table : internal_tables_) {
+            internal_table.for_all([&function](internal_value_type& value) {
+                std::invoke(function, value.first);
+            });
+        }
+    }
+
+    /*!
+     * \brief Call a function with all values.
+     *
+     * \tparam Function Type of the function.
+     * \param[in] function Function.
+     */
+    template <typename Function>
+    void for_all(Function&& function) const {
+        for (const auto& internal_table : internal_tables_) {
+            internal_table.for_all(
+                [&function](const internal_value_type& value) {
+                    std::invoke(function, value.first);
+                });
+        }
+    }
+
+    ///@}
+
+    /*!
+     * \name Delete values.
+     */
+    ///@{
+
+    /*!
+     * \brief Delete all values.
+     */
+    void clear() noexcept {
+        for (auto& internal_table : internal_tables_) {
+            internal_table.clear();
+        }
+    }
+
+    /*!
+     * \brief Delete a value.
+     *
+     * \param[in] key Key.
+     * \retval true Deleted the value.
+     * \retval false Failed to delete the value because the key not found.
+     */
+    auto erase(const key_type& key) -> bool {
+        const auto [internal_table_index, internal_key] =
+            prepare_for_search(key);
+        return internal_tables_[internal_table_index].erase(internal_key);
+    }
+
+    /*!
+     * \brief Delete values which satisfy a condition.
+     *
+     * \tparam Function Type of the function.
+     * \param[in] function Function to check the condition.
+     * \return Number of removed values.
+     */
+    template <typename Function>
+    auto erase_if(Function&& function) -> size_type {
+        size_type res = 0U;
+        for (auto& internal_table : internal_tables_) {
+            res += internal_table.erase_if(
+                [&function](const internal_value_type& value) {
+                    return std::invoke(function, value.first);
+                });
+        }
+        return res;
     }
 
     ///@}
@@ -286,7 +495,7 @@ public:
      * \param[in] size Number of values.
      */
     void reserve(size_type size) {
-        for (const auto& internal_table : internal_tables_) {
+        for (auto& internal_table : internal_tables_) {
             internal_table.reserve(size);
         }
     }
@@ -332,6 +541,19 @@ public:
      */
     [[nodiscard]] auto allocator() const -> allocator_type {
         return allocator_type(internal_tables_.get_allocator());
+    }
+
+    /*!
+     * \brief Get the total number of nodes in internal tables.
+     *
+     * \return Total number of nodes.
+     */
+    [[nodiscard]] auto num_nodes() const noexcept -> size_type {
+        size_type res = 0U;
+        for (const auto& internal_table : internal_tables_) {
+            res += internal_table.num_nodes();
+        }
+        return res;
     }
 
     ///@}
