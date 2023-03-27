@@ -622,6 +622,9 @@ private:
             hash_number & internal_table_index_mask_;
         const size_type internal_table_hash_number =
             hash_number >> internal_table_hash_shift_;
+        assert(hash_number ==
+            internal_table_hash_number * internal_tables_.size() +
+                internal_table_index);
         return {internal_table_index,
             internal::hashed_key_view<key_type>(
                 key, internal_table_hash_number)};
