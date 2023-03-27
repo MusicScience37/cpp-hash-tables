@@ -76,6 +76,9 @@ public:
     //! Default number of internal tables.
     static constexpr size_type default_num_tables = 16U;
 
+    //! Default number of nodes in internal tables.
+    static constexpr size_type default_num_internal_nodes = 32;
+
     /*!
      * \brief Constructor.
      */
@@ -94,8 +97,7 @@ public:
      * \param[in] allocator Allocator.
      */
     explicit multi_open_address_table_st(size_type min_num_tables,
-        size_type min_internal_num_nodes =
-            internal_table_type::default_num_nodes,
+        size_type min_internal_num_nodes = default_num_internal_nodes,
         extract_key_type extract_key = extract_key_type(),
         hash_type hash = hash_type(),
         key_equal_type key_equal = key_equal_type(),
