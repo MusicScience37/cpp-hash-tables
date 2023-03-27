@@ -34,6 +34,7 @@
 
 #include "hash_tables/extract_key_functions/extract_first_from_pair.h"
 #include "hash_tables/hashes/std_hash.h"
+#include "hash_tables/tables/multi_open_address_table_mt.h"
 #include "hash_tables/tables/multi_open_address_table_st.h"
 #include "hash_tables/tables/open_address_table_st.h"
 #include "hash_tables/tables/separate_shared_chain_table_mt.h"
@@ -100,6 +101,28 @@ STAT_BENCH_CASE_F(find_pairs_fixture, "find_pairs", "open_address_st") {
 // NOLINTNEXTLINE
 STAT_BENCH_CASE_F(find_pairs_fixture, "find_pairs", "multi_open_address_st") {
     hash_tables::tables::multi_open_address_table_st<value_type, key_type,
+        extract_key>
+        table;
+    table.max_load_factor(max_load_factor_);
+    table.reserve(size_);
+    for (std::size_t i = 0; i < size_; ++i) {
+        const auto& key = keys_.at(i);
+        const auto& second_value = second_values_.at(i);
+        table.emplace(key, key, second_value);
+    }
+    assert(table.size() == size_);  // NOLINT
+
+    STAT_BENCH_MEASURE() {
+        for (std::size_t i = 0; i < size_; ++i) {
+            const auto& key = keys_.at(i);
+            stat_bench::do_not_optimize(table.at(keys_.at(i)));
+        }
+    };
+}
+
+// NOLINTNEXTLINE
+STAT_BENCH_CASE_F(find_pairs_fixture, "find_pairs", "multi_open_address_mt") {
+    hash_tables::tables::multi_open_address_table_mt<value_type, key_type,
         extract_key>
         table;
     table.max_load_factor(max_load_factor_);

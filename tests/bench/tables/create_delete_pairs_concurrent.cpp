@@ -37,6 +37,7 @@
 
 #include "hash_tables/extract_key_functions/extract_first_from_pair.h"
 #include "hash_tables/hashes/std_hash.h"
+#include "hash_tables/tables/multi_open_address_table_mt.h"
 #include "hash_tables/tables/open_address_table_st.h"
 #include "hash_tables/tables/separate_shared_chain_table_mt.h"
 #include "hash_tables_test/create_random_int_vector.h"
@@ -99,6 +100,37 @@ STAT_BENCH_CASE_F(create_delete_pairs_concurrent,
         for (std::size_t i = begin_ind; i < end_ind; ++i) {
             const auto& key = keys_.at(i);
             std::unique_lock<std::mutex> lock(mutex);
+            table.erase(key);
+        }
+    };
+
+    assert(table.empty());  // NOLINT
+    stat_bench::do_not_optimize(table);
+}
+
+// NOLINTNEXTLINE
+STAT_BENCH_CASE_F(create_delete_pairs_concurrent,
+    "create_delete_pairs_concurrent", "multi_open_address_mt") {
+    hash_tables::tables::multi_open_address_table_mt<value_type, key_type,
+        extract_key>
+        table;
+    table.reserve(size_);
+
+    const std::size_t num_threads =
+        stat_bench::current_invocation_context().threads();
+    const std::size_t size_per_thread = (size_ + num_threads - 1) / num_threads;
+
+    STAT_BENCH_MEASURE_INDEXED(thread_ind, /*sample_ind*/, /*iteration_ind*/) {
+        const std::size_t begin_ind = thread_ind * size_per_thread;
+        const std::size_t end_ind =
+            std::min((thread_ind + 1) * size_per_thread, size_);
+        for (std::size_t i = begin_ind; i < end_ind; ++i) {
+            const auto& key = keys_.at(i);
+            const auto& second_value = second_values_.at(i);
+            table.emplace(key, key, second_value);
+        }
+        for (std::size_t i = begin_ind; i < end_ind; ++i) {
+            const auto& key = keys_.at(i);
             table.erase(key);
         }
     };
