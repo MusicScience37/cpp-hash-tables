@@ -47,14 +47,10 @@ TEMPLATE_TEST_CASE("hash_tables::tables::multi_open_address_table_st", "",
 
     SECTION("default constructor") {
         table_type table;
-        /*
         CHECK(table.size() == 0);  // NOLINT
         CHECK(table.empty());
-        CHECK(table.num_nodes() == table_type::default_num_nodes);
-        */
     }
 
-    /*
     SECTION("copy constructor") {
         table_type orig;
         const auto value = std::string("abc");
@@ -222,6 +218,7 @@ TEMPLATE_TEST_CASE("hash_tables::tables::multi_open_address_table_st", "",
         }
     }
 
+    /*
     SECTION("emplace_or_assign") {
         SECTION("successful") {
             table_type table;

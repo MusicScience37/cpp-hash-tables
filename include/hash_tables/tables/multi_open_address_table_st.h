@@ -22,7 +22,10 @@
 #include <algorithm>
 #include <functional>
 #include <memory>
+#include <tuple>
 #include <utility>
+
+#include <__utility/piecewise_construct.h>
 
 #include "hash_tables/hashes/default_hash.h"
 #include "hash_tables/tables/internal/hashed_key_view.h"
@@ -77,7 +80,7 @@ public:
     static constexpr size_type default_num_tables = 16U;
 
     //! Default number of nodes in internal tables.
-    static constexpr size_type default_num_internal_nodes = 32;
+    static constexpr size_type default_num_internal_nodes = 32U;
 
     /*!
      * \brief Constructor.
@@ -120,6 +123,219 @@ public:
         }
     }
 
+    /*!
+     * \brief Copy constructor.
+     */
+    multi_open_address_table_st(const multi_open_address_table_st&) = default;
+
+    /*!
+     * \brief Move constructor.
+     */
+    multi_open_address_table_st(multi_open_address_table_st&&)
+#ifndef HASH_TABLES_DOCUMENTATION
+        noexcept(std::is_nothrow_move_constructible_v<extract_key_type>&&  //
+                std::is_nothrow_move_constructible_v<hash_type>&&          //
+                    std::is_nothrow_move_constructible_v<key_equal_type>)
+#endif
+        = default;
+
+    /*!
+     * \brief Copy assignment operator.
+     *
+     * \return This.
+     */
+    auto operator=(const multi_open_address_table_st&)
+        -> multi_open_address_table_st& = default;
+
+    /*!
+     * \brief Move assignment operator.
+     *
+     * \return This.
+     */
+    auto operator=(multi_open_address_table_st&&)
+#ifndef HASH_TABLES_DOCUMENTATION
+        noexcept(std::is_nothrow_move_assignable_v<extract_key_type>&&  //
+                std::is_nothrow_move_assignable_v<hash_type>&&          //
+                    std::is_nothrow_move_assignable_v<key_equal_type>)
+#endif
+            -> multi_open_address_table_st& = default;
+
+    /*!
+     * \brief Destructor.
+     */
+    ~multi_open_address_table_st() noexcept = default;
+
+    /*!
+     * \name Create or update values.
+     */
+    ///@{
+
+    /*!
+     * \brief Insert a value.
+     *
+     * \param[in] value Value.
+     * \retval true Value is inserted.
+     * \retval false Value is not inserted due to a duplicated key.
+     */
+    auto insert(const value_type& value) -> bool {
+        return emplace(extract_key_(value), value);
+    }
+
+    /*!
+     * \brief Insert a value.
+     *
+     * \param[in] value Value.
+     * \retval true Value is inserted.
+     * \retval false Value is not inserted due to a duplicated key.
+     */
+    auto insert(value_type&& value) -> bool {
+        return emplace(extract_key_(value), value);
+    }
+
+    /*!
+     * \brief Insert a value from the arguments of its constructor.
+     *
+     * \tparam Args Type of arguments of the constructor.
+     * \param[in] key Key of the value. (Assumed to be equal to the key of the
+     * value constructed from arguments.)
+     * \param[in] args Arguments of the constructor.
+     * \retval true Value is inserted.
+     * \retval false Value is not inserted due to a duplicated key.
+     */
+    template <typename... Args>
+    auto emplace(const key_type& key, Args&&... args) -> bool {
+        const auto [internal_table_index, internal_key] =
+            prepare_for_search(key);
+        return internal_tables_[internal_table_index].emplace(internal_key,
+            std::piecewise_construct,
+            std::forward_as_tuple(std::forward<Args>(args)...),
+            std::forward_as_tuple(internal_key.hash_number()));
+    }
+
+    ///@}
+
+    /*!
+     * \name Read values.
+     */
+    ///@{
+
+    /*!
+     * \brief Get a value.
+     *
+     * \param[in] key Key.
+     * \return Value.
+     */
+    [[nodiscard]] auto at(const key_type& key) -> value_type& {
+        const auto [internal_table_index, internal_key] =
+            prepare_for_search(key);
+        return internal_tables_[internal_table_index].at(internal_key).first;
+    }
+
+    /*!
+     * \brief Get a value.
+     *
+     * \param[in] key Key.
+     * \return Value.
+     */
+    [[nodiscard]] auto at(const key_type& key) const -> const value_type& {
+        const auto [internal_table_index, internal_key] =
+            prepare_for_search(key);
+        return internal_tables_[internal_table_index].at(internal_key).first;
+    }
+
+    ///@}
+
+    /*!
+     * \name Handle size.
+     */
+    ///@{
+
+    /*!
+     * \brief Get the number of values.
+     *
+     * \return Number of values.
+     */
+    [[nodiscard]] auto size() const noexcept -> size_type {
+        size_type res = 0U;
+        for (const auto& internal_table : internal_tables_) {
+            res += internal_table.size();
+        }
+        return res;
+    }
+
+    /*!
+     * \brief Check whether this object is empty.
+     *
+     * \retval true This object is empty.
+     * \retval false This object is not empty.
+     */
+    [[nodiscard]] auto empty() const noexcept -> bool { return size() == 0U; }
+
+    /*!
+     * \brief Get the maximum number of values.
+     *
+     * \return Maximum number of values.
+     */
+    [[nodiscard]] auto max_size() const noexcept -> size_type {
+        return internal_tables_[0].max_size();
+    }
+
+    /*!
+     * \brief Reserve enough place for values.
+     *
+     * \param[in] size Number of values.
+     */
+    void reserve(size_type size) {
+        for (const auto& internal_table : internal_tables_) {
+            internal_table.reserve(size);
+        }
+    }
+
+    ///@}
+
+    /*!
+     * \name Access to internal information.
+     */
+    ///@{
+
+    /*!
+     * \brief Get the function to extract keys from values.
+     *
+     * \return Function to extract keys from values.
+     */
+    [[nodiscard]] auto extract_key() const noexcept -> const extract_key_type& {
+        return extract_key_;
+    }
+
+    /*!
+     * \brief Get the hash function.
+     *
+     * \return Hash function.
+     */
+    [[nodiscard]] auto hash() const noexcept -> const hash_type& {
+        return hash_;
+    }
+
+    /*!
+     * \brief Get the function to check whether keys are equal.
+     *
+     * \return Function to check whether keys are equal.
+     */
+    [[nodiscard]] auto key_equal() const noexcept -> const key_equal_type& {
+        return key_equal_;
+    }
+
+    /*!
+     * \brief Get the allocator.
+     *
+     * \return Allocator.
+     */
+    [[nodiscard]] auto allocator() const -> allocator_type {
+        return allocator_type(internal_tables_.get_allocator());
+    }
+
+    ///@}
+
 private:
     /*!
      * \brief Type of values in internal tables.
@@ -156,6 +372,25 @@ private:
     //! Type of allocators of internal tables.
     using internal_table_allocator_type = typename std::allocator_traits<
         allocator_type>::template rebind_alloc<internal_table_type>;
+
+    /*!
+     * \brief Prepare for search of positions to create, get, or remove values
+     * of a key.
+     *
+     * \param[in] key Key.
+     * \return Index of internal table and key for the internal table.
+     */
+    [[nodiscard]] auto prepare_for_search(const key_type& key) const
+        -> std::pair<size_type, internal::hashed_key_view<key_type>> {
+        const size_type hash_number = hash_(key);
+        const size_type internal_table_index =
+            hash_number & internal_table_index_mask_;
+        const size_type internal_table_hash_number =
+            hash_number >> internal_table_hash_shift_;
+        return {internal_table_index,
+            internal::hashed_key_view<key_type>(
+                key, internal_table_hash_number)};
+    }
 
     //! Internal tables.
     std::vector<internal_table_type, internal_table_allocator_type>
