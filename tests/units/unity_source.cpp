@@ -7,6 +7,7 @@
 #include "hash_tables/maps/separate_shared_chain_map_mt_test.cpp"  // NOLINT(bugprone-suspicious-include)
 #include "hash_tables/sets/open_address_set_st_test.cpp"  // NOLINT(bugprone-suspicious-include)
 #include "hash_tables/tables/internal/hashed_key_view_test.cpp"  // NOLINT(bugprone-suspicious-include)
+#include "hash_tables/tables/multi_open_address_table_mt_test.cpp"  // NOLINT(bugprone-suspicious-include)
 #include "hash_tables/tables/multi_open_address_table_st_test.cpp"  // NOLINT(bugprone-suspicious-include)
 #include "hash_tables/tables/open_address_table_st_test.cpp"  // NOLINT(bugprone-suspicious-include)
 #include "hash_tables/tables/separate_shared_chain_table_mt_test.cpp"  // NOLINT(bugprone-suspicious-include)

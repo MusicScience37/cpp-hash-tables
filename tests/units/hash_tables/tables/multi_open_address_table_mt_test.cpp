@@ -15,11 +15,12 @@
  */
 /*!
  * \file
- * \brief Test of multi_open_address_table_st class.
+ * \brief Test of multi_open_address_table_mt class.
  */
-#include "hash_tables/tables/multi_open_address_table_st.h"
+#include "hash_tables/tables/multi_open_address_table_mt.h"
 
 #include <string>
+#include <type_traits>  // IWYU pragma: keep
 #include <unordered_set>
 
 #include <catch2/catch_message.hpp>
@@ -31,10 +32,10 @@
 #include "hash_tables_test/hashes/fixed_hash.h"
 
 // NOLINTNEXTLINE
-TEMPLATE_TEST_CASE("hash_tables::tables::multi_open_address_table_st", "",
+TEMPLATE_TEST_CASE("hash_tables::tables::multi_open_address_table_mt", "",
     (std::tuple<hash_tables::hashes::std_hash<char>>),
     (std::tuple<hash_tables_test::hashes::fixed_hash<char>>)) {
-    using hash_tables::tables::multi_open_address_table_st;
+    using hash_tables::tables::multi_open_address_table_mt;
 
     using key_type = char;
     using value_type = std::string;
@@ -42,51 +43,20 @@ TEMPLATE_TEST_CASE("hash_tables::tables::multi_open_address_table_st", "",
         hash_tables_test::extract_key_functions::extract_first_element<
             value_type>;
     using hash_type = std::tuple_element_t<0, TestType>;
-    using table_type = multi_open_address_table_st<value_type, key_type,
+    using table_type = multi_open_address_table_mt<value_type, key_type,
         extract_key_type, hash_type>;
+
+    SECTION("prevent copy and move") {
+        STATIC_REQUIRE_FALSE(std::is_copy_constructible_v<table_type>);
+        STATIC_REQUIRE_FALSE(std::is_move_constructible_v<table_type>);
+        STATIC_REQUIRE_FALSE(std::is_copy_assignable_v<table_type>);
+        STATIC_REQUIRE_FALSE(std::is_move_assignable_v<table_type>);
+    }
 
     SECTION("default constructor") {
         table_type table;
         CHECK(table.size() == 0);  // NOLINT
         CHECK(table.empty());
-    }
-
-    SECTION("copy constructor") {
-        table_type orig;
-        const auto value = std::string("abc");
-        orig.insert(value);
-
-        table_type copy{orig};  // NOLINT
-        CHECK(copy.at(extract_key_type()(value)) == value);
-    }
-
-    SECTION("move constructor") {
-        table_type orig;
-        const auto value = std::string("abc");
-        orig.insert(value);
-
-        table_type copy{std::move(orig)};  // NOLINT
-        CHECK(copy.at(extract_key_type()(value)) == value);
-    }
-
-    SECTION("copy assignment operator") {
-        table_type orig;
-        const auto value = std::string("abc");
-        orig.insert(value);
-
-        table_type copy;
-        copy = orig;  // NOLINT
-        CHECK(copy.at(extract_key_type()(value)) == value);
-    }
-
-    SECTION("move assignment operator") {
-        table_type orig;
-        const auto value = std::string("abc");
-        orig.insert(value);
-
-        table_type copy;
-        copy = std::move(orig);  // NOLINT
-        CHECK(copy.at(extract_key_type()(value)) == value);
     }
 
     SECTION("insert (const reference)") {

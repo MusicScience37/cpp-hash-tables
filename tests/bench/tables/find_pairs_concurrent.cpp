@@ -37,6 +37,7 @@
 
 #include "hash_tables/extract_key_functions/extract_first_from_pair.h"
 #include "hash_tables/hashes/std_hash.h"
+#include "hash_tables/tables/multi_open_address_table_mt.h"
 #include "hash_tables/tables/open_address_table_st.h"
 #include "hash_tables/tables/separate_shared_chain_table_mt.h"
 #include "hash_tables_test/create_random_int_vector.h"
@@ -50,8 +51,14 @@ using extract_key =
 class find_pairs_concurrent_fixture : public stat_bench::FixtureBase {
 public:
     find_pairs_concurrent_fixture() {
-        // NOLINTNEXTLINE
-        add_param<std::size_t>("size")->add(100)->add(1000);
+        add_param<std::size_t>("size")
+            ->add(100)   // NOLINT
+            ->add(1000)  // NOLINT
+#ifdef NDEBUG
+            ->add(10000)   // NOLINT
+            ->add(100000)  // NOLINT
+#endif
+            ;
         // NOLINTNEXTLINE
         add_threads_param()->add(1)->add(2)->add(4);
     }
@@ -76,10 +83,9 @@ protected:
 // NOLINTNEXTLINE
 STAT_BENCH_CASE_F(
     find_pairs_concurrent_fixture, "find_pairs_concurrent", "open_address_st") {
-    const auto min_num_buckets = size_ * 2;
     hash_tables::tables::open_address_table_st<value_type, key_type,
         extract_key>
-        table{min_num_buckets};
+        table;
     for (std::size_t i = 0; i < size_; ++i) {
         const auto& key = keys_.at(i);
         const auto& second_value = second_values_.at(i);
@@ -105,10 +111,9 @@ STAT_BENCH_CASE_F(
 // NOLINTNEXTLINE
 STAT_BENCH_CASE_F(find_pairs_concurrent_fixture, "find_pairs_concurrent",
     "mutex_open_address_st") {
-    const auto min_num_buckets = size_ * 2;
     hash_tables::tables::open_address_table_st<value_type, key_type,
         extract_key>
-        table{min_num_buckets};
+        table;
     for (std::size_t i = 0; i < size_; ++i) {
         const auto& key = keys_.at(i);
         const auto& second_value = second_values_.at(i);
@@ -135,12 +140,40 @@ STAT_BENCH_CASE_F(find_pairs_concurrent_fixture, "find_pairs_concurrent",
 }
 
 // NOLINTNEXTLINE
+STAT_BENCH_CASE_F(find_pairs_concurrent_fixture, "find_pairs_concurrent",
+    "multi_open_address_mt") {
+    hash_tables::tables::multi_open_address_table_mt<value_type, key_type,
+        extract_key>
+        table;
+
+    for (std::size_t i = 0; i < size_; ++i) {
+        const auto& key = keys_.at(i);
+        const auto& second_value = second_values_.at(i);
+        table.emplace(key, key, second_value);
+    }
+    assert(table.size() == size_);  // NOLINT
+
+    const std::size_t num_threads =
+        stat_bench::current_invocation_context().threads();
+    const std::size_t size_per_thread = (size_ + num_threads - 1) / num_threads;
+
+    STAT_BENCH_MEASURE_INDEXED(thread_ind, /*sample_ind*/, /*iteration_ind*/) {
+        const std::size_t begin_ind = thread_ind * size_per_thread;
+        const std::size_t end_ind =
+            std::min((thread_ind + 1) * size_per_thread, size_);
+        for (std::size_t i = begin_ind; i < end_ind; ++i) {
+            const auto& key = keys_.at(i);
+            stat_bench::do_not_optimize(table.at(keys_.at(i)));
+        }
+    };
+}
+
+// NOLINTNEXTLINE
 STAT_BENCH_CASE_F(
     find_pairs_concurrent_fixture, "find_pairs_concurrent", "shared_chain_mt") {
-    const auto min_num_buckets = size_ * 2;
     hash_tables::tables::separate_shared_chain_table_mt<value_type, key_type,
         extract_key>
-        table{min_num_buckets};
+        table;
     for (std::size_t i = 0; i < size_; ++i) {
         const auto& key = keys_.at(i);
         const auto& second_value = second_values_.at(i);

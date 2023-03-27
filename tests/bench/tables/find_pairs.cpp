@@ -34,6 +34,7 @@
 
 #include "hash_tables/extract_key_functions/extract_first_from_pair.h"
 #include "hash_tables/hashes/std_hash.h"
+#include "hash_tables/tables/multi_open_address_table_mt.h"
 #include "hash_tables/tables/multi_open_address_table_st.h"
 #include "hash_tables/tables/open_address_table_st.h"
 #include "hash_tables/tables/separate_shared_chain_table_mt.h"
@@ -48,10 +49,16 @@ using extract_key =
 class find_pairs_fixture : public stat_bench::FixtureBase {
 public:
     find_pairs_fixture() {
+        add_param<std::size_t>("size")
+            ->add(100)   // NOLINT
+            ->add(1000)  // NOLINT
+#ifdef NDEBUG
+            ->add(10000)   // NOLINT
+            ->add(100000)  // NOLINT
+#endif
+            ;
         // NOLINTNEXTLINE
-        add_param<std::size_t>("size")->add(10)->add(1000);
-        // NOLINTNEXTLINE
-        add_param<float>("load")->add(0.1)->add(0.2)->add(0.5)->add(0.8);
+        add_param<float>("load")->add(0.2)->add(0.5)->add(0.8);
     }
 
     void setup(stat_bench::InvocationContext& context) override {
@@ -103,7 +110,29 @@ STAT_BENCH_CASE_F(find_pairs_fixture, "find_pairs", "multi_open_address_st") {
         extract_key>
         table;
     table.max_load_factor(max_load_factor_);
-    table.reserve(size_);
+    table.reserve_approx(size_);
+    for (std::size_t i = 0; i < size_; ++i) {
+        const auto& key = keys_.at(i);
+        const auto& second_value = second_values_.at(i);
+        table.emplace(key, key, second_value);
+    }
+    assert(table.size() == size_);  // NOLINT
+
+    STAT_BENCH_MEASURE() {
+        for (std::size_t i = 0; i < size_; ++i) {
+            const auto& key = keys_.at(i);
+            stat_bench::do_not_optimize(table.at(keys_.at(i)));
+        }
+    };
+}
+
+// NOLINTNEXTLINE
+STAT_BENCH_CASE_F(find_pairs_fixture, "find_pairs", "multi_open_address_mt") {
+    hash_tables::tables::multi_open_address_table_mt<value_type, key_type,
+        extract_key>
+        table;
+    table.max_load_factor(max_load_factor_);
+    table.reserve_approx(size_);
     for (std::size_t i = 0; i < size_; ++i) {
         const auto& key = keys_.at(i);
         const auto& second_value = second_values_.at(i);

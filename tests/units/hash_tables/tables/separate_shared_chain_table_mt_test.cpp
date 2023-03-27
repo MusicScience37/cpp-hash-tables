@@ -524,6 +524,12 @@ TEMPLATE_TEST_CASE("hash_tables::tables::separate_shared_chain_table_mt", "",
         CHECK(table.size() == 1);
     }
 
+    SECTION("max_size") {
+        table_type table;
+
+        CHECK(table.max_size() > 0U);
+    }
+
     SECTION("load_factor") {
         table_type table;
         CHECK(table.load_factor() == 0.0F);
