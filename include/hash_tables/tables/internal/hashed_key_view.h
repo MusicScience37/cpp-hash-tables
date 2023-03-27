@@ -101,7 +101,8 @@ public:
  * \brief Class to compare hashed_key_view objects.
  *
  * \tparam ActualKeyType Type of actual keys.
- * \tparam KeyEqual Type of the actual function to check whether keys are equal.
+ * \tparam ActualKeyEqual Type of the actual function to check whether keys are
+ * equal.
  */
 template <typename ActualKeyType, typename ActualKeyEqual>
 class hashed_key_view_equal {
