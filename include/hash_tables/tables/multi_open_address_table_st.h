@@ -189,7 +189,7 @@ public:
      * \retval false Value is not inserted due to a duplicated key.
      */
     auto insert(value_type&& value) -> bool {
-        return emplace(extract_key_(value), value);
+        return emplace(extract_key_(value), std::move(value));
     }
 
     /*!
