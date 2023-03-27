@@ -58,7 +58,7 @@ public:
 #endif
             ;
         // NOLINTNEXTLINE
-        add_param<float>("load")->add(0.2)->add(0.5)->add(0.8);
+        add_param<float>("load")->add(0.5F)->add(0.7F)->add(0.8F)->add(0.9F);
     }
 
     void setup(stat_bench::InvocationContext& context) override {
@@ -133,28 +133,6 @@ STAT_BENCH_CASE_F(find_pairs_fixture, "find_pairs", "multi_open_address_mt") {
         table;
     table.max_load_factor(max_load_factor_);
     table.reserve_approx(size_);
-    for (std::size_t i = 0; i < size_; ++i) {
-        const auto& key = keys_.at(i);
-        const auto& second_value = second_values_.at(i);
-        table.emplace(key, key, second_value);
-    }
-    assert(table.size() == size_);  // NOLINT
-
-    STAT_BENCH_MEASURE() {
-        for (std::size_t i = 0; i < size_; ++i) {
-            const auto& key = keys_.at(i);
-            stat_bench::do_not_optimize(table.at(keys_.at(i)));
-        }
-    };
-}
-
-// NOLINTNEXTLINE
-STAT_BENCH_CASE_F(find_pairs_fixture, "find_pairs", "shared_chain_mt") {
-    const auto min_num_buckets =
-        static_cast<std::size_t>(static_cast<float>(size_) / max_load_factor_);
-    hash_tables::tables::separate_shared_chain_table_mt<value_type, key_type,
-        extract_key>
-        table{min_num_buckets};
     for (std::size_t i = 0; i < size_; ++i) {
         const auto& key = keys_.at(i);
         const auto& second_value = second_values_.at(i);
