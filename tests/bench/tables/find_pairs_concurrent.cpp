@@ -55,7 +55,8 @@ public:
             ->add(100)   // NOLINT
             ->add(1000)  // NOLINT
 #ifdef NDEBUG
-            ->add(10000)  // NOLINT
+            ->add(10000)   // NOLINT
+            ->add(100000)  // NOLINT
 #endif
             ;
         // NOLINTNEXTLINE

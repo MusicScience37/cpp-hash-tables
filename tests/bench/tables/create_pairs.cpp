@@ -53,11 +53,12 @@ public:
             ->add(100)   // NOLINT
             ->add(1000)  // NOLINT
 #ifdef NDEBUG
-            ->add(10000)  // NOLINT
+            ->add(10000)   // NOLINT
+            ->add(100000)  // NOLINT
 #endif
             ;
         // NOLINTNEXTLINE
-        add_param<float>("load")->add(0.1)->add(0.2)->add(0.5)->add(0.8);
+        add_param<float>("load")->add(0.2)->add(0.5)->add(0.8);
     }
 
     void setup(stat_bench::InvocationContext& context) override {
