@@ -40,7 +40,7 @@
 namespace hash_tables::tables {
 
 /*!
- * \brief Class of hash tables using separate chains.
+ * \brief Class of concurrent hash tables using separate chains.
  *
  * \tparam ValueType Type of values.
  * \tparam KeyType Type of keys.
