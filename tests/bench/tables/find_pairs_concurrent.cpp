@@ -51,8 +51,13 @@ using extract_key =
 class find_pairs_concurrent_fixture : public stat_bench::FixtureBase {
 public:
     find_pairs_concurrent_fixture() {
-        // NOLINTNEXTLINE
-        add_param<std::size_t>("size")->add(100)->add(1000);
+        add_param<std::size_t>("size")
+            ->add(100)   // NOLINT
+            ->add(1000)  // NOLINT
+#ifdef NDEBUG
+            ->add(10000)  // NOLINT
+#endif
+            ;
         // NOLINTNEXTLINE
         add_threads_param()->add(1)->add(2)->add(4);
     }

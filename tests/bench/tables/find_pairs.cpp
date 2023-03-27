@@ -49,8 +49,13 @@ using extract_key =
 class find_pairs_fixture : public stat_bench::FixtureBase {
 public:
     find_pairs_fixture() {
-        // NOLINTNEXTLINE
-        add_param<std::size_t>("size")->add(10)->add(1000);
+        add_param<std::size_t>("size")
+            ->add(100)   // NOLINT
+            ->add(1000)  // NOLINT
+#ifdef NDEBUG
+            ->add(10000)  // NOLINT
+#endif
+            ;
         // NOLINTNEXTLINE
         add_param<float>("load")->add(0.1)->add(0.2)->add(0.5)->add(0.8);
     }
