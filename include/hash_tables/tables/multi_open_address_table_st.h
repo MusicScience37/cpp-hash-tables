@@ -558,6 +558,17 @@ public:
         return res;
     }
 
+    /*!
+     * \brief Set the maximum load factor (number of values / number of nodes).
+     *
+     * \param[in] value Maximum load factor.
+     */
+    void max_load_factor(float value) {
+        for (auto& internal_table : internal_tables_) {
+            internal_table.max_load_factor(value);
+        }
+    }
+
     ///@}
 
 private:
