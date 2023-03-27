@@ -20,7 +20,7 @@
 #include "hash_tables/tables/multi_open_address_table_mt.h"
 
 #include <string>
-#include <type_traits>
+#include <type_traits>  // IWYU pragma: keep
 #include <unordered_set>
 
 #include <catch2/catch_message.hpp>
