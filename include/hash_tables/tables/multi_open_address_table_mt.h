@@ -26,10 +26,8 @@
 #include <memory>
 #include <mutex>
 #include <optional>
-#include <shared_mutex>
 #include <tuple>
 #include <utility>
-#include <vector>
 
 #include "hash_tables/hashes/default_hash.h"
 #include "hash_tables/tables/internal/hashed_key_view.h"
