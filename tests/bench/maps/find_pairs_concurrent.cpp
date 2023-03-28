@@ -17,8 +17,10 @@
  * \file
  * \brief Test to find pairs in maps.
  */
+#include <algorithm>
 #include <cassert>
 #include <cstddef>
+#include <functional>
 #include <memory>
 #include <mutex>
 #include <string>
@@ -27,40 +29,42 @@
 #include <vector>
 
 #include <fmt/core.h>
-#include <stat_bench/bench/invocation_context.h>
 #include <stat_bench/benchmark_macros.h>
+#include <stat_bench/current_invocation_context.h>
+#include <stat_bench/do_not_optimize.h>
+#include <stat_bench/fixture_base.h>
+#include <stat_bench/invocation_context.h>
 #include <stat_bench/param/parameter_value_vector.h>
-#include <stat_bench/util/do_not_optimize.h>
 
 #include "hash_tables/hashes/std_hash.h"
-#include "hash_tables/maps/open_address_map_st.h"
+#include "hash_tables/maps/multi_open_address_map_mt.h"
 #include "hash_tables/maps/separate_shared_chain_map_mt.h"
+#include "hash_tables/tables/separate_shared_chain_table_mt.h"
 #include "hash_tables_test/create_random_int_vector.h"
+#include "hash_tables_test/create_random_string_vector.h"
 
-using key_type = int;
-using mapped_type = std::string;
+using key_type = std::string;
+using mapped_type = int;
 
-class fixture : public stat_bench::FixtureBase {
+class find_pairs_concurrent_fixture : public stat_bench::FixtureBase {
 public:
-    fixture() {
+    find_pairs_concurrent_fixture() {
         add_param<std::size_t>("size")
             ->add(100)   // NOLINT
             ->add(1000)  // NOLINT
 #ifdef NDEBUG
-            ->add(10000)  // NOLINT
+            ->add(10000)   // NOLINT
+            ->add(100000)  // NOLINT
 #endif
             ;
         add_threads_param()->add(1)->add(2)->add(4);
     }
 
-    void setup(stat_bench::bench::InvocationContext& context) override {
+    void setup(stat_bench::InvocationContext& context) override {
         size_ = context.get_param<std::size_t>("size");
-        keys_ = hash_tables_test::create_random_int_vector<key_type>(size_);
-        second_values_.clear();
-        second_values_.reserve(keys_.size());
-        for (const auto& key : keys_) {
-            second_values_.push_back(std::to_string(key));
-        }
+        keys_ = hash_tables_test::create_random_string_vector(size_);
+        second_values_ =
+            hash_tables_test::create_random_int_vector<mapped_type>(size_);
     }
 
 protected:
@@ -75,8 +79,9 @@ protected:
 };
 
 // NOLINTNEXTLINE
-STAT_BENCH_CASE_F(fixture, "find_pairs", "mutex_unordered_map") {
-    std::unordered_map<key_type, mapped_type> map{2U * size_};
+STAT_BENCH_CASE_F(find_pairs_concurrent_fixture, "find_pairs_concurrent",
+    "mutex_unordered_map") {
+    std::unordered_map<key_type, mapped_type> map;
     for (std::size_t i = 0; i < size_; ++i) {
         const auto& key = keys_.at(i);
         const auto& second_value = second_values_.at(i);
@@ -86,7 +91,8 @@ STAT_BENCH_CASE_F(fixture, "find_pairs", "mutex_unordered_map") {
 
     std::mutex mutex;
 
-    const std::size_t num_threads = STAT_BENCH_CONTEXT_NAME.threads();
+    const std::size_t num_threads =
+        stat_bench::current_invocation_context().threads();
     const std::size_t size_per_thread = (size_ + num_threads - 1) / num_threads;
 
     STAT_BENCH_MEASURE_INDEXED(thread_ind, /*sample_ind*/, /*iteration_ind*/) {
@@ -96,15 +102,15 @@ STAT_BENCH_CASE_F(fixture, "find_pairs", "mutex_unordered_map") {
         for (std::size_t i = begin_ind; i < end_ind; ++i) {
             const auto& key = keys_.at(i);
             std::unique_lock<std::mutex> lock(mutex);
-            stat_bench::util::do_not_optimize(map.at(key));
+            stat_bench::do_not_optimize(map.at(key));
         };
     };
 }
 
 // NOLINTNEXTLINE
-STAT_BENCH_CASE_F(fixture, "find_pairs", "mutex_open_address_st") {
-    hash_tables::maps::open_address_map_st<key_type, mapped_type> map{
-        2U * size_};
+STAT_BENCH_CASE_F(find_pairs_concurrent_fixture, "find_pairs_concurrent",
+    "multi_open_address_mt") {
+    hash_tables::maps::multi_open_address_map_mt<key_type, mapped_type> map;
     for (std::size_t i = 0; i < size_; ++i) {
         const auto& key = keys_.at(i);
         const auto& second_value = second_values_.at(i);
@@ -112,9 +118,8 @@ STAT_BENCH_CASE_F(fixture, "find_pairs", "mutex_open_address_st") {
     }
     assert(map.size() == size_);  // NOLINT
 
-    std::mutex mutex;
-
-    const std::size_t num_threads = STAT_BENCH_CONTEXT_NAME.threads();
+    const std::size_t num_threads =
+        stat_bench::current_invocation_context().threads();
     const std::size_t size_per_thread = (size_ + num_threads - 1) / num_threads;
 
     STAT_BENCH_MEASURE_INDEXED(thread_ind, /*sample_ind*/, /*iteration_ind*/) {
@@ -123,16 +128,15 @@ STAT_BENCH_CASE_F(fixture, "find_pairs", "mutex_open_address_st") {
             std::min((thread_ind + 1) * size_per_thread, size_);
         for (std::size_t i = begin_ind; i < end_ind; ++i) {
             const auto& key = keys_.at(i);
-            std::unique_lock<std::mutex> lock(mutex);
-            stat_bench::util::do_not_optimize(map.at(key));
+            stat_bench::do_not_optimize(map.at(key));
         };
     };
 }
 
 // NOLINTNEXTLINE
-STAT_BENCH_CASE_F(fixture, "find_pairs", "shared_chain_mt") {
-    hash_tables::maps::separate_shared_chain_map_mt<key_type, mapped_type> map{
-        2U * size_};
+STAT_BENCH_CASE_F(
+    find_pairs_concurrent_fixture, "find_pairs_concurrent", "shared_chain_mt") {
+    hash_tables::maps::separate_shared_chain_map_mt<key_type, mapped_type> map;
     for (std::size_t i = 0; i < size_; ++i) {
         const auto& key = keys_.at(i);
         const auto& second_value = second_values_.at(i);
@@ -140,7 +144,8 @@ STAT_BENCH_CASE_F(fixture, "find_pairs", "shared_chain_mt") {
     }
     assert(map.size() == size_);  // NOLINT
 
-    const std::size_t num_threads = STAT_BENCH_CONTEXT_NAME.threads();
+    const std::size_t num_threads =
+        stat_bench::current_invocation_context().threads();
     const std::size_t size_per_thread = (size_ + num_threads - 1) / num_threads;
 
     STAT_BENCH_MEASURE_INDEXED(thread_ind, /*sample_ind*/, /*iteration_ind*/) {
@@ -149,9 +154,7 @@ STAT_BENCH_CASE_F(fixture, "find_pairs", "shared_chain_mt") {
             std::min((thread_ind + 1) * size_per_thread, size_);
         for (std::size_t i = begin_ind; i < end_ind; ++i) {
             const auto& key = keys_.at(i);
-            stat_bench::util::do_not_optimize(map.at(key));
+            stat_bench::do_not_optimize(map.at(key));
         };
     };
 }
-
-STAT_BENCH_MAIN

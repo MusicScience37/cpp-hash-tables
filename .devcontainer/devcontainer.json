@@ -1,32 +1,40 @@
 {
   "build": { "dockerfile": "Dockerfile" },
+  "runArgs": [
+    // Configuration for GDB.
+    "--cap-add=SYS_PTRACE", "--security-opt", "seccomp=unconfined"
+  ],
   "containerEnv": {
-    "PIPENV_VENV_IN_PROJECT": "1",
-    "PIPENV_IGNORE_VIRTUALENVS": "1",
     "ASAN_OPTIONS": "alloc_dealloc_mismatch=0"
   },
-  "extensions": [
-    "ms-vscode.cpptools",
-    "llvm-vs-code-extensions.vscode-clangd",
-    "twxs.cmake",
-    "ms-vscode.cmake-tools",
-    "cheshirekow.cmake-format",
-    "streetsidesoftware.code-spell-checker",
-    "cschlosser.doxdocgen",
-    "davidanson.vscode-markdownlint",
-    "jebbs.plantuml",
-    "esbenp.prettier-vscode",
-    "ms-python.python",
-    "njpwerner.autodocstring",
-    "lextudio.restructuredtext",
-    "trond-snekvik.simple-rst",
-    "fredericbonnet.cmake-test-adapter",
-    "hbenl.vscode-test-explorer",
-    "ms-azuretools.vscode-docker",
-    "tomoki1207.pdf"
-  ],
-  "postCreateCommand": "bash ./.devcontainer/setup.bash",
-  "settings": {
-    "cmakeFormat.exePath": "/workspaces/cpp-hash-tables/.venv/bin/cmake-format"
-  }
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-vscode.cpptools",
+        "llvm-vs-code-extensions.vscode-clangd",
+        "twxs.cmake",
+        "ms-vscode.cmake-tools",
+        "cheshirekow.cmake-format",
+        "streetsidesoftware.code-spell-checker",
+        "cschlosser.doxdocgen",
+        "davidanson.vscode-markdownlint",
+        "jebbs.plantuml",
+        "esbenp.prettier-vscode",
+        "ms-python.python",
+        "njpwerner.autodocstring",
+        "lextudio.restructuredtext",
+        "trond-snekvik.simple-rst",
+        "fredericbonnet.cmake-test-adapter",
+        "hbenl.vscode-test-explorer",
+        "ms-azuretools.vscode-docker",
+        "james-yu.latex-workshop",
+        "tamasfe.even-better-toml",
+        "redhat.vscode-yaml"
+      ],
+      "settings": {
+        "cmakeFormat.exePath": "/workspaces/cpp-hash-tables/.venv/bin/cmake-format"
+      }
+    }
+  },
+  "postCreateCommand": "bash ./.devcontainer/setup.bash"
 }

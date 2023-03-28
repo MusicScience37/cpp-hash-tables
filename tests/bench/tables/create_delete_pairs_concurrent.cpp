@@ -22,46 +22,51 @@
 #include <cstddef>
 #include <memory>
 #include <mutex>
-#include <shared_mutex>
 #include <string>
 #include <type_traits>
 #include <utility>
 #include <vector>
 
 #include <fmt/core.h>
-#include <stat_bench/bench/invocation_context.h>
 #include <stat_bench/benchmark_macros.h>
+#include <stat_bench/current_invocation_context.h>
+#include <stat_bench/do_not_optimize.h>
+#include <stat_bench/fixture_base.h>
+#include <stat_bench/invocation_context.h>
 #include <stat_bench/param/parameter_value_vector.h>
-#include <stat_bench/util/do_not_optimize.h>
 
 #include "hash_tables/extract_key_functions/extract_first_from_pair.h"
 #include "hash_tables/hashes/std_hash.h"
+#include "hash_tables/tables/multi_open_address_table_mt.h"
 #include "hash_tables/tables/open_address_table_st.h"
 #include "hash_tables/tables/separate_shared_chain_table_mt.h"
 #include "hash_tables_test/create_random_int_vector.h"
+#include "hash_tables_test/create_random_string_vector.h"
 
 using key_type = int;
 using value_type = std::pair<int, std::string>;
 using extract_key =
     hash_tables::extract_key_functions::extract_first_from_pair<value_type>;
 
-class fixture : public stat_bench::FixtureBase {
+class create_delete_pairs_concurrent : public stat_bench::FixtureBase {
 public:
-    fixture() {
-        // NOLINTNEXTLINE
-        add_param<std::size_t>("size")->add(100)->add(1000);
+    create_delete_pairs_concurrent() {
+        add_param<std::size_t>("size")
+            ->add(100)   // NOLINT
+            ->add(1000)  // NOLINT
+#ifdef NDEBUG
+            ->add(10000)   // NOLINT
+            ->add(100000)  // NOLINT
+#endif
+            ;
         // NOLINTNEXTLINE
         add_threads_param()->add(1)->add(2)->add(4);
     }
 
-    void setup(stat_bench::bench::InvocationContext& context) override {
+    void setup(stat_bench::InvocationContext& context) override {
         size_ = context.get_param<std::size_t>("size");
         keys_ = hash_tables_test::create_random_int_vector<key_type>(size_);
-        second_values_.clear();
-        second_values_.reserve(keys_.size());
-        for (const auto& key : keys_) {
-            second_values_.push_back(std::to_string(key));
-        }
+        second_values_ = hash_tables_test::create_random_string_vector(size_);
     }
 
 protected:
@@ -76,15 +81,15 @@ protected:
 };
 
 // NOLINTNEXTLINE
-STAT_BENCH_CASE_F(
-    fixture, "create_delete_pairs_concurrent", "mutex_open_address_st") {
-    const auto min_num_buckets = size_ * 2;
+STAT_BENCH_CASE_F(create_delete_pairs_concurrent,
+    "create_delete_pairs_concurrent", "mutex_open_address_st") {
     hash_tables::tables::open_address_table_st<value_type, key_type,
         extract_key>
-        table{min_num_buckets};
+        table;
     std::mutex mutex;
 
-    const std::size_t num_threads = STAT_BENCH_CONTEXT_NAME.threads();
+    const std::size_t num_threads =
+        stat_bench::current_invocation_context().threads();
     const std::size_t size_per_thread = (size_ + num_threads - 1) / num_threads;
 
     STAT_BENCH_MEASURE_INDEXED(thread_ind, /*sample_ind*/, /*iteration_ind*/) {
@@ -105,18 +110,18 @@ STAT_BENCH_CASE_F(
     };
 
     assert(table.empty());  // NOLINT
-    stat_bench::util::do_not_optimize(table);
+    stat_bench::do_not_optimize(table);
 }
 
 // NOLINTNEXTLINE
-STAT_BENCH_CASE_F(
-    fixture, "create_delete_pairs_concurrent", "shared_chain_mt") {
-    const auto min_num_buckets = size_ * 2;
-    hash_tables::tables::separate_shared_chain_table_mt<value_type, key_type,
+STAT_BENCH_CASE_F(create_delete_pairs_concurrent,
+    "create_delete_pairs_concurrent", "multi_open_address_mt") {
+    hash_tables::tables::multi_open_address_table_mt<value_type, key_type,
         extract_key>
-        table{min_num_buckets};
+        table;
 
-    const std::size_t num_threads = STAT_BENCH_CONTEXT_NAME.threads();
+    const std::size_t num_threads =
+        stat_bench::current_invocation_context().threads();
     const std::size_t size_per_thread = (size_ + num_threads - 1) / num_threads;
 
     STAT_BENCH_MEASURE_INDEXED(thread_ind, /*sample_ind*/, /*iteration_ind*/) {
@@ -135,7 +140,35 @@ STAT_BENCH_CASE_F(
     };
 
     assert(table.empty());  // NOLINT
-    stat_bench::util::do_not_optimize(table);
+    stat_bench::do_not_optimize(table);
 }
 
-STAT_BENCH_MAIN
+// NOLINTNEXTLINE
+STAT_BENCH_CASE_F(create_delete_pairs_concurrent,
+    "create_delete_pairs_concurrent", "shared_chain_mt") {
+    hash_tables::tables::separate_shared_chain_table_mt<value_type, key_type,
+        extract_key>
+        table;
+
+    const std::size_t num_threads =
+        stat_bench::current_invocation_context().threads();
+    const std::size_t size_per_thread = (size_ + num_threads - 1) / num_threads;
+
+    STAT_BENCH_MEASURE_INDEXED(thread_ind, /*sample_ind*/, /*iteration_ind*/) {
+        const std::size_t begin_ind = thread_ind * size_per_thread;
+        const std::size_t end_ind =
+            std::min((thread_ind + 1) * size_per_thread, size_);
+        for (std::size_t i = begin_ind; i < end_ind; ++i) {
+            const auto& key = keys_.at(i);
+            const auto& second_value = second_values_.at(i);
+            table.emplace(key, key, second_value);
+        }
+        for (std::size_t i = begin_ind; i < end_ind; ++i) {
+            const auto& key = keys_.at(i);
+            table.erase(key);
+        }
+    };
+
+    assert(table.empty());  // NOLINT
+    stat_bench::do_not_optimize(table);
+}

@@ -289,6 +289,8 @@ TEMPLATE_TEST_CASE("hash_tables::tables::open_address_table_st", "",
         }
     }
 
+    // cSpell:ignore bcdef
+
     SECTION("at (non const)") {
         table_type table;
         const auto value1 = std::string("abc");
@@ -515,6 +517,12 @@ TEMPLATE_TEST_CASE("hash_tables::tables::open_address_table_st", "",
         CHECK_FALSE(table.has(key1));
         CHECK(table.has(key2));
         CHECK(table.size() == 1);
+    }
+
+    SECTION("max_size") {
+        table_type table;
+
+        CHECK(table.max_size() > 0U);
     }
 
     SECTION("reserve") {

@@ -32,7 +32,7 @@ template <typename Integer, unsigned int TotalDigits,
     unsigned int ShiftBitsInThisIteration,
     std::enable_if_t<(ShiftBitsInThisIteration >= TotalDigits), void*> =
         nullptr>
-inline constexpr auto propergate_bits_to_right_impl(Integer val) noexcept
+inline constexpr auto propagate_bits_to_right_impl(Integer val) noexcept
     -> Integer {
     return val;
 }
@@ -54,8 +54,8 @@ template <typename Integer, unsigned int TotalDigits,
     std::enable_if_t<(ShiftBitsInThisIteration < TotalDigits), void*> = nullptr
 #endif
     >
-inline constexpr auto propergate_bits_to_right_impl(Integer val) -> Integer {
-    return propergate_bits_to_right_impl<Integer, TotalDigits,
+inline constexpr auto propagate_bits_to_right_impl(Integer val) -> Integer {
+    return propagate_bits_to_right_impl<Integer, TotalDigits,
         (ShiftBitsInThisIteration << 1U)>(
         val | val >> ShiftBitsInThisIteration);
 }
@@ -71,11 +71,10 @@ inline constexpr auto propergate_bits_to_right_impl(Integer val) -> Integer {
 template <typename Integer,
     unsigned int TotalDigits = static_cast<unsigned int>(
         std::numeric_limits<Integer>::digits)>
-inline constexpr auto propergate_bits_to_right(Integer val) noexcept
-    -> Integer {
+inline constexpr auto propagate_bits_to_right(Integer val) noexcept -> Integer {
     static_assert(std::is_integral_v<Integer>);
     static_assert(std::is_unsigned_v<Integer>);
-    return propergate_bits_to_right_impl<Integer, TotalDigits, 1U>(val);
+    return propagate_bits_to_right_impl<Integer, TotalDigits, 1U>(val);
 }
 
 }  // namespace internal
@@ -99,7 +98,7 @@ inline auto round_up_to_power_of_two(Integer val) {
     }
 
     val -= one;
-    val = internal::propergate_bits_to_right(val);
+    val = internal::propagate_bits_to_right(val);
     if (val == static_cast<Integer>(-1)) {
         throw std::logic_error("Overflow in finding the next power of two.");
     }

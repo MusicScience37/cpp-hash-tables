@@ -19,6 +19,8 @@
  */
 #pragma once
 
+// IWYU pragma: no_include <string>
+
 #include <algorithm>
 #include <atomic>
 #include <cstddef>
@@ -26,7 +28,6 @@
 #include <memory>
 #include <mutex>
 #include <optional>
-#include <shared_mutex>
 #include <utility>
 #include <vector>
 
@@ -38,7 +39,7 @@
 namespace hash_tables::tables {
 
 /*!
- * \brief Class of hash tables using separate chains.
+ * \brief Class of concurrent hash tables using separate chains.
  *
  * \tparam ValueType Type of values.
  * \tparam KeyType Type of keys.
@@ -168,7 +169,7 @@ public:
     template <typename... Args>
     auto emplace(const key_type& key, Args&&... args) -> bool {
         auto& bucket = bucket_for(key);
-        std::unique_lock<std::shared_mutex> lock(bucket.mutex);
+        std::unique_lock<std::mutex> lock(bucket.mutex);
         if (std::none_of(bucket.nodes.begin(), bucket.nodes.end(),
                 value_has_key_equal_to(key))) {
             bucket.nodes.emplace_back(std::forward<Args>(args)...);
@@ -192,7 +193,7 @@ public:
     template <typename... Args>
     auto emplace_or_assign(const key_type& key, Args&&... args) -> bool {
         auto& bucket = bucket_for(key);
-        std::unique_lock<std::shared_mutex> lock(bucket.mutex);
+        std::unique_lock<std::mutex> lock(bucket.mutex);
         const auto iter = std::find_if(bucket.nodes.begin(), bucket.nodes.end(),
             value_has_key_equal_to(key));
         if (iter != bucket.nodes.end()) {
@@ -218,7 +219,7 @@ public:
     template <typename... Args>
     auto assign(const key_type& key, Args&&... args) -> bool {
         auto& bucket = bucket_for(key);
-        std::unique_lock<std::shared_mutex> lock(bucket.mutex);
+        std::unique_lock<std::mutex> lock(bucket.mutex);
         const auto iter = std::find_if(bucket.nodes.begin(), bucket.nodes.end(),
             value_has_key_equal_to(key));
         if (iter != bucket.nodes.end()) {
@@ -243,7 +244,7 @@ public:
      */
     [[nodiscard]] auto at(const key_type& key) const -> value_type {
         auto& bucket = bucket_for(key);
-        std::shared_lock<std::shared_mutex> lock(bucket.mutex);
+        std::unique_lock<std::mutex> lock(bucket.mutex);
         const auto iter = std::find_if(bucket.nodes.begin(), bucket.nodes.end(),
             value_has_key_equal_to(key));
         if (iter != bucket.nodes.end()) {
@@ -262,7 +263,7 @@ public:
     template <typename ValueOutput>
     void get_to(ValueOutput& value, const key_type& key) const {
         auto& bucket = bucket_for(key);
-        std::shared_lock<std::shared_mutex> lock(bucket.mutex);
+        std::unique_lock<std::mutex> lock(bucket.mutex);
         const auto iter = std::find_if(bucket.nodes.begin(), bucket.nodes.end(),
             value_has_key_equal_to(key));
         if (iter != bucket.nodes.end()) {
@@ -284,7 +285,7 @@ public:
     [[nodiscard]] auto get_or_create(const key_type& key, Args&&... args)
         -> value_type {
         auto& bucket = bucket_for(key);
-        std::unique_lock<std::shared_mutex> lock(bucket.mutex);
+        std::unique_lock<std::mutex> lock(bucket.mutex);
         const auto iter = std::find_if(bucket.nodes.begin(), bucket.nodes.end(),
             value_has_key_equal_to(key));
         if (iter != bucket.nodes.end()) {
@@ -308,7 +309,7 @@ public:
     void get_or_create_to(
         ValueOutput& value, const key_type& key, Args&&... args) {
         auto& bucket = bucket_for(key);
-        std::unique_lock<std::shared_mutex> lock(bucket.mutex);
+        std::unique_lock<std::mutex> lock(bucket.mutex);
         const auto iter = std::find_if(bucket.nodes.begin(), bucket.nodes.end(),
             value_has_key_equal_to(key));
         if (iter != bucket.nodes.end()) {
@@ -333,7 +334,7 @@ public:
     [[nodiscard]] auto get_or_create_with_factory(
         const key_type& key, Function&& function) -> value_type {
         auto& bucket = bucket_for(key);
-        std::unique_lock<std::shared_mutex> lock(bucket.mutex);
+        std::unique_lock<std::mutex> lock(bucket.mutex);
         const auto iter = std::find_if(bucket.nodes.begin(), bucket.nodes.end(),
             value_has_key_equal_to(key));
         if (iter != bucket.nodes.end()) {
@@ -358,7 +359,7 @@ public:
     void get_or_create_with_factory_to(
         ValueOutput& value, const key_type& key, Function&& function) {
         auto& bucket = bucket_for(key);
-        std::unique_lock<std::shared_mutex> lock(bucket.mutex);
+        std::unique_lock<std::mutex> lock(bucket.mutex);
         const auto iter = std::find_if(bucket.nodes.begin(), bucket.nodes.end(),
             value_has_key_equal_to(key));
         if (iter != bucket.nodes.end()) {
@@ -380,7 +381,7 @@ public:
     [[nodiscard]] auto try_get(const key_type& key) const
         -> std::optional<value_type> {
         auto& bucket = bucket_for(key);
-        std::shared_lock<std::shared_mutex> lock(bucket.mutex);
+        std::unique_lock<std::mutex> lock(bucket.mutex);
         const auto iter = std::find_if(bucket.nodes.begin(), bucket.nodes.end(),
             value_has_key_equal_to(key));
         if (iter != bucket.nodes.end()) {
@@ -401,7 +402,7 @@ public:
     template <typename ValueOutput>
     auto try_get_to(ValueOutput& value, const key_type& key) const -> bool {
         auto& bucket = bucket_for(key);
-        std::shared_lock<std::shared_mutex> lock(bucket.mutex);
+        std::unique_lock<std::mutex> lock(bucket.mutex);
         const auto iter = std::find_if(bucket.nodes.begin(), bucket.nodes.end(),
             value_has_key_equal_to(key));
         if (iter != bucket.nodes.end()) {
@@ -420,7 +421,7 @@ public:
      */
     [[nodiscard]] auto has(const key_type& key) const -> bool {
         auto& bucket = bucket_for(key);
-        std::shared_lock<std::shared_mutex> lock(bucket.mutex);
+        std::unique_lock<std::mutex> lock(bucket.mutex);
         const auto iter = std::find_if(bucket.nodes.begin(), bucket.nodes.end(),
             value_has_key_equal_to(key));
         return iter != bucket.nodes.end();
@@ -436,7 +437,7 @@ public:
     void for_all(Function&& function) {
         for (auto& bucket_ptr : buckets_) {
             auto& bucket = *bucket_ptr;
-            std::shared_lock<std::shared_mutex> lock(bucket.mutex);
+            std::unique_lock<std::mutex> lock(bucket.mutex);
             for (auto& node : bucket.nodes) {
                 std::invoke(function, static_cast<value_type&>(node));
             }
@@ -453,7 +454,7 @@ public:
     void for_all(Function&& function) const {
         for (auto& bucket_ptr : buckets_) {
             auto& bucket = *bucket_ptr;
-            std::shared_lock<std::shared_mutex> lock(bucket.mutex);
+            std::unique_lock<std::mutex> lock(bucket.mutex);
             for (auto& node : bucket.nodes) {
                 std::invoke(function, static_cast<const value_type&>(node));
             }
@@ -473,7 +474,7 @@ public:
     void clear() {
         for (auto& bucket_ptr : buckets_) {
             auto& bucket = *bucket_ptr;
-            std::unique_lock<std::shared_mutex> lock(bucket.mutex);
+            std::unique_lock<std::mutex> lock(bucket.mutex);
             size_type erased_size = bucket.nodes.size();
             bucket.nodes.clear();
             size_ -= erased_size;
@@ -485,11 +486,11 @@ public:
      *
      * \param[in] key Key.
      * \retval true Deleted the value.
-     * \retval false Failed to deleted the value because the key not found.
+     * \retval false Failed to delete the value because the key not found.
      */
     auto erase(const key_type& key) -> bool {
         auto& bucket = bucket_for(key);
-        std::unique_lock<std::shared_mutex> lock(bucket.mutex);
+        std::unique_lock<std::mutex> lock(bucket.mutex);
         const auto iter = std::find_if(bucket.nodes.begin(), bucket.nodes.end(),
             value_has_key_equal_to(key));
         if (iter != bucket.nodes.end()) {
@@ -512,7 +513,7 @@ public:
         size_type erased_count = 0;
         for (auto& bucket_ptr : buckets_) {
             auto& bucket = *bucket_ptr;
-            std::unique_lock<std::shared_mutex> lock(bucket.mutex);
+            std::unique_lock<std::mutex> lock(bucket.mutex);
             for (auto iter = bucket.nodes.begin();
                  iter != bucket.nodes.end();) {
                 if (std::invoke(
@@ -556,7 +557,7 @@ public:
      * \return Maximum number of values.
      */
     [[nodiscard]] auto max_size() const noexcept -> size_type {
-        return buckets_.at(0).nodes.max_size() * buckets_.size();
+        return buckets_.at(0)->nodes.max_size() * buckets_.size();
     }
 
     ///@}
@@ -629,7 +630,7 @@ private:
         std::vector<value_type, allocator_type> nodes;
 
         //! Mutex.
-        std::shared_mutex mutex{};
+        std::mutex mutex{};
 
         /*!
          * \brief Constructor.

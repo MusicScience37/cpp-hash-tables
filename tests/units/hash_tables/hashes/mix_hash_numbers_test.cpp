@@ -19,6 +19,8 @@
  */
 #include "hash_tables/hashes/mix_hash_numbers.h"
 
+#include <cstddef>
+
 #include <catch2/catch_test_macros.hpp>
 
 // NOLINTNEXTLINE

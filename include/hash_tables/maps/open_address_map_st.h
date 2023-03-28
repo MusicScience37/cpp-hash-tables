@@ -192,6 +192,7 @@ public:
      */
     template <typename... Args>
     auto emplace(key_type&& key, Args&&... args) -> bool {
+        // NOLINTNEXTLINE(bugprone-use-after-move,hicpp-invalid-access-moved): false positive
         return table_.emplace(key, std::piecewise_construct,
             std::forward_as_tuple(std::move(key)),
             std::forward_as_tuple(std::forward<Args>(args)...));
@@ -226,6 +227,7 @@ public:
      */
     template <typename... Args>
     auto emplace_or_assign(key_type&& key, Args&&... args) -> bool {
+        // NOLINTNEXTLINE(bugprone-use-after-move,hicpp-invalid-access-moved): false positive
         return table_.emplace_or_assign(key, std::piecewise_construct,
             std::forward_as_tuple(std::move(key)),
             std::forward_as_tuple(std::forward<Args>(args)...));
@@ -247,6 +249,7 @@ public:
         if (value == nullptr) {
             return false;
         }
+        // NOLINTNEXTLINE(google-readability-casting): false positive
         value->second = mapped_type(std::forward<Args>(args)...);
         return true;
     }
@@ -355,7 +358,8 @@ public:
      * \param[in] key Key.
      * \return Pointer to the value if found, otherwise nullptr.
      */
-    auto try_get(const key_type& key) const -> const mapped_type* {
+    [[nodiscard]] auto try_get(const key_type& key) const
+        -> const mapped_type* {
         const auto* value = table_.try_get(key);
         if (value == nullptr) {
             return nullptr;
@@ -419,7 +423,7 @@ public:
      *
      * \param[in] key Key.
      * \retval true Deleted the value.
-     * \retval false Failed to deleted the value because the key not found.
+     * \retval false Failed to delete the value because the key not found.
      */
     auto erase(const key_type& key) -> bool { return table_.erase(key); }
 

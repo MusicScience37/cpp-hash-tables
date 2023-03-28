@@ -58,7 +58,7 @@ auto main() -> int {
 
         for (std::size_t i = 0; i < size; ++i) {
             const auto key = keys.at(i);
-            const auto mapped_value = mapped_values.at(i);
+            const auto& mapped_value = mapped_values.at(i);
             map.emplace(key, mapped_value);
         }
 

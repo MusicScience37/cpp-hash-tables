@@ -2,7 +2,7 @@ option(HASH_TABLES_TEST_BENCHMARKS "execute benchmarks in tests" OFF)
 
 set(HASH_TABLES_BENCH_DIR
     "${CMAKE_BINARY_DIR}/bench"
-    CACHE PATH "directory to which benchmark results are outputed" FORCE)
+    CACHE PATH "directory to which benchmark results are written" FORCE)
 file(MAKE_DIRECTORY ${HASH_TABLES_BENCH_DIR})
 
 function(target_add_to_benchmark TARGET)
@@ -20,6 +20,6 @@ function(target_add_to_benchmark TARGET)
 endfunction()
 
 add_subdirectory(std)
-add_subdirectory(utility)
 add_subdirectory(tables)
 add_subdirectory(maps)
+add_subdirectory(sets)

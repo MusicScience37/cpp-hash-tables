@@ -1,14 +1,13 @@
 cmake_minimum_required(VERSION 3.12)
 
-if(DEFINED PROJECT_NAME)
-    set(HASH_TABLES_SUBPROJECT ON)
-else()
-    set(HASH_TABLES_SUBPROJECT OFF)
-endif()
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+include(ParseVersion)
+parse_version(${CMAKE_CURRENT_SOURCE_DIR}/include/hash_tables/version.h
+              HASH_TABLES)
 
 project(
     hash_tables
-    VERSION 0.4.1
+    VERSION ${HASH_TABLES_VERSION}
     DESCRIPTION "Hash tables in C++."
     LANGUAGES CXX)
 set(FULL_PROJECT_NAME "cpp-hash-tables")
@@ -32,6 +31,10 @@ set(CMAKE_CXX_STANDARD
     17
     CACHE STRING "C++ standard")
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS
+    ON
+    CACHE BOOL "export compile commands" FORCE)
+
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY $<1:${CMAKE_BINARY_DIR}/lib>)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY $<1:${CMAKE_BINARY_DIR}/lib>)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY $<1:${CMAKE_BINARY_DIR}/bin>)
@@ -51,11 +54,9 @@ if(HASH_TABLES_TESTING)
     find_package(cpp_stat_bench REQUIRED)
 endif()
 
-set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
-include(ConfigureClangTidy)
 include(CppWarningFlags)
 include(ConfigureSanitizer)
-include(pipenv)
+include(poetry)
 
 set(HASH_TABLES_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 

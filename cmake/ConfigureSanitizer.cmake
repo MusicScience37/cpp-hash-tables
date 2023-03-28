@@ -24,11 +24,11 @@ SOFTWARE.
 
 string(TOUPPER ${PROJECT_NAME} UPPER_PROJECT_NAME)
 option(${UPPER_PROJECT_NAME}_ENABLE_AUSAN
-       "enable address sanitizer and undefined behaivior sanitizer" OFF)
+       "enable address sanitizer and undefined behavior sanitizer" OFF)
 
 # Function target_add_ausan
 #
-# Add configuration of address sanitizer and undefined behaivior sanitizer.
+# Add configuration of address sanitizer and undefined behavior sanitizer.
 #
 function(target_add_ausan _TARGET)
     if(${UPPER_PROJECT_NAME}_ENABLE_AUSAN)

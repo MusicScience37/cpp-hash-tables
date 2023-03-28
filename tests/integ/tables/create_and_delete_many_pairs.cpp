@@ -28,6 +28,8 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "hash_tables/extract_key_functions/extract_first_from_pair.h"
+#include "hash_tables/tables/multi_open_address_table_mt.h"
+#include "hash_tables/tables/multi_open_address_table_st.h"
 #include "hash_tables/tables/open_address_table_st.h"
 #include "hash_tables/tables/separate_shared_chain_table_mt.h"
 #include "hash_tables_test/create_random_int_vector.h"
@@ -41,7 +43,11 @@ using extract_key =
 TEMPLATE_TEST_CASE("create and delete many pairs in tables", "",
     (hash_tables::tables::open_address_table_st<value_type, key_type,
         extract_key>),
+    (hash_tables::tables::multi_open_address_table_st<value_type, key_type,
+        extract_key>),
     (hash_tables::tables::separate_shared_chain_table_mt<value_type, key_type,
+        extract_key>),
+    (hash_tables::tables::multi_open_address_table_mt<value_type, key_type,
         extract_key>)) {
     SECTION("test") {
         constexpr std::size_t size = 1000;

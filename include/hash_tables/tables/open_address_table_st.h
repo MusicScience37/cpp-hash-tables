@@ -557,7 +557,7 @@ public:
      *
      * \param[in] key Key.
      * \retval true Deleted the value.
-     * \retval false Failed to deleted the value because the key not found.
+     * \retval false Failed to delete the value because the key not found.
      */
     auto erase(const key_type& key) -> bool {
         const auto node_ind = find_node_ind_for(key);
@@ -945,7 +945,7 @@ private:
     key_equal_type key_equal_;
 
     //! Default maximum load factor.
-    static constexpr float default_max_load_factor = 0.5F;
+    static constexpr float default_max_load_factor = 0.8F;
 
     //! Maximum load factor.
     float max_load_factor_{default_max_load_factor};

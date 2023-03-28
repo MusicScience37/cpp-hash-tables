@@ -164,6 +164,7 @@ public:
      */
     template <typename... Args>
     auto emplace(key_type&& key, Args&&... args) -> bool {
+        // NOLINTNEXTLINE(bugprone-use-after-move,hicpp-invalid-access-moved): false positive
         return table_.emplace(key, std::piecewise_construct,
             std::forward_as_tuple(std::move(key)),
             std::forward_as_tuple(std::forward<Args>(args)...));
@@ -181,6 +182,7 @@ public:
      */
     template <typename... Args>
     auto emplace_or_assign(const key_type& key, Args&&... args) -> bool {
+        // NOLINTNEXTLINE(bugprone-use-after-move,hicpp-invalid-access-moved): false positive
         return table_.emplace_or_assign(key, std::piecewise_construct,
             std::forward_as_tuple(key),
             std::forward_as_tuple(std::forward<Args>(args)...));
@@ -198,6 +200,7 @@ public:
      */
     template <typename... Args>
     auto emplace_or_assign(key_type&& key, Args&&... args) -> bool {
+        // NOLINTNEXTLINE(bugprone-use-after-move,hicpp-invalid-access-moved): false positive
         return table_.emplace_or_assign(key, std::piecewise_construct,
             std::forward_as_tuple(std::move(key)),
             std::forward_as_tuple(std::forward<Args>(args)...));
@@ -215,6 +218,7 @@ public:
      */
     template <typename... Args>
     auto assign(const key_type& key, Args&&... args) -> bool {
+        // NOLINTNEXTLINE(bugprone-use-after-move,hicpp-invalid-access-moved): false positive
         return table_.assign(key, std::piecewise_construct,
             std::forward_as_tuple(std::move(key)),
             std::forward_as_tuple(std::forward<Args>(args)...));
@@ -248,7 +252,8 @@ public:
      * \return Mapped value.
      */
     template <typename... Args>
-    auto get_or_create(const key_type& key, Args&&... args) -> mapped_type {
+    [[nodiscard]] auto get_or_create(const key_type& key, Args&&... args)
+        -> mapped_type {
         internal::mapped_value_getter<mapped_type> value;
         table_.get_or_create_to(value, key, std::piecewise_construct,
             std::forward_as_tuple(key),
@@ -265,8 +270,8 @@ public:
      * \return Mapped value.
      */
     template <typename Function>
-    auto get_or_create_with_factory(const key_type& key, Function&& function)
-        -> mapped_type {
+    [[nodiscard]] auto get_or_create_with_factory(
+        const key_type& key, Function&& function) -> mapped_type {
         internal::mapped_value_getter<mapped_type> value;
         table_.get_or_create_with_factory_to(value, key, [&key, &function] {
             return value_type(key, std::invoke(function));
@@ -280,7 +285,7 @@ public:
      * \param[in] key Key.
      * \return Mapped value.
      */
-    auto operator[](const key_type& key) const -> mapped_type {
+    [[nodiscard]] auto operator[](const key_type& key) const -> mapped_type {
         return at(key);
     }
 
@@ -290,7 +295,8 @@ public:
      * \param[in] key Key.
      * \return Value if found, otherwise null.
      */
-    auto try_get(const key_type& key) const -> std::optional<mapped_type> {
+    [[nodiscard]] auto try_get(const key_type& key) const
+        -> std::optional<mapped_type> {
         internal::mapped_value_getter<mapped_type> value;
         if (table_.try_get_to(value, key)) {
             return value.release();
@@ -354,7 +360,7 @@ public:
      *
      * \param[in] key Key.
      * \retval true Deleted the value.
-     * \retval false Failed to deleted the value because the key not found.
+     * \retval false Failed to delete the value because the key not found.
      */
     auto erase(const key_type& key) -> bool { return table_.erase(key); }
 

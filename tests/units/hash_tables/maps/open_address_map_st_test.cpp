@@ -47,6 +47,12 @@ TEMPLATE_TEST_CASE("hash_tables::maps::open_address_map_st", "",
         CHECK(map.empty());
     }
 
+    SECTION("constructor with an argument") {
+        map_type map{5U};        // NOLINT
+        CHECK(map.size() == 0);  // NOLINT
+        CHECK(map.empty());
+    }
+
     SECTION("copy constructor") {
         map_type orig;
 

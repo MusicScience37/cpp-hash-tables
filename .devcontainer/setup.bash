@@ -1,13 +1,16 @@
 #!/bin/bash
 
-pipenv sync --dev
+git config --global --add safe.directory $(pwd)
 
-pipenv run conan profile new --detect default
-pipenv run conan profile update settings.compiler.libcxx=libc++ default
-pipenv run conan remote add cpp-stat-bench https://gitlab.com/api/v4/projects/32226502/packages/conan
+poetry config virtualenvs.in-project true
+poetry env use 3.10
+poetry install
 
-git config --global --add safe.directory /workspaces/cpp-hash-tables
-pipenv run pre-commit install
+poetry run conan profile new --detect default
+poetry run conan profile update settings.compiler.libcxx=libc++ default
+poetry run conan remote add cpp-stat-bench https://gitlab.com/api/v4/projects/32226502/packages/conan
+
+poetry run pre-commit install
 
 git config commit.template .gitmessage
 
