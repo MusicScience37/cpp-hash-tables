@@ -119,23 +119,4 @@ STAT_BENCH_CASE_F(
     };
 }
 
-// NOLINTNEXTLINE
-STAT_BENCH_CASE_F(
-    create_pairs_fixture, "create_pairs", "multi_open_address_mt") {
-    STAT_BENCH_MEASURE() {
-        hash_tables::tables::multi_open_address_table_mt<value_type, key_type,
-            extract_key>
-            table;
-        table.max_load_factor(max_load_factor_);
-        table.reserve_approx(size_);
-        for (std::size_t i = 0; i < size_; ++i) {
-            const auto& key = keys_.at(i);
-            const auto& second_value = second_values_.at(i);
-            table.emplace(key, key, second_value);
-        }
-        assert(table.size() == size_);  // NOLINT
-        stat_bench::do_not_optimize(table);
-    };
-}
-
 STAT_BENCH_MAIN
