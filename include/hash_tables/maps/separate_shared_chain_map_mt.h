@@ -252,7 +252,8 @@ public:
      * \return Mapped value.
      */
     template <typename... Args>
-    auto get_or_create(const key_type& key, Args&&... args) -> mapped_type {
+    [[nodiscard]] auto get_or_create(const key_type& key, Args&&... args)
+        -> mapped_type {
         internal::mapped_value_getter<mapped_type> value;
         table_.get_or_create_to(value, key, std::piecewise_construct,
             std::forward_as_tuple(key),
@@ -269,8 +270,8 @@ public:
      * \return Mapped value.
      */
     template <typename Function>
-    auto get_or_create_with_factory(const key_type& key, Function&& function)
-        -> mapped_type {
+    [[nodiscard]] auto get_or_create_with_factory(
+        const key_type& key, Function&& function) -> mapped_type {
         internal::mapped_value_getter<mapped_type> value;
         table_.get_or_create_with_factory_to(value, key, [&key, &function] {
             return value_type(key, std::invoke(function));
@@ -284,7 +285,7 @@ public:
      * \param[in] key Key.
      * \return Mapped value.
      */
-    auto operator[](const key_type& key) const -> mapped_type {
+    [[nodiscard]] auto operator[](const key_type& key) const -> mapped_type {
         return at(key);
     }
 
@@ -294,7 +295,8 @@ public:
      * \param[in] key Key.
      * \return Value if found, otherwise null.
      */
-    auto try_get(const key_type& key) const -> std::optional<mapped_type> {
+    [[nodiscard]] auto try_get(const key_type& key) const
+        -> std::optional<mapped_type> {
         internal::mapped_value_getter<mapped_type> value;
         if (table_.try_get_to(value, key)) {
             return value.release();
