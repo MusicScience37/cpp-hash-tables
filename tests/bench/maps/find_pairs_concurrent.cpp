@@ -37,6 +37,7 @@
 #include <stat_bench/param/parameter_value_vector.h>
 
 #include "hash_tables/hashes/std_hash.h"
+#include "hash_tables/maps/multi_open_address_map_mt.h"
 #include "hash_tables/maps/separate_shared_chain_map_mt.h"
 #include "hash_tables/tables/separate_shared_chain_table_mt.h"
 #include "hash_tables_test/create_random_int_vector.h"
@@ -52,7 +53,8 @@ public:
             ->add(100)   // NOLINT
             ->add(1000)  // NOLINT
 #ifdef NDEBUG
-            ->add(10000)  // NOLINT
+            ->add(10000)   // NOLINT
+            ->add(100000)  // NOLINT
 #endif
             ;
         add_threads_param()->add(1)->add(2)->add(4);
@@ -79,7 +81,7 @@ protected:
 // NOLINTNEXTLINE
 STAT_BENCH_CASE_F(find_pairs_concurrent_fixture, "find_pairs_concurrent",
     "mutex_unordered_map") {
-    std::unordered_map<key_type, mapped_type> map{2U * size_};
+    std::unordered_map<key_type, mapped_type> map;
     for (std::size_t i = 0; i < size_; ++i) {
         const auto& key = keys_.at(i);
         const auto& second_value = second_values_.at(i);
@@ -106,10 +108,35 @@ STAT_BENCH_CASE_F(find_pairs_concurrent_fixture, "find_pairs_concurrent",
 }
 
 // NOLINTNEXTLINE
+STAT_BENCH_CASE_F(find_pairs_concurrent_fixture, "find_pairs_concurrent",
+    "multi_open_address_mt") {
+    hash_tables::maps::multi_open_address_map_mt<key_type, mapped_type> map;
+    for (std::size_t i = 0; i < size_; ++i) {
+        const auto& key = keys_.at(i);
+        const auto& second_value = second_values_.at(i);
+        map.emplace(key, second_value);
+    }
+    assert(map.size() == size_);  // NOLINT
+
+    const std::size_t num_threads =
+        stat_bench::current_invocation_context().threads();
+    const std::size_t size_per_thread = (size_ + num_threads - 1) / num_threads;
+
+    STAT_BENCH_MEASURE_INDEXED(thread_ind, /*sample_ind*/, /*iteration_ind*/) {
+        const std::size_t begin_ind = thread_ind * size_per_thread;
+        const std::size_t end_ind =
+            std::min((thread_ind + 1) * size_per_thread, size_);
+        for (std::size_t i = begin_ind; i < end_ind; ++i) {
+            const auto& key = keys_.at(i);
+            stat_bench::do_not_optimize(map.at(key));
+        };
+    };
+}
+
+// NOLINTNEXTLINE
 STAT_BENCH_CASE_F(
     find_pairs_concurrent_fixture, "find_pairs_concurrent", "shared_chain_mt") {
-    hash_tables::maps::separate_shared_chain_map_mt<key_type, mapped_type> map{
-        2U * size_};
+    hash_tables::maps::separate_shared_chain_map_mt<key_type, mapped_type> map;
     for (std::size_t i = 0; i < size_; ++i) {
         const auto& key = keys_.at(i);
         const auto& second_value = second_values_.at(i);

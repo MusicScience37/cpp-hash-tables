@@ -15,7 +15,7 @@
  */
 /*!
  * \file
- * \brief Test to find pairs in maps.
+ * \brief Test to create pairs in maps.
  */
 #include <cassert>
 #include <cstddef>
@@ -43,9 +43,9 @@
 using key_type = std::string;
 using mapped_type = int;
 
-class find_pairs_fixture : public stat_bench::FixtureBase {
+class create_pairs_no_reserve_fixture : public stat_bench::FixtureBase {
 public:
-    find_pairs_fixture() {
+    create_pairs_no_reserve_fixture() {
         add_param<std::size_t>("size")
             ->add(100)   // NOLINT
             ->add(1000)  // NOLINT
@@ -75,37 +75,31 @@ protected:
 };
 
 // NOLINTNEXTLINE
-STAT_BENCH_CASE_F(find_pairs_fixture, "find_pairs", "unordered_map") {
-    std::unordered_map<key_type, mapped_type> map;
-    for (std::size_t i = 0; i < size_; ++i) {
-        const auto& key = keys_.at(i);
-        const auto& second_value = second_values_.at(i);
-        map.try_emplace(key, second_value);
-    }
-    assert(map.size() == size_);  // NOLINT
-
+STAT_BENCH_CASE_F(create_pairs_no_reserve_fixture, "create_pairs_no_reserve",
+    "unordered_map") {
     STAT_BENCH_MEASURE() {
+        std::unordered_map<key_type, mapped_type> map;
         for (std::size_t i = 0; i < size_; ++i) {
             const auto& key = keys_.at(i);
-            stat_bench::do_not_optimize(map.at(key));
-        };
+            const auto& second_value = second_values_.at(i);
+            map.try_emplace(key, second_value);
+        }
+        assert(map.size() == size_);  // NOLINT
+        stat_bench::do_not_optimize(map);
     };
 }
 
 // NOLINTNEXTLINE
-STAT_BENCH_CASE_F(find_pairs_fixture, "find_pairs", "open_address_st") {
-    hash_tables::maps::open_address_map_st<key_type, mapped_type> map;
-    for (std::size_t i = 0; i < size_; ++i) {
-        const auto& key = keys_.at(i);
-        const auto& second_value = second_values_.at(i);
-        map.emplace(key, second_value);
-    }
-    assert(map.size() == size_);  // NOLINT
-
+STAT_BENCH_CASE_F(create_pairs_no_reserve_fixture, "create_pairs_no_reserve",
+    "open_address_st") {
     STAT_BENCH_MEASURE() {
+        hash_tables::maps::open_address_map_st<key_type, mapped_type> map;
         for (std::size_t i = 0; i < size_; ++i) {
             const auto& key = keys_.at(i);
-            stat_bench::do_not_optimize(map.at(key));
-        };
+            const auto& second_value = second_values_.at(i);
+            map.emplace(key, second_value);
+        }
+        assert(map.size() == size_);  // NOLINT
+        stat_bench::do_not_optimize(map);
     };
 }
