@@ -260,20 +260,7 @@ TEMPLATE_TEST_CASE("hash_tables::tables::multi_open_address_table_mt", "",
 
     // cSpell:ignore bcdef
 
-    SECTION("at (non const)") {
-        table_type table;
-        const auto value1 = std::string("abc");
-        const char key1 = extract_key_type()(value1);
-        const auto value2 = std::string("bcdef");
-        const char key2 = extract_key_type()(value2);
-        CHECK_NOTHROW(table.emplace(key1, value1));
-        CHECK_NOTHROW(table.emplace(key2, value2));
-
-        CHECK(table.at(key1) == value1);
-        CHECK(table.at(key2) == value2);
-    }
-
-    SECTION("at (const)") {
+    SECTION("at") {
         table_type table;
         const auto value1 = std::string("abc");
         const char key1 = extract_key_type()(value1);
@@ -285,6 +272,23 @@ TEMPLATE_TEST_CASE("hash_tables::tables::multi_open_address_table_mt", "",
         const auto& const_table = table;
         CHECK(const_table.at(key1) == value1);
         CHECK(const_table.at(key2) == value2);
+    }
+
+    SECTION("get_to") {
+        table_type table;
+        const auto value1 = std::string("abc");
+        const char key1 = extract_key_type()(value1);
+        const auto value2 = std::string("bcdef");
+        const char key2 = extract_key_type()(value2);
+        CHECK_NOTHROW(table.emplace(key1, value1));
+        CHECK_NOTHROW(table.emplace(key2, value2));
+
+        const auto& const_table = table;
+        std::optional<value_type> res;
+        CHECK_NOTHROW(const_table.get_to(res, key1));
+        CHECK(res == value1);
+        CHECK_NOTHROW(const_table.get_to(res, key2));
+        CHECK(res == value2);
     }
 
     SECTION("get_or_create") {
@@ -299,6 +303,24 @@ TEMPLATE_TEST_CASE("hash_tables::tables::multi_open_address_table_mt", "",
         CHECK(table.get_or_create(key1, "af") == value1);
         CHECK(table.size() == 1);
         CHECK(table.get_or_create(key2, value2.c_str()) == value2);
+        CHECK(table.size() == 2);
+    }
+
+    SECTION("get_or_create_to") {
+        table_type table;
+        const auto value1 = std::string("abc");
+        const char key1 = extract_key_type()(value1);
+        const auto value2 = std::string("bcdef");
+        const char key2 = extract_key_type()(value2);
+        CHECK_NOTHROW(table.emplace(key1, value1));
+        CHECK(table.size() == 1);
+
+        std::optional<value_type> res;
+        CHECK_NOTHROW(table.get_or_create_to(res, key1, "af"));
+        CHECK(res == value1);
+        CHECK(table.size() == 1);
+        CHECK_NOTHROW(table.get_or_create_to(res, key2, value2.c_str()));
+        CHECK(res == value2);
         CHECK(table.size() == 2);
     }
 
@@ -319,22 +341,27 @@ TEMPLATE_TEST_CASE("hash_tables::tables::multi_open_address_table_mt", "",
         CHECK(table.size() == 2);
     }
 
-    SECTION("try_get (non const)") {
+    SECTION("get_or_create_with_factory_to") {
         table_type table;
         const auto value1 = std::string("abc");
         const char key1 = extract_key_type()(value1);
         const auto value2 = std::string("bcdef");
         const char key2 = extract_key_type()(value2);
         CHECK_NOTHROW(table.emplace(key1, value1));
+        CHECK(table.size() == 1);
 
-        std::string* res1 = table.try_get(key1);
-        REQUIRE(static_cast<const void*>(res1) != nullptr);
-        CHECK(*res1 == value1);
-        std::string* res2 = table.try_get(key2);
-        CHECK(static_cast<const void*>(res2) == nullptr);
+        std::optional<value_type> res;
+        CHECK_NOTHROW(table.get_or_create_with_factory_to(
+            res, key1, [] { return std::string("af"); }));
+        CHECK(res == value1);
+        CHECK(table.size() == 1);
+        CHECK_NOTHROW(table.get_or_create_with_factory_to(
+            res, key2, [&value2] { return std::string(value2); }));
+        CHECK(res == value2);
+        CHECK(table.size() == 2);
     }
 
-    SECTION("try_get (const)") {
+    SECTION("try_get") {
         table_type table;
         const auto value1 = std::string("abc");
         const char key1 = extract_key_type()(value1);
@@ -343,11 +370,24 @@ TEMPLATE_TEST_CASE("hash_tables::tables::multi_open_address_table_mt", "",
         CHECK_NOTHROW(table.emplace(key1, value1));
 
         const auto& const_table = table;
-        const std::string* res1 = const_table.try_get(key1);
-        REQUIRE(static_cast<const void*>(res1) != nullptr);
-        CHECK(*res1 == value1);
-        const std::string* res2 = const_table.try_get(key2);
-        CHECK(static_cast<const void*>(res2) == nullptr);
+        CHECK(const_table.try_get(key1) == value1);
+        CHECK(const_table.try_get(key2) == std::nullopt);
+    }
+
+    SECTION("try_get_to") {
+        table_type table;
+        const auto value1 = std::string("abc");
+        const char key1 = extract_key_type()(value1);
+        const auto value2 = std::string("bcdef");
+        const char key2 = extract_key_type()(value2);
+        CHECK_NOTHROW(table.emplace(key1, value1));
+
+        const auto& const_table = table;
+        std::optional<value_type> res;
+        CHECK(const_table.try_get_to(res, key1));
+        CHECK(res == value1);
+        CHECK_FALSE(const_table.try_get(key2));
+        CHECK(res == value1);
     }
 
     SECTION("has") {

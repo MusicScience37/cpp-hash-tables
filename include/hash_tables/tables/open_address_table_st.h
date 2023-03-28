@@ -945,7 +945,7 @@ private:
     key_equal_type key_equal_;
 
     //! Default maximum load factor.
-    static constexpr float default_max_load_factor = 0.5F;
+    static constexpr float default_max_load_factor = 0.8F;
 
     //! Maximum load factor.
     float max_load_factor_{default_max_load_factor};

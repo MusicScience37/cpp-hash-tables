@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 MusicScience37 (Kenta Kabashima)
+ * Copyright 2023 MusicScience37 (Kenta Kabashima)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  */
 /*!
  * \file
- * \brief Definition of separate_shared_chain_map_mt class.
+ * \brief Definition of multi_open_address_map_mt class.
  */
 #pragma once
 
@@ -29,13 +29,13 @@
 #include "hash_tables/extract_key_functions/extract_first_from_pair.h"
 #include "hash_tables/hashes/default_hash.h"
 #include "hash_tables/maps/internal/mapped_value_getter.h"
-#include "hash_tables/tables/separate_shared_chain_table_mt.h"
+#include "hash_tables/tables/multi_open_address_table_mt.h"
 
 namespace hash_tables::maps {
 
 /*!
- * \brief Class to save key-value relations in a hash table using separate
- * chains.
+ * \brief Class to save key-value relations in a concurrent hash table made of
+ * multiple hash tables using open addressing.
  *
  * \tparam KeyType Type of keys.
  * \tparam MappedType Type of mapped values.
@@ -49,7 +49,7 @@ template <typename KeyType, typename MappedType,
     typename Hash = hashes::default_hash<KeyType>,
     typename KeyEqual = std::equal_to<KeyType>,
     typename Allocator = std::allocator<std::pair<KeyType, MappedType>>>
-class separate_shared_chain_map_mt {
+class multi_open_address_map_mt {
 public:
     //! Type of keys.
     using key_type = KeyType;
@@ -77,38 +77,42 @@ public:
         extract_key_functions::extract_first_from_pair<value_type>;
 
     //! Type of the internal hash table.
-    using table_type = tables::separate_shared_chain_table_mt<value_type,
-        key_type, extract_key_type, hash_type, key_equal_type, allocator_type>;
+    using table_type = tables::multi_open_address_table_mt<value_type, key_type,
+        extract_key_type, hash_type, key_equal_type, allocator_type>;
 
     /*!
      * \brief Constructor.
      */
-    separate_shared_chain_map_mt() : table_() {}
+    multi_open_address_map_mt() : table_() {}
 
     /*!
      * \brief Constructor.
      *
-     * \param[in] min_num_buckets Minimum number of buckets.
+     * \param[in] min_num_tables Minimum number of internal tables.
+     * \param[in] min_internal_num_nodes Minimum number of nodes in internal
+     * tables.
      * \param[in] hash Hash function.
      * \param[in] key_equal Function to check whether keys are equal.
      * \param[in] allocator Allocator.
      */
-    explicit separate_shared_chain_map_mt(size_type min_num_buckets,
+    explicit multi_open_address_map_mt(size_type min_num_tables,
+        size_type min_internal_num_nodes =
+            table_type::default_num_internal_nodes,
         hash_type hash = hash_type(),
         key_equal_type key_equal = key_equal_type(),
         const allocator_type& allocator = allocator_type())
-        : table_(min_num_buckets, extract_key_type(), hash, key_equal,
-              allocator) {}
+        : table_(min_num_tables, min_internal_num_nodes, extract_key_type(),
+              hash, key_equal, allocator) {}
 
-    separate_shared_chain_map_mt(const separate_shared_chain_map_mt&) = delete;
-    separate_shared_chain_map_mt(separate_shared_chain_map_mt&&) = delete;
-    auto operator=(const separate_shared_chain_map_mt&) = delete;
-    auto operator=(separate_shared_chain_map_mt&&) = delete;
+    multi_open_address_map_mt(const multi_open_address_map_mt&) = delete;
+    multi_open_address_map_mt(multi_open_address_map_mt&&) = delete;
+    auto operator=(const multi_open_address_map_mt&) = delete;
+    auto operator=(multi_open_address_map_mt&&) = delete;
 
     /*!
      * \brief Destructor.
      */
-    ~separate_shared_chain_map_mt() noexcept = default;
+    ~multi_open_address_map_mt() noexcept = default;
 
     /*!
      * \name Create or update values.
@@ -413,6 +417,23 @@ public:
         return table_.max_size();
     }
 
+    /*!
+     * \brief Reserve enough place for values.
+     *
+     * \param[in] size Number of values.
+     */
+    void reserve(size_type size) { table_.reserve(size); }
+
+    /*!
+     * \brief Reserve approximately enough place for values.
+     *
+     * \note Use of this function may be faster than reserve function for real
+     * application.
+     *
+     * \param[in] size Number of values.
+     */
+    void reserve_approx(size_type size) { table_.reserve_approx(size); }
+
     ///@}
 
     /*!
@@ -448,20 +469,20 @@ public:
     }
 
     /*!
-     * \brief Get the number of buckets.
+     * \brief Get the total number of nodes in internal tables.
      *
-     * \return Number of nodes.
+     * \return Total number of nodes.
      */
-    [[nodiscard]] auto num_buckets() const noexcept -> size_type {
-        return table_.num_buckets();
+    [[nodiscard]] auto num_nodes() const noexcept -> size_type {
+        return table_.num_nodes();
     }
 
     /*!
-     * \brief Get the load factor (number of values / number of nodes).
+     * \brief Set the maximum load factor (number of values / number of nodes).
      *
-     * \return Load factor.
+     * \param[in] value Maximum load factor.
      */
-    auto load_factor() -> float { return table_.load_factor(); }
+    void max_load_factor(float value) { table_.max_load_factor(value); }
 
     ///@}
 

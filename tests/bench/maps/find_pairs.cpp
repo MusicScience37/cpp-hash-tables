@@ -47,11 +47,11 @@ class find_pairs_fixture : public stat_bench::FixtureBase {
 public:
     find_pairs_fixture() {
         add_param<std::size_t>("size")
-            ->add(10)    // NOLINT
             ->add(100)   // NOLINT
             ->add(1000)  // NOLINT
 #ifdef NDEBUG
-            ->add(10000)  // NOLINT
+            ->add(10000)   // NOLINT
+            ->add(100000)  // NOLINT
 #endif
             ;
     }
@@ -77,7 +77,6 @@ protected:
 // NOLINTNEXTLINE
 STAT_BENCH_CASE_F(find_pairs_fixture, "find_pairs", "unordered_map") {
     std::unordered_map<key_type, mapped_type> map;
-    map.reserve(size_);
     for (std::size_t i = 0; i < size_; ++i) {
         const auto& key = keys_.at(i);
         const auto& second_value = second_values_.at(i);
@@ -96,26 +95,6 @@ STAT_BENCH_CASE_F(find_pairs_fixture, "find_pairs", "unordered_map") {
 // NOLINTNEXTLINE
 STAT_BENCH_CASE_F(find_pairs_fixture, "find_pairs", "open_address_st") {
     hash_tables::maps::open_address_map_st<key_type, mapped_type> map;
-    map.reserve(size_);
-    for (std::size_t i = 0; i < size_; ++i) {
-        const auto& key = keys_.at(i);
-        const auto& second_value = second_values_.at(i);
-        map.emplace(key, second_value);
-    }
-    assert(map.size() == size_);  // NOLINT
-
-    STAT_BENCH_MEASURE() {
-        for (std::size_t i = 0; i < size_; ++i) {
-            const auto& key = keys_.at(i);
-            stat_bench::do_not_optimize(map.at(key));
-        };
-    };
-}
-
-// NOLINTNEXTLINE
-STAT_BENCH_CASE_F(find_pairs_fixture, "find_pairs", "shared_chain_mt") {
-    hash_tables::maps::separate_shared_chain_map_mt<key_type, mapped_type> map{
-        2U * size_};
     for (std::size_t i = 0; i < size_; ++i) {
         const auto& key = keys_.at(i);
         const auto& second_value = second_values_.at(i);

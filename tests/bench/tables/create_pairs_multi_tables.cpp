@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 MusicScience37 (Kenta Kabashima)
+ * Copyright 2023 MusicScience37 (Kenta Kabashima)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  */
 /*!
  * \file
- * \brief Benchmark to find pairs in tables.
+ * \brief Benchmark to create pairs in tables.
  */
 #include <cassert>
 #include <cstddef>
@@ -46,11 +46,10 @@ using value_type = std::pair<int, std::string>;
 using extract_key =
     hash_tables::extract_key_functions::extract_first_from_pair<value_type>;
 
-class find_pairs_fixture : public stat_bench::FixtureBase {
+class create_pairs_multi_tables_fixture : public stat_bench::FixtureBase {
 public:
-    find_pairs_fixture() {
+    create_pairs_multi_tables_fixture() {
         add_param<std::size_t>("size")
-            ->add(100)   // NOLINT
             ->add(1000)  // NOLINT
 #ifdef NDEBUG
             ->add(10000)   // NOLINT
@@ -58,12 +57,12 @@ public:
 #endif
             ;
         // NOLINTNEXTLINE
-        add_param<float>("load")->add(0.5F)->add(0.7F)->add(0.8F)->add(0.9F);
+        add_param<std::size_t>("tables")->add(4)->add(8)->add(16)->add(32);
     }
 
     void setup(stat_bench::InvocationContext& context) override {
         size_ = context.get_param<std::size_t>("size");
-        max_load_factor_ = context.get_param<float>("load");
+        num_tables_ = context.get_param<std::size_t>("tables");
         keys_ = hash_tables_test::create_random_int_vector<key_type>(size_);
         second_values_ = hash_tables_test::create_random_string_vector(size_);
     }
@@ -73,7 +72,7 @@ protected:
     std::size_t size_{};
 
     // NOLINTNEXTLINE(cppcoreguidelines-non-private-member-variables-in-classes)
-    float max_load_factor_{};
+    std::size_t num_tables_{};
 
     // NOLINTNEXTLINE(cppcoreguidelines-non-private-member-variables-in-classes)
     std::vector<key_type> keys_{};
@@ -83,43 +82,18 @@ protected:
 };
 
 // NOLINTNEXTLINE
-STAT_BENCH_CASE_F(find_pairs_fixture, "find_pairs", "open_address_st") {
-    hash_tables::tables::open_address_table_st<value_type, key_type,
-        extract_key>
-        table;
-    table.max_load_factor(max_load_factor_);
-    for (std::size_t i = 0; i < size_; ++i) {
-        const auto& key = keys_.at(i);
-        const auto& second_value = second_values_.at(i);
-        table.emplace(key, key, second_value);
-    }
-    assert(table.size() == size_);  // NOLINT
-
+STAT_BENCH_CASE_F(create_pairs_multi_tables_fixture,
+    "create_pairs_multi_tables", "multi_open_address_st") {
     STAT_BENCH_MEASURE() {
+        hash_tables::tables::multi_open_address_table_st<value_type, key_type,
+            extract_key>
+            table{num_tables_};
         for (std::size_t i = 0; i < size_; ++i) {
             const auto& key = keys_.at(i);
-            stat_bench::do_not_optimize(table.at(keys_.at(i)));
+            const auto& second_value = second_values_.at(i);
+            table.emplace(key, key, second_value);
         }
-    };
-}
-
-// NOLINTNEXTLINE
-STAT_BENCH_CASE_F(find_pairs_fixture, "find_pairs", "multi_open_address_st") {
-    hash_tables::tables::multi_open_address_table_st<value_type, key_type,
-        extract_key>
-        table;
-    table.max_load_factor(max_load_factor_);
-    for (std::size_t i = 0; i < size_; ++i) {
-        const auto& key = keys_.at(i);
-        const auto& second_value = second_values_.at(i);
-        table.emplace(key, key, second_value);
-    }
-    assert(table.size() == size_);  // NOLINT
-
-    STAT_BENCH_MEASURE() {
-        for (std::size_t i = 0; i < size_; ++i) {
-            const auto& key = keys_.at(i);
-            stat_bench::do_not_optimize(table.at(keys_.at(i)));
-        }
+        assert(table.size() == size_);  // NOLINT
+        stat_bench::do_not_optimize(table);
     };
 }

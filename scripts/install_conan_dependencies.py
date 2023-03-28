@@ -4,9 +4,10 @@
 
 from pathlib import Path
 import subprocess
-from sys import argv
 from typing import Iterable
 import os
+
+import click
 
 THIS_DIR = Path(__file__).absolute().parent
 
@@ -24,12 +25,19 @@ def make_build_path(build_type: str) -> str:
     return str(THIS_DIR.parent / "build" / build_type)
 
 
-def install_conan_dependencies(build_type: str, *additional_args: Iterable[str]):
+@click.command()
+@click.argument(
+    "build_type",
+    nargs=1,
+    type=click.Choice(["Debug", "Release", "RelWithDebInfo", "MinSizeRel"]),
+)
+@click.argument("additional_args", nargs=-1)
+def install_conan_dependencies(build_type: str, additional_args: Iterable[str]):
     """Install dependent Conan packages.
 
-    Args:
-        build_type (str): Type of build.
-        additional_args (List[str]): Additional command line arguments.
+    - build_type: Type of build.
+
+    - additional_args: Additional command line arguments.
     """
 
     build_path = make_build_path(build_type)
@@ -59,8 +67,4 @@ def install_conan_dependencies(build_type: str, *additional_args: Iterable[str])
 
 
 if __name__ == "__main__":
-    if len(argv) == 1:
-        print(f"Usage: python3 {argv[0]} <build_type> <optional_additional_args>...")
-        exit(1)
-
-    install_conan_dependencies(*(argv[1:]))
+    install_conan_dependencies()
