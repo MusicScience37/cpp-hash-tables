@@ -17,4 +17,5 @@ function(add_profiling TARGET)
                                             hash_tables_test_helper)
 endfunction()
 
+add_subdirectory(tables)
 add_subdirectory(maps)
