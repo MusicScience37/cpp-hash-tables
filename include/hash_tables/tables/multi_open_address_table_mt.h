@@ -25,6 +25,7 @@
 #include <functional>
 #include <memory>
 #include <mutex>
+#include <optional>
 #include <shared_mutex>
 #include <tuple>
 #include <utility>
@@ -240,7 +241,7 @@ public:
      * \param[in] key Key.
      * \return Value.
      */
-    [[nodiscard]] auto at(const key_type& key) -> value_type& {
+    [[nodiscard]] auto at(const key_type& key) const -> value_type {
         const auto [internal_table_index, internal_key] =
             prepare_for_search(key);
         return shared_table(internal_table_index)->at(internal_key).first;
@@ -249,13 +250,15 @@ public:
     /*!
      * \brief Get a value.
      *
+     * \tparam ValueOutput Type of the value for output.
      * \param[in] key Key.
-     * \return Value.
+     * \param[out] value Value.
      */
-    [[nodiscard]] auto at(const key_type& key) const -> const value_type& {
+    template <typename ValueOutput>
+    void get_to(ValueOutput& value, const key_type& key) const {
         const auto [internal_table_index, internal_key] =
             prepare_for_search(key);
-        return shared_table(internal_table_index)->at(internal_key).first;
+        value = shared_table(internal_table_index)->at(internal_key).first;
     }
 
     /*!
@@ -268,7 +271,7 @@ public:
      */
     template <typename... Args>
     [[nodiscard]] auto get_or_create(const key_type& key, Args&&... args)
-        -> value_type& {
+        -> value_type {
         const auto [internal_table_index, internal_key] =
             prepare_for_search(key);
         return exclusive_table(internal_table_index)
@@ -276,6 +279,27 @@ public:
                 std::forward_as_tuple(std::forward<Args>(args)...),
                 std::forward_as_tuple(internal_key.hash_number()))
             .first;
+    }
+
+    /*!
+     * \brief Get a value constructing it if not found.
+     *
+     * \tparam ValueOutput Type of the value for output.
+     * \tparam Args Type of arguments of the constructor.
+     * \param[out] value Value.
+     * \param[in] key Key.
+     * \param[in] args Arguments of the constructor.
+     */
+    template <typename ValueOutput, typename... Args>
+    void get_or_create_to(
+        ValueOutput& value, const key_type& key, Args&&... args) {
+        const auto [internal_table_index, internal_key] =
+            prepare_for_search(key);
+        value = exclusive_table(internal_table_index)
+                    ->get_or_create(internal_key, std::piecewise_construct,
+                        std::forward_as_tuple(std::forward<Args>(args)...),
+                        std::forward_as_tuple(internal_key.hash_number()))
+                    .first;
     }
 
     /*!
@@ -288,7 +312,7 @@ public:
      */
     template <typename Function>
     [[nodiscard]] auto get_or_create_with_factory(
-        const key_type& key, Function&& function) -> value_type& {
+        const key_type& key, Function&& function) -> value_type {
         const auto [internal_table_index, internal_key] =
             prepare_for_search(key);
         return exclusive_table(internal_table_index)
@@ -302,20 +326,28 @@ public:
     }
 
     /*!
-     * \brief Get a value if found.
+     * \brief Get a value constructing using a factory function it if not found.
      *
+     * \tparam ValueOutput Type of the value for output.
+     * \tparam Function Type of the factory function.
+     * \param[out] value Value.
      * \param[in] key Key.
-     * \return Pointer to the value if found, otherwise nullptr.
+     * \param[in] function Factory function.
      */
-    [[nodiscard]] auto try_get(const key_type& key) -> value_type* {
+    template <typename ValueOutput, typename Function>
+    void get_or_create_with_factory_to(
+        ValueOutput& value, const key_type& key, Function&& function) {
         const auto [internal_table_index, internal_key] =
             prepare_for_search(key);
-        internal_value_type* ptr =
-            shared_table(internal_table_index)->try_get(internal_key);
-        if (ptr == nullptr) {
-            return nullptr;
-        }
-        return &(ptr->first);
+        value = exclusive_table(internal_table_index)
+                    ->get_or_create_with_factory(internal_key,
+                        [internal_hash_number = internal_key.hash_number(),
+                            &function] {
+                            return std::make_pair(
+                                std::invoke(std::forward<Function>(function)),
+                                internal_hash_number);
+                        })
+                    .first;
     }
 
     /*!
@@ -324,15 +356,38 @@ public:
      * \param[in] key Key.
      * \return Pointer to the value if found, otherwise nullptr.
      */
-    [[nodiscard]] auto try_get(const key_type& key) const -> const value_type* {
+    [[nodiscard]] auto try_get(const key_type& key) const
+        -> std::optional<value_type> {
         const auto [internal_table_index, internal_key] =
             prepare_for_search(key);
         const internal_value_type* ptr =
             shared_table(internal_table_index)->try_get(internal_key);
         if (ptr == nullptr) {
-            return nullptr;
+            return std::nullopt;
         }
-        return &(ptr->first);
+        return ptr->first;
+    }
+
+    /*!
+     * \brief Get a value if found.
+     *
+     * \tparam ValueOutput Type of the value for output.
+     * \param[in] key Key.
+     * \param[out] value Value.
+     * \retval true Value was found and assigned to value.
+     * \retval false Value was not found.
+     */
+    template <typename ValueOutput>
+    auto try_get_to(ValueOutput& value, const key_type& key) const -> bool {
+        const auto [internal_table_index, internal_key] =
+            prepare_for_search(key);
+        const internal_value_type* ptr =
+            shared_table(internal_table_index)->try_get(internal_key);
+        if (ptr == nullptr) {
+            return false;
+        }
+        value = ptr->first;
+        return true;
     }
 
     /*!
