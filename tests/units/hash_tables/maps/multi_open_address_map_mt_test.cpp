@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 MusicScience37 (Kenta Kabashima)
+ * Copyright 2023 MusicScience37 (Kenta Kabashima)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,9 @@
  */
 /*!
  * \file
- * \brief Test of open_address_map_st class.
+ * \brief Test of multi_open_address_map_mt class.
  */
-#include "hash_tables/maps/open_address_map_st.h"
+#include "hash_tables/maps/multi_open_address_map_mt.h"
 
 #include <string>
 #include <unordered_set>
@@ -31,15 +31,16 @@
 #include "hash_tables_test/hashes/fixed_hash.h"
 
 // NOLINTNEXTLINE
-TEMPLATE_TEST_CASE("hash_tables::maps::open_address_map_st", "",
+TEMPLATE_TEST_CASE("hash_tables::maps::multi_open_address_map_mt", "",
     (std::tuple<hash_tables::hashes::std_hash<std::string>>),
     (std::tuple<hash_tables_test::hashes::fixed_hash<std::string>>)) {
-    using hash_tables::maps::open_address_map_st;
+    using hash_tables::maps::multi_open_address_map_mt;
 
     using key_type = std::string;
     using mapped_type = int;
     using hash_type = std::tuple_element_t<0, TestType>;
-    using map_type = open_address_map_st<key_type, mapped_type, hash_type>;
+    using map_type =
+        multi_open_address_map_mt<key_type, mapped_type, hash_type>;
 
     SECTION("default constructor") {
         map_type map;
@@ -51,54 +52,6 @@ TEMPLATE_TEST_CASE("hash_tables::maps::open_address_map_st", "",
         map_type map{5U};        // NOLINT
         CHECK(map.size() == 0);  // NOLINT
         CHECK(map.empty());
-    }
-
-    SECTION("copy constructor") {
-        map_type orig;
-
-        constexpr int mapped = 123;
-        const auto key = std::to_string(mapped);
-        CHECK(orig.emplace(key, mapped));
-
-        const map_type copy{orig};  // NOLINT
-        CHECK(copy.size() == 1);
-        CHECK(copy.at(key) == mapped);
-    }
-
-    SECTION("move constructor") {
-        map_type orig;
-
-        constexpr int mapped = 123;
-        const auto key = std::to_string(mapped);
-        CHECK(orig.emplace(key, mapped));
-
-        const map_type copy{std::move(orig)};  // NOLINT
-        CHECK(copy.size() == 1);
-        CHECK(copy.at(key) == mapped);
-    }
-
-    SECTION("copy assignment operator") {
-        map_type orig;
-
-        constexpr int mapped = 123;
-        const auto key = std::to_string(mapped);
-        CHECK(orig.emplace(key, mapped));
-
-        const map_type copy = orig;  // NOLINT
-        CHECK(copy.size() == 1);
-        CHECK(copy.at(key) == mapped);
-    }
-
-    SECTION("move assignment operator") {
-        map_type orig;
-
-        constexpr int mapped = 123;
-        const auto key = std::to_string(mapped);
-        CHECK(orig.emplace(key, mapped));
-
-        const map_type copy = std::move(orig);  // NOLINT
-        CHECK(copy.size() == 1);
-        CHECK(copy.at(key) == mapped);
     }
 
     SECTION("insert (const reference)") {
@@ -256,26 +209,7 @@ TEMPLATE_TEST_CASE("hash_tables::maps::open_address_map_st", "",
         CHECK(map.at(key2) == mapped2);
     }
 
-    SECTION("operator[] (non const)") {
-        map_type map;
-
-        constexpr int mapped = 123;
-        const auto key = std::to_string(mapped);
-        CHECK(map.emplace(key, mapped));
-        CHECK(map.size() == 1);
-        CHECK(map.at(key) == mapped);
-
-        CHECK(map[key] == mapped);
-        CHECK(map.size() == 1);
-        CHECK(map.at(key) == mapped);
-
-        const auto key2 = std::string("abc");
-        CHECK(map[key2] == 0);
-        CHECK(map.size() == 2);
-        CHECK(map.at(key2) == 0);
-    }
-
-    SECTION("operator[] (const)") {
+    SECTION("operator[]") {
         map_type map;
 
         constexpr int mapped = 123;
@@ -295,7 +229,7 @@ TEMPLATE_TEST_CASE("hash_tables::maps::open_address_map_st", "",
         CHECK_THROWS(const_map.at(key2));
     }
 
-    SECTION("try_get (non const)") {
+    SECTION("try_get") {
         map_type map;
 
         constexpr int mapped = 123;
@@ -305,39 +239,14 @@ TEMPLATE_TEST_CASE("hash_tables::maps::open_address_map_st", "",
         CHECK(map.at(key) == mapped);
 
         SECTION("found") {
-            mapped_type* res = map.try_get(key);
-            REQUIRE(static_cast<void*>(res) != nullptr);
-            CHECK(*res == mapped);
+            const auto res = map.try_get(key);
+            CHECK(res == mapped);
         }
 
         SECTION("not found") {
             const auto key2 = std::string("abc");
-            mapped_type* res = map.try_get(key2);
-            CHECK(static_cast<void*>(res) == nullptr);
-        }
-    }
-
-    SECTION("try_get (const)") {
-        map_type map;
-
-        constexpr int mapped = 123;
-        const auto key = std::to_string(mapped);
-        CHECK(map.emplace(key, mapped));
-        CHECK(map.size() == 1);
-        CHECK(map.at(key) == mapped);
-
-        const auto& const_map = map;
-
-        SECTION("found") {
-            const mapped_type* res = const_map.try_get(key);
-            REQUIRE(static_cast<const void*>(res) != nullptr);
-            CHECK(*res == mapped);
-        }
-
-        SECTION("not found") {
-            const auto key2 = std::string("abc");
-            const mapped_type* res = const_map.try_get(key2);
-            CHECK(static_cast<const void*>(res) == nullptr);
+            const auto res = map.try_get(key2);
+            CHECK(res == std::nullopt);
         }
     }
 
@@ -463,7 +372,9 @@ TEMPLATE_TEST_CASE("hash_tables::maps::open_address_map_st", "",
         CHECK(map.emplace(key, mapped));
 
         CHECK(map.size() == 1);
-        CHECK(map.num_nodes() == map_type::table_type::default_num_nodes);
+        CHECK(map.num_nodes() ==
+            map_type::table_type::default_num_tables *
+                map_type::table_type::default_num_internal_nodes);
 
         SECTION("to larger size") {
             constexpr std::size_t size = 128;
@@ -477,62 +388,11 @@ TEMPLATE_TEST_CASE("hash_tables::maps::open_address_map_st", "",
             constexpr std::size_t size = 1;
             CHECK_NOTHROW(map.reserve(size));
             CHECK(map.size() == 1);
-            CHECK(map.num_nodes() == map_type::table_type::default_num_nodes);
+            CHECK(map.num_nodes() ==
+                map_type::table_type::default_num_tables *
+                    map_type::table_type::default_num_internal_nodes);
             CHECK(map.at(key) == mapped);
         }
-    }
-
-    SECTION("rehash") {
-        map_type map;
-
-        constexpr int mapped = 123;
-        const auto key = std::to_string(mapped);
-        CHECK(map.emplace(key, mapped));
-
-        CHECK(map.size() == 1);
-        CHECK(map.num_nodes() == map_type::table_type::default_num_nodes);
-
-        SECTION("to larger size") {
-            constexpr std::size_t min_num_nodes = 200;
-            constexpr std::size_t expected_num_nodes = 256;
-            CHECK_NOTHROW(map.rehash(min_num_nodes));
-            CHECK(map.size() == 1);
-            CHECK(map.num_nodes() == expected_num_nodes);
-            CHECK(map.at(key) == mapped);
-        }
-
-        SECTION("to larger size (power of two)") {
-            constexpr std::size_t min_num_nodes = 128;
-            CHECK_NOTHROW(map.rehash(min_num_nodes));
-            CHECK(map.size() == 1);
-            CHECK(map.num_nodes() == min_num_nodes);
-            CHECK(map.at(key) == mapped);
-        }
-
-        SECTION("to smaller size") {
-            constexpr std::size_t min_num_nodes = 1;
-            CHECK_NOTHROW(map.rehash(min_num_nodes));
-            CHECK(map.size() == 1);
-            CHECK(map.num_nodes() == map_type::table_type::default_num_nodes);
-            CHECK(map.at(key) == mapped);
-        }
-    }
-
-    SECTION("load_factor") {
-        map_type map;
-        CHECK(map.load_factor() == 0.0F);
-
-        CHECK(map.emplace("abc", 1));
-        CHECK(map.size() == 1);
-        CHECK(map.load_factor() ==
-            static_cast<float>(map.size()) /
-                static_cast<float>(map.num_nodes()));
-
-        CHECK(map.emplace("def", 1));
-        CHECK(map.size() == 2);
-        CHECK(map.load_factor() ==
-            static_cast<float>(map.size()) /
-                static_cast<float>(map.num_nodes()));
     }
 
     SECTION("max_load_factor") {
@@ -540,7 +400,6 @@ TEMPLATE_TEST_CASE("hash_tables::maps::open_address_map_st", "",
 
         constexpr float value = 0.1;
         CHECK_NOTHROW(map.max_load_factor(value));
-        CHECK(map.max_load_factor() == value);
 
         CHECK_THROWS(map.max_load_factor(0.0));    // NOLINT
         CHECK_NOTHROW(map.max_load_factor(0.01));  // NOLINT

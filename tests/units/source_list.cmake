@@ -4,6 +4,7 @@ set(SOURCE_FILES
     hash_tables/hashes/hash_cache_test.cpp
     hash_tables/hashes/mix_hash_numbers_test.cpp
     hash_tables/hashes/std_hash_test.cpp
+    hash_tables/maps/multi_open_address_map_mt_test.cpp
     hash_tables/maps/open_address_map_st_test.cpp
     hash_tables/maps/separate_shared_chain_map_mt_test.cpp
     hash_tables/sets/open_address_set_st_test.cpp
