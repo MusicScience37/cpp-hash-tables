@@ -23,7 +23,7 @@
 #define HASH_TABLES_VERSION_MAJOR 0
 
 //! Minor version of cpp-hash-table project.
-#define HASH_TABLES_VERSION_MINOR 4
+#define HASH_TABLES_VERSION_MINOR 5
 
 //! Patch version of cpp-hash-table project.
-#define HASH_TABLES_VERSION_PATCH 1
+#define HASH_TABLES_VERSION_PATCH 0
