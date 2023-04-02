@@ -120,18 +120,18 @@ test release:
         CXX_STANDARD: 20
   image: ${IMAGE_PATH}:${COMPILER_TYPE}
   variables:
+    GIT_SUBMODULE_STRATEGY: recursive
     BUILD_TYPE: Release
     BUILD_DIR: build_${COMPILER_TYPE}_release
   before_script:
+    - apt-get update
+    - apt-get install -y --no-install-recommends curl zip unzip tar
+    - ./vcpkg/bootstrap-vcpkg.sh
     - mkdir $BUILD_DIR
-    - cd $BUILD_DIR
-    - poetry run conan profile new --detect default
-    - poetry run conan profile update settings.compiler.libcxx=$CONAN_LIBCXX default
-    - poetry run conan remote add cpp-stat-bench $CPP_STAT_BENCH_CONAN_REGISTRY
-    - poetry run conan install --build missing -o cpp_hash_tables:requirements_for_tests=True -s build_type=$BUILD_TYPE ..
-    - cd ../
   script:
-    - cmake -S ./ -B $BUILD_DIR
+    - cd $BUILD_DIR
+    - cmake ..
+      -DCMAKE_TOOLCHAIN_FILE=../vcpkg/scripts/buildsystems/vcpkg.cmake
       -DCMAKE_BUILD_TYPE=$BUILD_TYPE
       -DHASH_TABLES_TESTING:BOOL=ON
       -DHASH_TABLES_ENABLE_BENCH=ON
@@ -140,7 +140,6 @@ test release:
       -DHASH_TABLES_TEST_EXAMPLES=ON
       -DHASH_TABLES_WRITE_JUNIT:BOOL=ON
       -DCMAKE_CXX_STANDARD=$CXX_STANDARD
-    - cd $BUILD_DIR
     - cmake --build .
     - ctest -V
   artifacts:
@@ -172,14 +171,15 @@ test debug:
     BUILD_TYPE: Debug
     BUILD_DIR: build_${COMPILER_TYPE}_debug
   script:
-    - cmake -S ./ -B $BUILD_DIR
+    - cd $BUILD_DIR
+    - cmake ..
+      -DCMAKE_TOOLCHAIN_FILE=../vcpkg/scripts/buildsystems/vcpkg.cmake
       -DCMAKE_BUILD_TYPE=$BUILD_TYPE
       -DHASH_TABLES_TESTING:BOOL=ON
       -DHASH_TABLES_BUILD_EXAMPLES=ON
       -DHASH_TABLES_TEST_EXAMPLES=ON
       -DHASH_TABLES_WRITE_JUNIT:BOOL=ON
       -DCMAKE_CXX_STANDARD=$CXX_STANDARD
-    - cd $BUILD_DIR
     - cmake --build .
     - ctest -V
 
@@ -194,14 +194,15 @@ clang coverage:
   variables:
     BUILD_DIR: build_clang_coverage
   script:
-    - cmake -S ./ -B $BUILD_DIR
+    - cd $BUILD_DIR
+    - cmake ..
+      -DCMAKE_TOOLCHAIN_FILE=../vcpkg/scripts/buildsystems/vcpkg.cmake
       -DCMAKE_BUILD_TYPE=Debug
       -DHASH_TABLES_TESTING:BOOL=ON
       -DHASH_TABLES_WRITE_JUNIT:BOOL=ON
       -DHASH_TABLES_ENABLE_INTEG_TESTS:BOOL=OFF
       "-DCMAKE_CXX_FLAGS=-fprofile-instr-generate -fcoverage-mapping"
       "-DCMAKE_MODULE_LINKER_FLAGS=-fprofile-instr-generate -fcoverage-mapping"
-    - cd $BUILD_DIR
     - mkdir coverage
     - export LLVM_PROFILE_FILE=$(pwd)/coverage/coverage_%p.profraw
     - cmake --build .
@@ -239,12 +240,13 @@ clang-14-asan-ubsan:
     BUILD_DIR: build_clang_asan_ubsan
     ASAN_OPTIONS: alloc_dealloc_mismatch=0
   script:
-    - cmake -S ./ -B $BUILD_DIR
+    - cd $BUILD_DIR
+    - cmake ..
+      -DCMAKE_TOOLCHAIN_FILE=../vcpkg/scripts/buildsystems/vcpkg.cmake
       -DCMAKE_BUILD_TYPE=Debug
       -DHASH_TABLES_TESTING:BOOL=ON
       -DHASH_TABLES_WRITE_JUNIT:BOOL=ON
       -DHASH_TABLES_ENABLE_AUSAN:BOOL=ON
-    - cd $BUILD_DIR
     - cmake --build .
     - ctest -V
 
@@ -293,39 +295,31 @@ msvc-release:
   needs: []
   dependencies: []
   variables:
+    GIT_SUBMODULE_STRATEGY: recursive
     BUILD_DIR: build_msvc_release
-    CONAN_USER_HOME: C:\Users\gitlab_runner
-    # Workaround in https://docs.conan.io/en/latest/reference/conanfile/attributes.html?highlight=conan_use_always_short_paths#short-paths
-    CONAN_USE_ALWAYS_SHORT_PATHS: 1
     # workaround in https://github.com/python-poetry/poetry/issues/1917#issuecomment-1235998997
     PYTHON_KEYRING_BACKEND: keyring.backends.null.Keyring
   before_script:
-    - (mv ${CI_PROJECT_DIR}/.conan C:\Users\gitlab_runner -Force)
     - Import-Module "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
     - choco install cmake -y --installargs 'ADD_CMAKE_TO_PATH=System'
     - choco install python --version=3.11.0 -y
     - RefreshEnv
     - pip install poetry==1.3.2
     - poetry install --without dev
-  script:
+    - .\vcpkg\bootstrap-vcpkg.bat
     - mkdir $BUILD_DIR
+  script:
     - cd $BUILD_DIR
-    - poetry run conan profile new --detect default
-    - poetry run conan remote add cpp-stat-bench $CPP_STAT_BENCH_CONAN_REGISTRY
-    - poetry run conan install --build missing -o cpp_hash_tables:requirements_for_tests=True -s build_type=Release ..
-    - cd ../
-    - cmake -S ./ -B $BUILD_DIR
+    - cmake ..
+      "-DCMAKE_TOOLCHAIN_FILE=../vcpkg/scripts/buildsystems/vcpkg.cmake"
       -DCMAKE_BUILD_TYPE=Release
       -DHASH_TABLES_TESTING:BOOL=ON
       -DHASH_TABLES_ENABLE_BENCH=ON
       -DHASH_TABLES_BUILD_EXAMPLES=ON
       -DHASH_TABLES_TEST_EXAMPLES=ON
       -DHASH_TABLES_WRITE_JUNIT:BOOL=ON
-    - cd $BUILD_DIR
     - cmake --build . --config Release --parallel
     - ctest -V --build-config Release
-  after_script:
-    - (mv C:\Users\gitlab_runner\.conan ${CI_PROJECT_DIR} -Force)
   artifacts:
     paths:
       - $BUILD_DIR/bench
@@ -353,13 +347,16 @@ static analysis:
     BUILD_TYPE: Debug
     BUILD_DIR: build_static_analysis
   script:
-    - cmake -S ./ -B $BUILD_DIR
+    - cd $BUILD_DIR
+    - cmake ..
+      -DCMAKE_TOOLCHAIN_FILE=../vcpkg/scripts/buildsystems/vcpkg.cmake
       -DCMAKE_BUILD_TYPE=$BUILD_TYPE
       -DHASH_TABLES_TESTING:BOOL=ON
       -DHASH_TABLES_ENABLE_BENCH=ON
       -DHASH_TABLES_BUILD_EXAMPLES=ON
       -DHASH_TABLES_ENABLE_CPP_WARNINGS:BOOL=ON
       -DCMAKE_CXX_STANDARD=$CXX_STANDARD
+    - cd ..
     - poetry run clang-tidy-checker -b ${BUILD_DIR}
 
 spell check:
@@ -399,14 +396,10 @@ doc:
   script:
     - mkdir build_doc
     - cd build_doc
-    - poetry run conan profile new --detect default
-    - poetry run conan profile update settings.compiler.libcxx=libc++ default
-    - poetry run conan remote add cpp-stat-bench $CPP_STAT_BENCH_CONAN_REGISTRY
-    - poetry run conan install --build missing -o cpp_hash_tables:requirements_for_tests=True ..
-    - cd ../
-    - cmake -S ./ -B build_doc
+    - cmake ..
+      -DCMAKE_TOOLCHAIN_FILE=../vcpkg/scripts/buildsystems/vcpkg.cmake
       -DHASH_TABLES_BUILD_DOC:BOOL=ON
-    - cmake --build build_doc --target hash_tables_doc
+    - cmake --build . --target hash_tables_doc
   artifacts:
     paths:
       - build_doc/doc
