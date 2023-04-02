@@ -36,6 +36,8 @@ to build documentation.
 
 ## Build commands
 
+### Via Conan
+
 After installation of dependencies,
 execute the following commands to build:
 
@@ -72,6 +74,62 @@ execute the following commands to build:
 
    ```bash
    <some_editor> CMakeCache.txt
+   ```
+
+6. Build.
+
+   ```bash
+   cmake --build .
+   ```
+
+7. Optionally run tests.
+
+   ```bash
+   ctest
+   ```
+
+### Via vcpkg (experimental)
+
+1. Start a shell of poetry.
+
+   ```bash
+   cd <this-directory>
+   poetry install
+   poetry shell
+   ```
+
+2. Download vcpkg if you haven't already.
+
+   ```bash
+   git submodule update --init
+   ```
+
+3. Build vcpkg.
+
+   - On Windows:
+
+     ```bat
+     .\vcpkg\bootstrap-vcpkg.bat
+     ```
+
+   - On Linux:
+
+     ```bash
+     ./vcpkg/bootstrap-vcpkg.sh
+     ```
+
+4. Configure.
+
+   ```bash
+   mkdir build
+   cd build
+   cmake .. -DCMAKE_TOOLCHAIN_FILE=../vcpkg/scripts/buildsystems/vcpkg.cmake
+   ```
+
+5. Optionally edit options.
+
+   ```bash
+   <some-editor> CMakeCache.txt
    ```
 
 6. Build.
