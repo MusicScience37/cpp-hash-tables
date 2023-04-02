@@ -6,7 +6,7 @@ set(HASH_TABLES_BENCH_DIR
 file(MAKE_DIRECTORY ${HASH_TABLES_BENCH_DIR})
 
 function(target_add_to_benchmark TARGET)
-    target_link_libraries(${TARGET} PRIVATE cpp_stat_bench::cpp_stat_bench
+    target_link_libraries(${TARGET} PRIVATE cpp_stat_bench::stat_bench
                                             hash_tables hash_tables_test_helper)
     target_include_directories(${TARGET}
                                PRIVATE ${HASH_TABLES_BENCH_INCLUDE_DIR})
