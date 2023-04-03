@@ -26,6 +26,8 @@ option(HASH_TABLES_TESTING "enable tests of ${FULL_PROJECT_NAME}" OFF)
 option(HASH_TABLES_BUILD_EXAMPLES "build examples of ${FULL_PROJECT_NAME}" OFF)
 option(HASH_TABLES_ENABLE_PROFILING "enable profiling of ${FULL_PROJECT_NAME}"
        OFF)
+option(HASH_TABLES_ENABLE_INSTALL
+       "enable CMake target to install ${FULL_PROJECT_NAME}" ON)
 
 set(CMAKE_CXX_STANDARD
     17
@@ -35,6 +37,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS
     ON
     CACHE BOOL "export compile commands" FORCE)
 
+include(GNUInstallDirs)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY $<1:${CMAKE_BINARY_DIR}/lib>)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY $<1:${CMAKE_BINARY_DIR}/lib>)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY $<1:${CMAKE_BINARY_DIR}/bin>)
@@ -62,6 +65,7 @@ else()
         find_package(cpp-stat-bench REQUIRED)
     endif()
 endif()
+find_package(Threads REQUIRED)
 
 include(CppWarningFlags)
 include(ConfigureSanitizer)
@@ -70,8 +74,10 @@ include(poetry)
 set(HASH_TABLES_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
 add_library(hash_tables INTERFACE)
-target_include_directories(hash_tables
-                           INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_include_directories(
+    hash_tables INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+                          $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
+target_link_libraries(hash_tables INTERFACE Threads::Threads)
 
 if(HASH_TABLES_BUILD_DOC)
     add_subdirectory(doc)
@@ -87,4 +93,34 @@ endif()
 
 if(HASH_TABLES_TESTING AND HASH_TABLES_ENABLE_PROFILING)
     add_subdirectory(profiling)
+endif()
+
+if(HASH_TABLES_ENABLE_INSTALL)
+    install(
+        TARGETS hash_tables
+        EXPORT cpp-hash-tables-targets
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+        FRAMEWORK DESTINATION ${CMAKE_INSTALL_PREFIX})
+
+    install(
+        DIRECTORY ${HASH_TABLES_SOURCE_DIR}/include/hash_tables
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+        FILES_MATCHING
+        PATTERN "*.h*")
+
+    install(
+        EXPORT cpp-hash-tables-targets
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/cpp-hash-tables
+        NAMESPACE cpp_hash_tables::)
+
+    include(CMakePackageConfigHelpers)
+    configure_package_config_file(
+        cmake/cpp-hash-tables-config.cmake.in
+        "${CMAKE_CURRENT_BINARY_DIR}/cpp-hash-tables-config.cmake"
+        INSTALL_DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/cpp-hash-tables")
+
+    install(FILES "${CMAKE_CURRENT_BINARY_DIR}/cpp-hash-tables-config.cmake"
+            DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/cpp-hash-tables")
 endif()
