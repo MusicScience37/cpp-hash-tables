@@ -1,0 +1,10 @@
+@PACKAGE_INIT@
+
+if(NOT TARGET cpp_hash_tables::hash_tables)
+    include(CMakeFindDependencyMacro)
+    find_dependency(Threads)
+
+    include(${CMAKE_CURRENT_LIST_DIR}/cpp-hash-tables-targets.cmake)
+endif()
+
+check_required_components(hash_tables)
