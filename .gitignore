@@ -1,6 +1,5 @@
-
-# Created by https://www.toptal.com/developers/gitignore/api/c++,visualstudiocode,cmake,conan,python,visualstudio
-# Edit at https://www.toptal.com/developers/gitignore?templates=c++,visualstudiocode,cmake,conan,python,visualstudio
+# Created by https://www.toptal.com/developers/gitignore/api/c++,visualstudiocode,cmake,vcpkg,python,visualstudio
+# Edit at https://www.toptal.com/developers/gitignore?templates=c++,visualstudiocode,cmake,vcpkg,python,visualstudio
 
 ### C++ ###
 # Prerequisites
@@ -52,28 +51,6 @@ _deps
 ### CMake Patch ###
 # External projects
 *-prefix/
-
-### Conan ###
-# Conan build information
-conan.lock
-conanbuildinfo.*
-conaninfo.txt
-graph_info.json
-
-## Various built-in generators
-# cmake_find_package generator https://docs.conan.io/en/latest/reference/generators/cmake_find_package.html
-Find*.cmake
-
-# cmake_paths generator https://docs.conan.io/en/1.4/integrations/cmake/cmake_paths_generator.html
-conan_paths.*
-
-# Environment activation scripts produced by https://docs.conan.io/en/latest/mastering/virtualenv.html#virtualenv-generator
-activate_run.ps1
-activate_run.sh
-deactivate_run.ps1
-deactivate_run.sh
-environment_run.ps1.env
-environment_run.sh.env
 
 ### Python ###
 # Byte-compiled / optimized / DLL files
@@ -178,7 +155,15 @@ ipython_config.py
 #   https://python-poetry.org/docs/basic-usage/#commit-your-poetrylock-file-to-version-control
 #poetry.lock
 
-# PEP 582; used by e.g. github.com/David-OConnor/pyflow
+# pdm
+#   Similar to Pipfile.lock, it is generally recommended to include pdm.lock in version control.
+#pdm.lock
+#   pdm stores project-wide configurations in .pdm.toml, but it is recommended to not include it
+#   in version control.
+#   https://pdm.fming.dev/#use-with-ide
+.pdm.toml
+
+# PEP 582; used by e.g. github.com/David-OConnor/pyflow and github.com/pdm-project/pdm
 __pypackages__/
 
 # Celery stuff
@@ -228,6 +213,24 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 
+### Python Patch ###
+# Poetry local configuration file - https://python-poetry.org/docs/configuration/#local-configuration
+poetry.toml
+
+# ruff
+.ruff_cache/
+
+# LSP config files
+pyrightconfig.json
+
+### vcpkg ###
+# Vcpkg
+
+vcpkg-manifest-install.log
+
+## Manifest Mode
+vcpkg_installed/
+
 ### VisualStudioCode ###
 .vscode/*
 !.vscode/settings.json
@@ -246,8 +249,6 @@ cython_debug/
 # Ignore all local history of files
 .history
 .ionide
-
-# Support for Project snippet scope
 
 ### VisualStudio ###
 ## Ignore Visual Studio temporary files, build results, and
@@ -640,10 +641,7 @@ FodyWeavers.xsd
 ### VisualStudio Patch ###
 # Additional files built by Visual Studio
 
-# End of https://www.toptal.com/developers/gitignore/api/c++,visualstudiocode,cmake,conan,python,visualstudio
-
-# Conan
-/.conan/
+# End of https://www.toptal.com/developers/gitignore/api/c++,visualstudiocode,cmake,vcpkg,python,visualstudio
 
 # VS Code - CMake tools
 !/.vscode/cmake-variants.yaml
