@@ -5,10 +5,7 @@ stages:
   - release
 
 variables:
-  CONAN_USER: "MusicScience37"
   SECURE_LOG_LEVEL: debug
-  CPP_STAT_BENCH_CONAN_REGISTRY: "https://gitlab.com/api/v4/projects/32226502/packages/conan"
-  CPP_HASH_TABLES_CONAN_REGISTRY: "https://gitlab.com/api/v4/projects/35726343/packages/conan"
 
 include:
   - template: Dependency-Scanning.gitlab-ci.yml
@@ -17,15 +14,9 @@ include:
 sast:
   needs: []
 dependency_scanning:
-  needs:
-    - prepare lock files
-  dependencies:
-    - prepare lock files
+  needs: []
 license_scanning:
-  needs:
-    - prepare lock files
-  dependencies:
-    - prepare lock files
+  needs: []
 
 sync poetry:
   stage: prepare
@@ -45,30 +36,6 @@ sync poetry:
   artifacts:
     paths:
       - .venv
-    expire_in: "1 mos"
-
-prepare lock files:
-  stage: prepare
-  needs: []
-  image: musicscience37/clang-ci:clang14
-  script:
-    - poetry config virtualenvs.in-project true
-    - poetry env use 3.10
-    - poetry install
-    - poetry run conan profile new --detect default
-    - poetry run conan profile update settings.compiler.libcxx=libc++ default
-    - poetry run conan remote add cpp-stat-bench $CPP_STAT_BENCH_CONAN_REGISTRY
-    - poetry run conan install --build missing -o cpp_hash_tables:requirements_for_tests=True -s build_type=Debug .
-  cache:
-    key:
-      prefix: poetry-linux-prepare
-      files:
-        - Poetry.lock
-    paths:
-      - .venv
-  artifacts:
-    paths:
-      - conan.lock
     expire_in: "1 mos"
 
 line count:
@@ -108,15 +75,12 @@ test release:
     matrix:
       - COMPILER_TYPE: ["gcc10", "gcc12"]
         IMAGE_PATH: "musicscience37/gcc-ci"
-        CONAN_LIBCXX: libstdc++11
         CXX_STANDARD: 17
       - COMPILER_TYPE: ["clang14", "clang15"]
         IMAGE_PATH: "musicscience37/clang-ci"
-        CONAN_LIBCXX: libc++
         CXX_STANDARD: 17
       - COMPILER_TYPE: ["clang14"]
         IMAGE_PATH: "musicscience37/clang-ci"
-        CONAN_LIBCXX: libc++
         CXX_STANDARD: 20
   image: ${IMAGE_PATH}:${COMPILER_TYPE}
   variables:
@@ -161,11 +125,9 @@ test debug:
     matrix:
       - COMPILER_TYPE: ["gcc10"]
         IMAGE_PATH: "musicscience37/gcc-ci"
-        CONAN_LIBCXX: libstdc++11
         CXX_STANDARD: 17
       - COMPILER_TYPE: ["clang14"]
         IMAGE_PATH: "musicscience37/clang-ci"
-        CONAN_LIBCXX: libc++
         CXX_STANDARD: 17
   variables:
     BUILD_TYPE: Debug
@@ -189,7 +151,6 @@ clang coverage:
     matrix:
       - COMPILER_TYPE: "clang14"
         IMAGE_PATH: "musicscience37/clang-ci"
-        CONAN_LIBCXX: libc++
         CXX_STANDARD: 17
   variables:
     BUILD_DIR: build_clang_coverage
@@ -234,7 +195,6 @@ clang-14-asan-ubsan:
     matrix:
       - COMPILER_TYPE: "clang14"
         IMAGE_PATH: "musicscience37/clang-ci"
-        CONAN_LIBCXX: libc++
         CXX_STANDARD: 17
   variables:
     BUILD_DIR: build_clang_asan_ubsan
@@ -249,42 +209,6 @@ clang-14-asan-ubsan:
       -DHASH_TABLES_ENABLE_AUSAN:BOOL=ON
     - cmake --build .
     - ctest -V
-
-clang-14-conan:
-  stage: test
-  needs:
-    - sync poetry
-  dependencies:
-    - sync poetry
-  image: musicscience37/clang-ci:clang14
-  variables:
-    CONAN_CHANNEL: "testing"
-  script:
-    - poetry run conan profile new --detect default
-    - poetry run conan profile update settings.compiler.libcxx=libc++ default
-    - poetry run conan remote add cpp-stat-bench $CPP_STAT_BENCH_CONAN_REGISTRY
-    - poetry run conan create --build missing --test-folder tests/conan_package -s build_type=Debug . ${CONAN_USER}/${CONAN_CHANNEL}
-    - poetry run conan create --build missing --test-folder tests/conan_package -s build_type=Release . ${CONAN_USER}/${CONAN_CHANNEL}
-
-clang-14-conan-release:
-  stage: deploy
-  needs:
-    - sync poetry
-  dependencies:
-    - sync poetry
-  image: musicscience37/clang-ci:clang14
-  variables:
-    CONAN_CHANNEL: "stable"
-  script:
-    - poetry run conan profile new --detect default
-    - poetry run conan profile update settings.compiler.libcxx=libc++ default
-    - poetry run conan remote add cpp-stat-bench $CPP_STAT_BENCH_CONAN_REGISTRY
-    - poetry run conan remote add cpp-hash-tables $CPP_HASH_TABLES_CONAN_REGISTRY
-    - poetry run conan create --build missing --test-folder tests/conan_package -s build_type=Debug . ${CONAN_USER}/${CONAN_CHANNEL}
-    - poetry run conan create --build missing --test-folder tests/conan_package -s build_type=Release . ${CONAN_USER}/${CONAN_CHANNEL}
-    - CONAN_LOGIN_USERNAME=ci_user CONAN_PASSWORD=${CI_JOB_TOKEN} poetry run conan upload -r cpp-hash-tables cpp_hash_tables -c --all
-  only:
-    - tags
 
 msvc-release:
   tags:
@@ -341,7 +265,6 @@ static analysis:
     matrix:
       - COMPILER_TYPE: "clang14"
         IMAGE_PATH: "musicscience37/clang-ci"
-        CONAN_LIBCXX: libc++
         CXX_STANDARD: 17
   variables:
     BUILD_TYPE: Debug

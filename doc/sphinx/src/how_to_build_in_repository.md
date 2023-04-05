@@ -8,7 +8,7 @@ A development environment including dependencies can be created using
 To build this repository,
 you will require following dependencies:
 
-- [Python](https://www.python.org/) 3.9
+- [Python](https://www.python.org/) 3.10
   - You may want to use [pyenv](https://github.com/pyenv/pyenv).
 - [poetry](https://python-poetry.org/)
   - Required Python packages can be installed using poetry.
@@ -35,60 +35,6 @@ to build documentation.
 - Java runtime environment (JRE) for PlantUML.
 
 ## Build commands
-
-### Via Conan
-
-After installation of dependencies,
-execute the following commands to build:
-
-1. Start a shell of poetry.
-
-   ```bash
-   cd <this-directory>
-   poetry install
-   poetry shell
-   ```
-
-2. Add a Conan remote in GitLab. (Once in an environment. Already done in devcontainer of VSCode.)
-
-   ```bash
-   conan remote add cpp-stat-bench https://gitlab.com/api/v4/projects/32226502/packages/conan
-   ```
-
-3. Download and install required Conan packages.
-
-   ```bash
-   python3 ./scripts/install_conan_dependencies.py <build_type>
-   ```
-
-   `build_type` can be `Debug`, `RelWithDebInfo`, or `Release`.
-
-4. Configure.
-
-   ```bash
-   cd build
-   cmake ..
-   ```
-
-5. Optionally edit options.
-
-   ```bash
-   <some_editor> CMakeCache.txt
-   ```
-
-6. Build.
-
-   ```bash
-   cmake --build .
-   ```
-
-7. Optionally run tests.
-
-   ```bash
-   ctest
-   ```
-
-### Via vcpkg (experimental)
 
 1. Start a shell of poetry.
 

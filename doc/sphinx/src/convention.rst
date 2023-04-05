@@ -22,6 +22,4 @@ This project uses following tools for documentation:
 This project uses following tools for dependency management:
 
 - `poetry <https://python-poetry.org/>`_ (Python),
-- `Conan <https://conan.io/>`_ (C++).
-
-  - Install ``conan`` command using Pipenv.
+- `vcpkg <https://vcpkg.io/>`_ (C++).
