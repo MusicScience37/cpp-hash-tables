@@ -19,6 +19,7 @@
  */
 #include "hash_tables/utility/count_right_zero_bits.h"
 
+#include <cstddef>
 #include <limits>
 
 #include <catch2/catch_test_macros.hpp>

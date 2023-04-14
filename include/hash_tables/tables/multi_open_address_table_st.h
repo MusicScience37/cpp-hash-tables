@@ -19,7 +19,9 @@
  */
 #pragma once
 
+// IWYU pragma: no_include <assert.h>
 #include <algorithm>
+#include <cassert>
 #include <cstddef>
 #include <functional>
 #include <memory>

@@ -17,15 +17,25 @@
  * \file
  * \brief Benchmark to check existence of keys in tables.
  */
+// IWYU pragma: no_include <assert.h>
+#include <cassert>
 #include <cstddef>
+#include <exception>
+#include <memory>
 #include <string>
+#include <type_traits>
 #include <utility>
+#include <vector>
 
+#include <fmt/core.h>
 #include <stat_bench/benchmark_macros.h>
 #include <stat_bench/do_not_optimize.h>
 #include <stat_bench/fixture_base.h>
+#include <stat_bench/invocation_context.h>
+#include <stat_bench/param/parameter_value_vector.h>
 
 #include "hash_tables/extract_key_functions/extract_first_from_pair.h"
+#include "hash_tables/hashes/std_hash.h"
 #include "hash_tables/tables/multi_open_address_table_mt.h"
 #include "hash_tables/tables/open_address_table_st.h"
 #include "hash_tables_test/create_random_int_vector.h"

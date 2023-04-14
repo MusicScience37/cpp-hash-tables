@@ -20,14 +20,12 @@
 #include "hash_tables/maps/open_address_map_st.h"
 
 #include <cstddef>
-#include <ostream>
 #include <string>
-#include <utility>
 #include <vector>
 
 #include <gperftools/profiler.h>
 
-#include "hash_tables/extract_key_functions/extract_first_from_pair.h"
+#include "hash_tables/hashes/std_hash.h"
 #include "hash_tables_test/create_random_int_vector.h"
 
 auto main() -> int {

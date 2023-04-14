@@ -19,6 +19,7 @@
  */
 #include <algorithm>
 #include <cstddef>
+#include <exception>
 #include <functional>
 #include <memory>
 #include <mutex>
