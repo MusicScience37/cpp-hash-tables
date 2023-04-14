@@ -11,6 +11,7 @@
   { include: [ "<stddef.h>", public, "<cstddef>", public ] },
   { include: [ "<stdint.h>", public, "<cstdint>", public ] },
   { include: [ "<stdlib.h>", public, "<cstdlib>", public ] },
+  { include: [ "<assert.h>", public, "<cassert>", public ] },
   { symbol: [ "char_traits", private, "<string>", public ] },
   { symbol: [ "std::hash", private, "<functional>", public ] },
   { symbol: [ "std::mt19937", private, "<random>", public ] },

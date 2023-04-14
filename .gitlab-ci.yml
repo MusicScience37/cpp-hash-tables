@@ -24,7 +24,7 @@ sync poetry:
   script:
     - mkdir -p .venv
     - poetry config virtualenvs.in-project true
-    - poetry env use 3.10
+    - poetry env use 3.11
     - poetry install
   cache:
     key:
@@ -158,11 +158,13 @@ clang coverage:
     - cd $BUILD_DIR
     - cmake ..
       -DCMAKE_TOOLCHAIN_FILE=../vcpkg/scripts/buildsystems/vcpkg.cmake
+      -DVCPKG_TARGET_TRIPLET=x64-linux-llvm
+      -DVCPKG_HOST_TRIPLET=x64-linux-llvm
       -DCMAKE_BUILD_TYPE=Debug
       -DHASH_TABLES_TESTING:BOOL=ON
       -DHASH_TABLES_WRITE_JUNIT:BOOL=ON
       -DHASH_TABLES_ENABLE_INTEG_TESTS:BOOL=OFF
-      "-DCMAKE_CXX_FLAGS=-fprofile-instr-generate -fcoverage-mapping"
+      "-DCMAKE_CXX_FLAGS=-stdlib=libc++ -fprofile-instr-generate -fcoverage-mapping"
       "-DCMAKE_MODULE_LINKER_FLAGS=-fprofile-instr-generate -fcoverage-mapping"
     - mkdir coverage
     - export LLVM_PROFILE_FILE=$(pwd)/coverage/coverage_%p.profraw
@@ -203,6 +205,10 @@ clang-14-asan-ubsan:
     - cd $BUILD_DIR
     - cmake ..
       -DCMAKE_TOOLCHAIN_FILE=../vcpkg/scripts/buildsystems/vcpkg.cmake
+      -DVCPKG_TARGET_TRIPLET=x64-linux-llvm
+      -DVCPKG_HOST_TRIPLET=x64-linux-llvm
+      -DCMAKE_CXX_FLAGS=-stdlib=libc++
+      -DCMAKE_C_FLAGS=-stdlib=libc++
       -DCMAKE_BUILD_TYPE=Debug
       -DHASH_TABLES_TESTING:BOOL=ON
       -DHASH_TABLES_WRITE_JUNIT:BOOL=ON
@@ -273,6 +279,10 @@ static analysis:
     - cd $BUILD_DIR
     - cmake ..
       -DCMAKE_TOOLCHAIN_FILE=../vcpkg/scripts/buildsystems/vcpkg.cmake
+      -DVCPKG_TARGET_TRIPLET=x64-linux-llvm
+      -DVCPKG_HOST_TRIPLET=x64-linux-llvm
+      -DCMAKE_CXX_FLAGS=-stdlib=libc++
+      -DCMAKE_C_FLAGS=-stdlib=libc++
       -DCMAKE_BUILD_TYPE=$BUILD_TYPE
       -DHASH_TABLES_TESTING:BOOL=ON
       -DHASH_TABLES_ENABLE_BENCH=ON

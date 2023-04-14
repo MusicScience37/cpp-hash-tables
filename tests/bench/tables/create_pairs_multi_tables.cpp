@@ -19,6 +19,7 @@
  */
 #include <cassert>
 #include <cstddef>
+#include <exception>
 #include <memory>
 #include <string>
 #include <type_traits>
@@ -34,10 +35,7 @@
 
 #include "hash_tables/extract_key_functions/extract_first_from_pair.h"
 #include "hash_tables/hashes/std_hash.h"
-#include "hash_tables/tables/multi_open_address_table_mt.h"
 #include "hash_tables/tables/multi_open_address_table_st.h"
-#include "hash_tables/tables/open_address_table_st.h"
-#include "hash_tables/tables/separate_shared_chain_table_mt.h"
 #include "hash_tables_test/create_random_int_vector.h"
 #include "hash_tables_test/create_random_string_vector.h"
 

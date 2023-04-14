@@ -19,6 +19,7 @@
  */
 #pragma once
 
+// IWYU pragma: no_include <string>
 #include <cstddef>
 #include <utility>
 
