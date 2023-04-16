@@ -19,6 +19,7 @@
  */
 #include <cassert>
 #include <cstddef>
+#include <exception>
 #include <functional>
 #include <memory>
 #include <string>
@@ -34,9 +35,8 @@
 #include <stat_bench/param/parameter_value_vector.h>
 
 #include "hash_tables/hashes/std_hash.h"
+#include "hash_tables/maps/multi_open_address_map_st.h"
 #include "hash_tables/maps/open_address_map_st.h"
-#include "hash_tables/maps/separate_shared_chain_map_mt.h"
-#include "hash_tables/tables/separate_shared_chain_table_mt.h"
 #include "hash_tables_test/create_random_int_vector.h"
 #include "hash_tables_test/create_random_string_vector.h"
 
@@ -94,6 +94,22 @@ STAT_BENCH_CASE_F(create_pairs_fixture, "create_pairs", "open_address_st") {
     STAT_BENCH_MEASURE() {
         hash_tables::maps::open_address_map_st<key_type, mapped_type> map;
         map.reserve(size_);
+        for (std::size_t i = 0; i < size_; ++i) {
+            const auto& key = keys_.at(i);
+            const auto& second_value = second_values_.at(i);
+            map.emplace(key, second_value);
+        }
+        assert(map.size() == size_);  // NOLINT
+        stat_bench::do_not_optimize(map);
+    };
+}
+
+// NOLINTNEXTLINE
+STAT_BENCH_CASE_F(
+    create_pairs_fixture, "create_pairs", "multi_open_address_st") {
+    STAT_BENCH_MEASURE() {
+        hash_tables::maps::multi_open_address_map_st<key_type, mapped_type> map;
+        map.reserve_approx(size_);
         for (std::size_t i = 0; i < size_; ++i) {
             const auto& key = keys_.at(i);
             const auto& second_value = second_values_.at(i);

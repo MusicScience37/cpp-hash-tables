@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 MusicScience37 (Kenta Kabashima)
+ * Copyright 2023 MusicScience37 (Kenta Kabashima)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,14 +15,13 @@
  */
 /*!
  * \file
- * \brief Benchmark to find pairs in tables.
+ * \brief Benchmark to check existence of keys in tables.
  */
-#include <algorithm>
+// IWYU pragma: no_include <assert.h>
 #include <cassert>
 #include <cstddef>
 #include <exception>
 #include <memory>
-#include <mutex>
 #include <string>
 #include <type_traits>
 #include <utility>
@@ -30,7 +29,6 @@
 
 #include <fmt/core.h>
 #include <stat_bench/benchmark_macros.h>
-#include <stat_bench/current_invocation_context.h>
 #include <stat_bench/do_not_optimize.h>
 #include <stat_bench/fixture_base.h>
 #include <stat_bench/invocation_context.h>
@@ -40,7 +38,6 @@
 #include "hash_tables/hashes/std_hash.h"
 #include "hash_tables/tables/multi_open_address_table_mt.h"
 #include "hash_tables/tables/open_address_table_st.h"
-#include "hash_tables/tables/separate_shared_chain_table_mt.h"
 #include "hash_tables_test/create_random_int_vector.h"
 #include "hash_tables_test/create_random_string_vector.h"
 
@@ -49,9 +46,9 @@ using value_type = std::pair<int, std::string>;
 using extract_key =
     hash_tables::extract_key_functions::extract_first_from_pair<value_type>;
 
-class find_pairs_concurrent_fixture : public stat_bench::FixtureBase {
+class check_existence_fixture : public stat_bench::FixtureBase {
 public:
-    find_pairs_concurrent_fixture() {
+    check_existence_fixture() {
         add_param<std::size_t>("size")
             ->add(100)   // NOLINT
             ->add(1000)  // NOLINT
@@ -60,13 +57,24 @@ public:
             ->add(100000)  // NOLINT
 #endif
             ;
-        // NOLINTNEXTLINE
-        add_threads_param()->add(1)->add(2)->add(4);
+        add_param<std::string>("exist")->add("yes")->add("no");
     }
 
     void setup(stat_bench::InvocationContext& context) override {
         size_ = context.get_param<std::size_t>("size");
-        keys_ = hash_tables_test::create_random_int_vector<key_type>(size_);
+        const bool key_exist = context.get_param<std::string>("exist") == "yes";
+        if (key_exist) {
+            keys_ = hash_tables_test::create_random_int_vector<key_type>(size_);
+            keys_search_ = keys_;
+        } else {
+            const auto keys =
+                hash_tables_test::create_random_int_vector<key_type>(
+                    size_ * 2U);
+            keys_ = std::vector<key_type>(keys.begin(),
+                keys.begin() + static_cast<std::ptrdiff_t>(size_));
+            keys_search_ = std::vector<key_type>(
+                keys.begin() + static_cast<std::ptrdiff_t>(size_), keys.end());
+        }
         second_values_ = hash_tables_test::create_random_string_vector(size_);
     }
 
@@ -78,12 +86,15 @@ protected:
     std::vector<key_type> keys_{};
 
     // NOLINTNEXTLINE(cppcoreguidelines-non-private-member-variables-in-classes)
+    std::vector<key_type> keys_search_{};
+
+    // NOLINTNEXTLINE(cppcoreguidelines-non-private-member-variables-in-classes)
     std::vector<std::string> second_values_{};
 };
 
 // NOLINTNEXTLINE
-STAT_BENCH_CASE_F(find_pairs_concurrent_fixture, "find_pairs_concurrent",
-    "mutex_open_address_st") {
+STAT_BENCH_CASE_F(
+    check_existence_fixture, "check_existence", "open_address_st") {
     hash_tables::tables::open_address_table_st<value_type, key_type,
         extract_key>
         table;
@@ -94,57 +105,18 @@ STAT_BENCH_CASE_F(find_pairs_concurrent_fixture, "find_pairs_concurrent",
     }
     assert(table.size() == size_);  // NOLINT
 
-    std::mutex mutex;
-
-    const std::size_t num_threads =
-        stat_bench::current_invocation_context().threads();
-    const std::size_t size_per_thread = (size_ + num_threads - 1) / num_threads;
-
-    STAT_BENCH_MEASURE_INDEXED(thread_ind, /*sample_ind*/, /*iteration_ind*/) {
-        const std::size_t begin_ind = thread_ind * size_per_thread;
-        const std::size_t end_ind =
-            std::min((thread_ind + 1) * size_per_thread, size_);
-        for (std::size_t i = begin_ind; i < end_ind; ++i) {
+    STAT_BENCH_MEASURE() {
+        for (std::size_t i = 0; i < size_; ++i) {
             const auto& key = keys_.at(i);
-            std::unique_lock<std::mutex> lock(mutex);
-            stat_bench::do_not_optimize(table.at(keys_.at(i)));
-        }
-    };
-}
-
-// NOLINTNEXTLINE
-STAT_BENCH_CASE_F(find_pairs_concurrent_fixture, "find_pairs_concurrent",
-    "multi_open_address_mt") {
-    hash_tables::tables::multi_open_address_table_mt<value_type, key_type,
-        extract_key>
-        table;
-
-    for (std::size_t i = 0; i < size_; ++i) {
-        const auto& key = keys_.at(i);
-        const auto& second_value = second_values_.at(i);
-        table.emplace(key, key, second_value);
-    }
-    assert(table.size() == size_);  // NOLINT
-
-    const std::size_t num_threads =
-        stat_bench::current_invocation_context().threads();
-    const std::size_t size_per_thread = (size_ + num_threads - 1) / num_threads;
-
-    STAT_BENCH_MEASURE_INDEXED(thread_ind, /*sample_ind*/, /*iteration_ind*/) {
-        const std::size_t begin_ind = thread_ind * size_per_thread;
-        const std::size_t end_ind =
-            std::min((thread_ind + 1) * size_per_thread, size_);
-        for (std::size_t i = begin_ind; i < end_ind; ++i) {
-            const auto& key = keys_.at(i);
-            stat_bench::do_not_optimize(table.at(keys_.at(i)));
+            stat_bench::do_not_optimize(table.try_get(keys_.at(i)));
         }
     };
 }
 
 // NOLINTNEXTLINE
 STAT_BENCH_CASE_F(
-    find_pairs_concurrent_fixture, "find_pairs_concurrent", "shared_chain_mt") {
-    hash_tables::tables::separate_shared_chain_table_mt<value_type, key_type,
+    check_existence_fixture, "check_existence", "multi_open_address_mt") {
+    hash_tables::tables::multi_open_address_table_mt<value_type, key_type,
         extract_key>
         table;
     for (std::size_t i = 0; i < size_; ++i) {
@@ -154,17 +126,10 @@ STAT_BENCH_CASE_F(
     }
     assert(table.size() == size_);  // NOLINT
 
-    const std::size_t num_threads =
-        stat_bench::current_invocation_context().threads();
-    const std::size_t size_per_thread = (size_ + num_threads - 1) / num_threads;
-
-    STAT_BENCH_MEASURE_INDEXED(thread_ind, /*sample_ind*/, /*iteration_ind*/) {
-        const std::size_t begin_ind = thread_ind * size_per_thread;
-        const std::size_t end_ind =
-            std::min((thread_ind + 1) * size_per_thread, size_);
-        for (std::size_t i = begin_ind; i < end_ind; ++i) {
+    STAT_BENCH_MEASURE() {
+        for (std::size_t i = 0; i < size_; ++i) {
             const auto& key = keys_.at(i);
-            stat_bench::do_not_optimize(table.at(keys_.at(i)));
+            stat_bench::do_not_optimize(table.try_get(keys_.at(i)));
         }
     };
 }

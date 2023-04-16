@@ -19,7 +19,9 @@
  */
 #include "hash_tables/tables/internal/hashed_key_view.h"
 
+// IWYU pragma: no_include <built-in>
 #include <functional>
+#include <string>
 #include <utility>
 
 #include <catch2/catch_test_macros.hpp>
