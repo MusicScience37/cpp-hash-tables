@@ -129,7 +129,8 @@ public:
      */
     [[nodiscard]] auto operator()(
         const key_type& left, const key_type& right) const {
-        return key_equal_(left.key(), right.key());
+        return left.hash_number() == right.hash_number() &&
+            key_equal_(left.key(), right.key());
     }
 
 private:
