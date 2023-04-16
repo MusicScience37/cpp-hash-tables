@@ -173,6 +173,7 @@ clang coverage:
     - cd ../
     - scripts/collect_llvm_coverage.sh build_clang_coverage
     - poetry run lcov_cobertura $BUILD_DIR/coverage/coverage --output $BUILD_DIR/coverage.xml
+    - bash <(curl -s https://codecov.io/bash) || echo "Codecov did not collect coverage reports"
   coverage: '/[^\s]+%\s+\d+\s+\d+\s+\s[^\s]+%/'
   artifacts:
     paths:
