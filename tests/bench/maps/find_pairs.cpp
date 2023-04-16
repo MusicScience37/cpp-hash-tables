@@ -35,6 +35,7 @@
 #include <stat_bench/param/parameter_value_vector.h>
 
 #include "hash_tables/hashes/std_hash.h"
+#include "hash_tables/maps/multi_open_address_map_st.h"
 #include "hash_tables/maps/open_address_map_st.h"
 #include "hash_tables_test/create_random_int_vector.h"
 #include "hash_tables_test/create_random_string_vector.h"
@@ -94,6 +95,24 @@ STAT_BENCH_CASE_F(find_pairs_fixture, "find_pairs", "unordered_map") {
 // NOLINTNEXTLINE
 STAT_BENCH_CASE_F(find_pairs_fixture, "find_pairs", "open_address_st") {
     hash_tables::maps::open_address_map_st<key_type, mapped_type> map;
+    for (std::size_t i = 0; i < size_; ++i) {
+        const auto& key = keys_.at(i);
+        const auto& second_value = second_values_.at(i);
+        map.emplace(key, second_value);
+    }
+    assert(map.size() == size_);  // NOLINT
+
+    STAT_BENCH_MEASURE() {
+        for (std::size_t i = 0; i < size_; ++i) {
+            const auto& key = keys_.at(i);
+            stat_bench::do_not_optimize(map.at(key));
+        };
+    };
+}
+
+// NOLINTNEXTLINE
+STAT_BENCH_CASE_F(find_pairs_fixture, "find_pairs", "multi_open_address_st") {
+    hash_tables::maps::multi_open_address_map_st<key_type, mapped_type> map;
     for (std::size_t i = 0; i < size_; ++i) {
         const auto& key = keys_.at(i);
         const auto& second_value = second_values_.at(i);

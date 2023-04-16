@@ -88,7 +88,9 @@ public:
     /*!
      * \brief Constructor.
      *
-     * \param[in] min_num_nodes Minimum number of nodes.
+     * \param[in] min_num_tables Minimum number of internal tables.
+     * \param[in] min_internal_num_nodes Minimum number of nodes in internal
+     * tables.
      * \param[in] hash Hash function.
      * \param[in] key_equal Function to check whether keys are equal.
      * \param[in] allocator Allocator.
