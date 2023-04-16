@@ -4,6 +4,7 @@
 #include "hash_tables/hashes/mix_hash_numbers_test.cpp"  // NOLINT(bugprone-suspicious-include)
 #include "hash_tables/hashes/std_hash_test.cpp"  // NOLINT(bugprone-suspicious-include)
 #include "hash_tables/maps/multi_open_address_map_mt_test.cpp"  // NOLINT(bugprone-suspicious-include)
+#include "hash_tables/maps/multi_open_address_map_st_test.cpp"  // NOLINT(bugprone-suspicious-include)
 #include "hash_tables/maps/open_address_map_st_test.cpp"  // NOLINT(bugprone-suspicious-include)
 #include "hash_tables/maps/separate_shared_chain_map_mt_test.cpp"  // NOLINT(bugprone-suspicious-include)
 #include "hash_tables/sets/open_address_set_st_test.cpp"  // NOLINT(bugprone-suspicious-include)
