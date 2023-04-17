@@ -51,7 +51,7 @@ public:
         add_param<std::size_t>("size")
             ->add(100)   // NOLINT
             ->add(1000)  // NOLINT
-#ifdef NDEBUG
+#ifdef HASH_TABLES_ENABLE_HEAVY_BENCH
             ->add(10000)   // NOLINT
             ->add(100000)  // NOLINT
 #endif

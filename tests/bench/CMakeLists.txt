@@ -1,4 +1,11 @@
 option(HASH_TABLES_TEST_BENCHMARKS "execute benchmarks in tests" OFF)
+if("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
+    set(HASH_TABLES_ENABLE_HEAVY_BENCH_DEFAULT OFF)
+else()
+    set(HASH_TABLES_ENABLE_HEAVY_BENCH_DEFAULT ON)
+endif()
+option(HASH_TABLES_ENABLE_HEAVY_BENCH "enable heavy benchmarks"
+       ${HASH_TABLES_ENABLE_HEAVY_BENCH_DEFAULT})
 
 set(HASH_TABLES_BENCH_DIR
     "${CMAKE_BINARY_DIR}/bench"
@@ -10,6 +17,10 @@ function(target_add_to_benchmark TARGET)
                                             hash_tables hash_tables_test_helper)
     target_include_directories(${TARGET}
                                PRIVATE ${HASH_TABLES_BENCH_INCLUDE_DIR})
+    if(HASH_TABLES_ENABLE_HEAVY_BENCH)
+        target_compile_definitions(${TARGET}
+                                   PRIVATE HASH_TABLES_ENABLE_HEAVY_BENCH=1)
+    endif()
 
     if(HASH_TABLES_TEST_BENCHMARKS)
         add_test(
