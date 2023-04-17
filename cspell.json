@@ -84,6 +84,7 @@
     "sphinxcontrib",
     "startuml",
     "stdlib",
+    "STREQUAL",
     "toctree",
     "TOUPPER",
     "tqdm",
