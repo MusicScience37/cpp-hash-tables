@@ -10,12 +10,9 @@ variables:
 include:
   - template: Dependency-Scanning.gitlab-ci.yml
   - template: Security/SAST.gitlab-ci.yml
-  - template: Security/License-Scanning.gitlab-ci.yml
 sast:
   needs: []
 dependency_scanning:
-  needs: []
-license_scanning:
   needs: []
 
 sync poetry:
