@@ -94,6 +94,7 @@
     "vcpkg",
     "venv",
     "Virtualenv",
+    "virtualenvs",
     "Wextra",
     "Xiwyu"
   ],
