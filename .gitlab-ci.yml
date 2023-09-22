@@ -241,10 +241,7 @@ msvc-release:
     PYTHON_KEYRING_BACKEND: keyring.backends.null.Keyring
     VCPKG_DEFAULT_BINARY_CACHE: ${CI_PROJECT_DIR}/.vcpkg-cache
   before_script:
-    - Import-Module "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
-    - choco install cmake -y --installargs 'ADD_CMAKE_TO_PATH=System'
-    - RefreshEnv
-    - mkdir -p $VCPKG_DEFAULT_BINARY_CACHE
+    - New-Item -ItemType Directory -Force -Path $VCPKG_DEFAULT_BINARY_CACHE
     - .\vcpkg\bootstrap-vcpkg.bat
     - mkdir $BUILD_DIR
   script:
