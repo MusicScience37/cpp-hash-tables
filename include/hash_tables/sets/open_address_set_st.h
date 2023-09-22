@@ -173,6 +173,17 @@ public:
         return *this;
     }
 
+    /*!
+     * \brief Merge another set.
+     *
+     * \param[in] right Right-hand-side object.
+     * \return Merged set.
+     */
+    auto operator+(const open_address_set_st& right) const
+        -> open_address_set_st {
+        return open_address_set_st(*this) += right;
+    }
+
     ///@}
 
     /*!
@@ -253,6 +264,18 @@ public:
     auto operator-=(const open_address_set_st& other) -> open_address_set_st& {
         erase(other);
         return *this;
+    }
+
+    /*!
+     * \brief Delete values in another set.
+     *
+     * \param[in] right Right-hand-side object.
+     * \return A set with elements same as this set except for elements in the
+     * right-hand-side set.
+     */
+    auto operator-(const open_address_set_st& right) const
+        -> open_address_set_st {
+        return open_address_set_st(*this) -= right;
     }
 
     /*!

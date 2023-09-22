@@ -150,6 +150,22 @@ TEMPLATE_TEST_CASE("hash_tables::sets::open_address_set_st", "",
         CHECK(set1.has("ghi"));
     }
 
+    SECTION("operator+") {
+        set_type set1;
+        set_type set2;
+        set1.insert("abc");
+        set1.insert("def");
+        set2.insert("def");
+        set2.insert("ghi");
+
+        const set_type ret = set1 + set2;
+
+        CHECK(ret.size() == 3U);
+        CHECK(ret.has("abc"));
+        CHECK(ret.has("def"));
+        CHECK(ret.has("ghi"));
+    }
+
     SECTION("has") {
         set_type set;
 
@@ -258,6 +274,20 @@ TEMPLATE_TEST_CASE("hash_tables::sets::open_address_set_st", "",
         CHECK(static_cast<void*>(&ret) == static_cast<void*>(&set1));
         CHECK(set1.size() == 1U);
         CHECK(set1.has("abc"));
+    }
+
+    SECTION("operator-") {
+        set_type set1;
+        set_type set2;
+        set1.insert("abc");
+        set1.insert("def");
+        set2.insert("def");
+        set2.insert("ghi");
+
+        const set_type ret = set1 - set2;
+
+        CHECK(ret.size() == 1U);
+        CHECK(ret.has("abc"));
     }
 
     SECTION("keep_only_intersection_with") {
