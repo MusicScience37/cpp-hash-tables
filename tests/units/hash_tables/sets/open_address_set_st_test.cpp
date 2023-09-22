@@ -304,6 +304,20 @@ TEMPLATE_TEST_CASE("hash_tables::sets::open_address_set_st", "",
         CHECK(set1.has("def"));
     }
 
+    SECTION("has_intersection_with") {
+        set_type set1;
+        set_type set2;
+        set_type set3;
+        set1.insert("abc");
+        set1.insert("def");
+        set2.insert("def");
+        set2.insert("ghi");
+        set3.insert("ghi");
+
+        CHECK(set1.has_intersection_with(set2));
+        CHECK_FALSE(set1.has_intersection_with(set3));
+    }
+
     SECTION("reserve") {
         set_type set;
 

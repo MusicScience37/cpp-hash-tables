@@ -288,6 +288,23 @@ public:
             [&other](const value_type& value) { return !other.has(value); });
     }
 
+    /*!
+     * \brief Determine whether this set and the given set have common elements.
+     *
+     * \param[in] other Another set.
+     * \return Whether this set and the given set have common elements.
+     */
+    [[nodiscard]] auto has_intersection_with(
+        const open_address_set_st& other) const {
+        bool result = false;
+        for_all([&result, &other](const value_type& value) {
+            if (other.has(value)) {
+                result = true;
+            }
+        });
+        return result;
+    }
+
     ///@}
 
     /*!
