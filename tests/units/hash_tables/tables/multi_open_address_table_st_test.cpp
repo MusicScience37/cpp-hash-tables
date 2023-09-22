@@ -396,10 +396,8 @@ TEMPLATE_TEST_CASE("hash_tables::tables::multi_open_address_table_st", "",
         table_type table;
 
         const auto value1 = std::string("abc");
-        const char key1 = extract_key_type()(value1);
         CHECK(table.insert(value1));
         const auto value2 = std::string("bcd");
-        const char key2 = extract_key_type()(value2);
         CHECK(table.insert(value2));
 
         std::unordered_set<std::string> args;
@@ -415,10 +413,8 @@ TEMPLATE_TEST_CASE("hash_tables::tables::multi_open_address_table_st", "",
         table_type table;
 
         const auto value1 = std::string("abc");
-        const char key1 = extract_key_type()(value1);
         CHECK(table.insert(value1));
         const auto value2 = std::string("bcd");
-        const char key2 = extract_key_type()(value2);
         CHECK(table.insert(value2));
 
         const auto& const_table = table;

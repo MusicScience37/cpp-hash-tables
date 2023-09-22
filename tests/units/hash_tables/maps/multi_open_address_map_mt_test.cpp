@@ -196,15 +196,15 @@ TEMPLATE_TEST_CASE("hash_tables::maps::multi_open_address_map_mt", "",
         CHECK(map.size() == 1);
         CHECK(map.at(key) == mapped);
 
-        const int mapped2 = 12345;
-        CHECK(map.get_or_create_with_factory(
-                  key, [&mapped2] { return mapped2; }) == mapped);
+        static constexpr int mapped2 = 12345;
+        CHECK(map.get_or_create_with_factory(key, [] { return mapped2; }) ==
+            mapped);
         CHECK(map.size() == 1);
         CHECK(map.at(key) == mapped);
 
         const auto key2 = std::to_string(mapped2);
-        CHECK(map.get_or_create_with_factory(
-                  key2, [&mapped2] { return mapped2; }) == mapped2);
+        CHECK(map.get_or_create_with_factory(key2, [] { return mapped2; }) ==
+            mapped2);
         CHECK(map.size() == 2);
         CHECK(map.at(key2) == mapped2);
     }
@@ -398,12 +398,12 @@ TEMPLATE_TEST_CASE("hash_tables::maps::multi_open_address_map_mt", "",
     SECTION("max_load_factor") {
         map_type map;
 
-        constexpr float value = 0.1;
+        constexpr float value = 0.1F;
         CHECK_NOTHROW(map.max_load_factor(value));
 
-        CHECK_THROWS(map.max_load_factor(0.0));    // NOLINT
-        CHECK_NOTHROW(map.max_load_factor(0.01));  // NOLINT
-        CHECK_NOTHROW(map.max_load_factor(0.99));  // NOLINT
-        CHECK_THROWS(map.max_load_factor(1.0));    // NOLINT
+        CHECK_THROWS(map.max_load_factor(0.0F));    // NOLINT
+        CHECK_NOTHROW(map.max_load_factor(0.01F));  // NOLINT
+        CHECK_NOTHROW(map.max_load_factor(0.99F));  // NOLINT
+        CHECK_THROWS(map.max_load_factor(1.0F));    // NOLINT
     }
 }

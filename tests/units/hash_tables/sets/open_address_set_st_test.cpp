@@ -355,13 +355,13 @@ TEMPLATE_TEST_CASE("hash_tables::sets::open_address_set_st", "",
     SECTION("max_load_factor") {
         set_type set;
 
-        constexpr float value = 0.1;
+        constexpr float value = 0.1F;
         CHECK_NOTHROW(set.max_load_factor(value));
         CHECK(set.max_load_factor() == value);
 
-        CHECK_THROWS(set.max_load_factor(0.0));    // NOLINT
-        CHECK_NOTHROW(set.max_load_factor(0.01));  // NOLINT
-        CHECK_NOTHROW(set.max_load_factor(0.99));  // NOLINT
-        CHECK_THROWS(set.max_load_factor(1.0));    // NOLINT
+        CHECK_THROWS(set.max_load_factor(0.0F));    // NOLINT
+        CHECK_NOTHROW(set.max_load_factor(0.01F));  // NOLINT
+        CHECK_NOTHROW(set.max_load_factor(0.99F));  // NOLINT
+        CHECK_THROWS(set.max_load_factor(1.0F));    // NOLINT
     }
 }

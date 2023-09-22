@@ -33,6 +33,10 @@ if(${UPPER_PROJECT_NAME}_ENABLE_CPP_WARNINGS)
         target_compile_options(${PROJECT_NAME}_cpp_warnings INTERFACE -Wall
                                                                       -Wextra)
     endif()
+    if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+        target_compile_options(${PROJECT_NAME}_cpp_warnings
+                               INTERFACE -Wimplicit-float-conversion)
+    endif()
 endif()
 
 if(MSVC)

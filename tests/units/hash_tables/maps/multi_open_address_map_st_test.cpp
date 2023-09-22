@@ -244,15 +244,15 @@ TEMPLATE_TEST_CASE("hash_tables::maps::multi_open_address_map_st", "",
         CHECK(map.size() == 1);
         CHECK(map.at(key) == mapped);
 
-        const int mapped2 = 12345;
-        CHECK(map.get_or_create_with_factory(
-                  key, [&mapped2] { return mapped2; }) == mapped);
+        static constexpr int mapped2 = 12345;
+        CHECK(map.get_or_create_with_factory(key, [] { return mapped2; }) ==
+            mapped);
         CHECK(map.size() == 1);
         CHECK(map.at(key) == mapped);
 
         const auto key2 = std::to_string(mapped2);
-        CHECK(map.get_or_create_with_factory(
-                  key2, [&mapped2] { return mapped2; }) == mapped2);
+        CHECK(map.get_or_create_with_factory(key2, [] { return mapped2; }) ==
+            mapped2);
         CHECK(map.size() == 2);
         CHECK(map.at(key2) == mapped2);
     }

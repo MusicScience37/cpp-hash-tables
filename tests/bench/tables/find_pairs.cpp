@@ -96,7 +96,6 @@ STAT_BENCH_CASE_F(find_pairs_fixture, "find_pairs", "open_address_st") {
 
     STAT_BENCH_MEASURE() {
         for (std::size_t i = 0; i < size_; ++i) {
-            const auto& key = keys_.at(i);
             stat_bench::do_not_optimize(table.at(keys_.at(i)));
         }
     };
@@ -117,7 +116,6 @@ STAT_BENCH_CASE_F(find_pairs_fixture, "find_pairs", "multi_open_address_st") {
 
     STAT_BENCH_MEASURE() {
         for (std::size_t i = 0; i < size_; ++i) {
-            const auto& key = keys_.at(i);
             stat_bench::do_not_optimize(table.at(keys_.at(i)));
         }
     };
