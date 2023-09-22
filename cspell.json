@@ -96,6 +96,7 @@
     "Virtualenv",
     "virtualenvs",
     "Wextra",
+    "Wimplicit",
     "Xiwyu"
   ],
   "ignoreWords": [],
