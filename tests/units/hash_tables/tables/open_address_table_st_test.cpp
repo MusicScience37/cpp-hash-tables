@@ -397,10 +397,8 @@ TEMPLATE_TEST_CASE("hash_tables::tables::open_address_table_st", "",
         table_type table;
 
         const auto value1 = std::string("abc");
-        const char key1 = extract_key_type()(value1);
         CHECK(table.insert(value1));
         const auto value2 = std::string("bcd");
-        const char key2 = extract_key_type()(value2);
         CHECK(table.insert(value2));
 
         std::unordered_set<std::string> args;
@@ -416,10 +414,8 @@ TEMPLATE_TEST_CASE("hash_tables::tables::open_address_table_st", "",
         table_type table;
 
         const auto value1 = std::string("abc");
-        const char key1 = extract_key_type()(value1);
         CHECK(table.insert(value1));
         const auto value2 = std::string("bcd");
-        const char key2 = extract_key_type()(value2);
         CHECK(table.insert(value2));
 
         const auto& const_table = table;
@@ -610,13 +606,13 @@ TEMPLATE_TEST_CASE("hash_tables::tables::open_address_table_st", "",
     SECTION("max_load_factor") {
         table_type table;
 
-        constexpr float value = 0.1;
+        constexpr float value = 0.1F;
         CHECK_NOTHROW(table.max_load_factor(value));
         CHECK(table.max_load_factor() == value);
 
-        CHECK_THROWS(table.max_load_factor(0.0));    // NOLINT
-        CHECK_NOTHROW(table.max_load_factor(0.01));  // NOLINT
-        CHECK_NOTHROW(table.max_load_factor(0.99));  // NOLINT
-        CHECK_THROWS(table.max_load_factor(1.0));    // NOLINT
+        CHECK_THROWS(table.max_load_factor(0.0F));    // NOLINT
+        CHECK_NOTHROW(table.max_load_factor(0.01F));  // NOLINT
+        CHECK_NOTHROW(table.max_load_factor(0.99F));  // NOLINT
+        CHECK_THROWS(table.max_load_factor(1.0F));    // NOLINT
     }
 }

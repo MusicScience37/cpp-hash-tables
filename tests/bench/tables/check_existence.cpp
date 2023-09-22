@@ -107,7 +107,6 @@ STAT_BENCH_CASE_F(
 
     STAT_BENCH_MEASURE() {
         for (std::size_t i = 0; i < size_; ++i) {
-            const auto& key = keys_.at(i);
             stat_bench::do_not_optimize(table.try_get(keys_.at(i)));
         }
     };
@@ -128,7 +127,6 @@ STAT_BENCH_CASE_F(
 
     STAT_BENCH_MEASURE() {
         for (std::size_t i = 0; i < size_; ++i) {
-            const auto& key = keys_.at(i);
             stat_bench::do_not_optimize(table.try_get(keys_.at(i)));
         }
     };

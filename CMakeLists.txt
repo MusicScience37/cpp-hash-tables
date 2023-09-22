@@ -59,7 +59,9 @@ add_library(hash_tables INTERFACE)
 target_include_directories(
     hash_tables INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
                           $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
-target_link_libraries(hash_tables INTERFACE Threads::Threads)
+target_link_libraries(
+    hash_tables INTERFACE Threads::Threads
+                          $<BUILD_INTERFACE:${PROJECT_NAME}_cpp_warnings>)
 target_compile_features(hash_tables INTERFACE cxx_std_17)
 
 if(HASH_TABLES_BUILD_DOC)
