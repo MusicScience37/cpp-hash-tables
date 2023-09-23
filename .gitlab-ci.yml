@@ -83,6 +83,8 @@ test release:
     BUILD_TYPE: Release
     BUILD_DIR: build_${COMPILER_TYPE}_release
     VCPKG_DEFAULT_BINARY_CACHE: ${CI_PROJECT_DIR}/.vcpkg-cache
+    CCACHE_DIR: ${CI_PROJECT_DIR}/.ccache
+    CCACHE_COMPILERCHECK: content
   before_script:
     - apt-get update
     - apt-get install -y --no-install-recommends curl zip unzip tar
@@ -101,6 +103,7 @@ test release:
       -DHASH_TABLES_BUILD_EXAMPLES=ON
       -DHASH_TABLES_TEST_EXAMPLES=ON
       -DHASH_TABLES_WRITE_JUNIT:BOOL=ON
+      -DHASH_TABLES_ENABLE_CCACHE:BOOL=ON
       -DCMAKE_CXX_STANDARD=$CXX_STANDARD
     - cmake --build .
     - ctest -V
@@ -111,6 +114,7 @@ test release:
         - vcpkg-configuration.json
     paths:
       - .vcpkg-cache
+      - .ccache
   artifacts:
     paths:
       - $BUILD_DIR/bench
@@ -146,6 +150,7 @@ test debug:
       -DHASH_TABLES_BUILD_EXAMPLES=ON
       -DHASH_TABLES_TEST_EXAMPLES=ON
       -DHASH_TABLES_WRITE_JUNIT:BOOL=ON
+      -DHASH_TABLES_ENABLE_CCACHE:BOOL=ON
       -DCMAKE_CXX_STANDARD=$CXX_STANDARD
     - cmake --build .
     - ctest -V
@@ -173,6 +178,7 @@ clang coverage:
       -DHASH_TABLES_TESTING:BOOL=ON
       -DHASH_TABLES_WRITE_JUNIT:BOOL=ON
       -DHASH_TABLES_ENABLE_INTEG_TESTS:BOOL=OFF
+      -DHASH_TABLES_ENABLE_CCACHE:BOOL=ON
       "-DCMAKE_CXX_FLAGS=-stdlib=libc++ -fprofile-instr-generate -fcoverage-mapping"
       "-DCMAKE_MODULE_LINKER_FLAGS=-fprofile-instr-generate -fcoverage-mapping"
     - mkdir coverage
@@ -222,6 +228,7 @@ clang-16-asan-ubsan:
       -DCMAKE_BUILD_TYPE=Debug
       -DHASH_TABLES_TESTING:BOOL=ON
       -DHASH_TABLES_WRITE_JUNIT:BOOL=ON
+      -DHASH_TABLES_ENABLE_CCACHE:BOOL=ON
       -DHASH_TABLES_ENABLE_AUSAN:BOOL=ON
     - cmake --build .
     - ctest -V
