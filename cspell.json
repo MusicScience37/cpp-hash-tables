@@ -14,6 +14,7 @@
     "bugprone",
     "BUILDNAME",
     "buildsystems",
+    "ccache",
     "choco",
     "cloc",
     "cmake",

@@ -7,7 +7,9 @@
     "seccomp=unconfined"
   ],
   "containerEnv": {
-    "ASAN_OPTIONS": "alloc_dealloc_mismatch=0"
+    "ASAN_OPTIONS": "alloc_dealloc_mismatch=0",
+    "CCACHE_COMPILERCHECK": "content",
+    "CCACHE_MAXSIZE": "10G"
   },
   "customizations": {
     "vscode": {

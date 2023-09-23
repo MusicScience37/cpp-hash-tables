@@ -52,6 +52,7 @@ endif()
 include(CppWarningFlags)
 include(ConfigureSanitizer)
 include(poetry)
+include(ConfigureCcache)
 
 set(HASH_TABLES_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
