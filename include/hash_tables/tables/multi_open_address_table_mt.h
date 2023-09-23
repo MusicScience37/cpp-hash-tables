@@ -20,6 +20,7 @@
 #pragma once
 
 #include <algorithm>
+#include <array>
 #include <cassert>
 #include <cstddef>
 #include <functional>
@@ -39,6 +40,16 @@
 
 namespace hash_tables::tables {
 
+namespace internal {
+
+/*!
+ * \brief Default of minimum number of internal tables in
+ * multi_open_address_table_mt.
+ */
+constexpr std::size_t multi_open_address_table_mt_default_min_num_tables = 16;
+
+}  // namespace internal
+
 /*!
  * \brief Class of concurrent hash tables made of multiple hash tables using
  * open addressing.
@@ -49,13 +60,16 @@ namespace hash_tables::tables {
  * \tparam Hash Type of the hash function.
  * \tparam KeyEqual Type of the function to check whether keys are equal.
  * \tparam Allocator Type of allocators.
+ * \tparam MinNumTables Minimum number of internal tables.
  *
  * \thread_safety Safe even for the same object.
  */
 template <typename ValueType, typename KeyType, typename ExtractKey,
     typename Hash = hashes::default_hash<KeyType>,
     typename KeyEqual = std::equal_to<KeyType>,
-    typename Allocator = std::allocator<ValueType>>
+    typename Allocator = std::allocator<ValueType>,
+    std::size_t MinNumTables =
+        internal::multi_open_address_table_mt_default_min_num_tables>
 class multi_open_address_table_mt {
 public:
     //! Type of values.
@@ -79,22 +93,12 @@ public:
     //! Type of sizes.
     using size_type = std::size_t;
 
-    //! Default number of internal tables.
-    static constexpr size_type default_num_tables = 16U;
-
     //! Default number of nodes in internal tables.
     static constexpr size_type default_num_internal_nodes = 32U;
 
     /*!
      * \brief Constructor.
-     */
-    multi_open_address_table_mt()  // NOLINT(cppcoreguidelines-pro-type-member-init, hicpp-member-init): false positive.
-        : multi_open_address_table_mt(default_num_tables) {}
-
-    /*!
-     * \brief Constructor.
      *
-     * \param[in] min_num_tables Minimum number of internal tables.
      * \param[in] min_internal_num_nodes Minimum number of nodes in internal
      * tables.
      * \param[in] extract_key Function to extract keys from values.
@@ -102,25 +106,14 @@ public:
      * \param[in] key_equal Function to check whether keys are equal.
      * \param[in] allocator Allocator.
      */
-    explicit multi_open_address_table_mt(size_type min_num_tables,
+    explicit multi_open_address_table_mt(
         size_type min_internal_num_nodes = default_num_internal_nodes,
         extract_key_type extract_key = extract_key_type(),
         hash_type hash = hash_type(),
         key_equal_type key_equal = key_equal_type(),
         allocator_type allocator = allocator_type())
-        : internal_tables_(nullptr),
-          num_internal_tables_(utility::round_up_to_power_of_two(
-              std::max<size_type>(min_num_tables, 2U))),
-          extract_key_(extract_key),
-          hash_(hash),
-          key_equal_(key_equal),
-          internal_table_index_mask_(num_internal_tables_ - 1U),
-          internal_table_hash_shift_(
-              utility::count_right_zero_bits(num_internal_tables_)) {
-        internal_tables_ = new utility::value_storage<
-            internal_table_data_type>[num_internal_tables_];
-        for (size_type i = 0; i < num_internal_tables_; ++i) {
-            // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        : extract_key_(extract_key), hash_(hash), key_equal_(key_equal) {
+        for (size_type i = 0; i < num_internal_tables; ++i) {
             internal_tables_[i].emplace(min_internal_num_nodes,
                 internal_extract_key_type(extract_key_), internal_hash_type(),
                 internal_key_equal_type(key_equal_),
@@ -137,11 +130,9 @@ public:
      * \brief Destructor.
      */
     ~multi_open_address_table_mt() noexcept {
-        for (size_type i = 0; i < num_internal_tables_; ++i) {
-            // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        for (size_type i = 0; i < num_internal_tables; ++i) {
             internal_tables_[i].clear();
         }
-        delete[] internal_tables_;
     }
 
     /*!
@@ -416,7 +407,7 @@ public:
      */
     template <typename Function>
     void for_all(Function&& function) {
-        for (std::size_t i = 0; i < num_internal_tables_; ++i) {
+        for (std::size_t i = 0; i < num_internal_tables; ++i) {
             shared_table(i)->for_all([&function](internal_value_type& value) {
                 std::invoke(function, value.first);
             });
@@ -431,7 +422,7 @@ public:
      */
     template <typename Function>
     void for_all(Function&& function) const {
-        for (std::size_t i = 0; i < num_internal_tables_; ++i) {
+        for (std::size_t i = 0; i < num_internal_tables; ++i) {
             shared_table(i)->for_all(
                 [&function](const internal_value_type& value) {
                     std::invoke(function, value.first);
@@ -450,7 +441,7 @@ public:
      * \brief Delete all values.
      */
     void clear() noexcept {
-        for (std::size_t i = 0; i < num_internal_tables_; ++i) {
+        for (std::size_t i = 0; i < num_internal_tables; ++i) {
             exclusive_table(i)->clear();
         }
     }
@@ -478,7 +469,7 @@ public:
     template <typename Function>
     auto erase_if(Function&& function) -> size_type {
         size_type res = 0U;
-        for (std::size_t i = 0; i < num_internal_tables_; ++i) {
+        for (std::size_t i = 0; i < num_internal_tables; ++i) {
             res += exclusive_table(i)->erase_if(
                 [&function](const internal_value_type& value) {
                     return std::invoke(function, value.first);
@@ -504,7 +495,7 @@ public:
      */
     template <typename Function>
     auto check_all_satisfy(Function&& function) const -> bool {
-        for (std::size_t i = 0; i < num_internal_tables_; ++i) {
+        for (std::size_t i = 0; i < num_internal_tables; ++i) {
             if (!shared_table(i)->check_all_satisfy(
                     [&function](const internal_value_type& value) {
                         return std::invoke(function, value.first);
@@ -525,7 +516,7 @@ public:
      */
     template <typename Function>
     auto check_any_satisfy(Function&& function) const -> bool {
-        for (std::size_t i = 0; i < num_internal_tables_; ++i) {
+        for (std::size_t i = 0; i < num_internal_tables; ++i) {
             if (shared_table(i)->check_any_satisfy(
                     [&function](const internal_value_type& value) {
                         return std::invoke(function, value.first);
@@ -546,7 +537,7 @@ public:
      */
     template <typename Function>
     auto check_none_satisfy(Function&& function) const -> bool {
-        for (std::size_t i = 0; i < num_internal_tables_; ++i) {
+        for (std::size_t i = 0; i < num_internal_tables; ++i) {
             if (!shared_table(i)->check_none_satisfy(
                     [&function](const internal_value_type& value) {
                         return std::invoke(function, value.first);
@@ -571,7 +562,7 @@ public:
      */
     [[nodiscard]] auto size() const noexcept -> size_type {
         size_type res = 0U;
-        for (std::size_t i = 0; i < num_internal_tables_; ++i) {
+        for (std::size_t i = 0; i < num_internal_tables; ++i) {
             res += shared_table(i)->size();
         }
         return res;
@@ -601,7 +592,7 @@ public:
      * \param[in] size Number of values.
      */
     void reserve(size_type size) {
-        for (std::size_t i = 0; i < num_internal_tables_; ++i) {
+        for (std::size_t i = 0; i < num_internal_tables; ++i) {
             exclusive_table(i)->reserve(size);
         }
     }
@@ -615,9 +606,9 @@ public:
      * \param[in] size Number of values.
      */
     void reserve_approx(size_type size) {
-        size_type approx_size_for_internal_tables = size / num_internal_tables_;
+        size_type approx_size_for_internal_tables = size / num_internal_tables;
         approx_size_for_internal_tables += approx_size_for_internal_tables / 2U;
-        for (std::size_t i = 0; i < num_internal_tables_; ++i) {
+        for (std::size_t i = 0; i < num_internal_tables; ++i) {
             exclusive_table(i)->reserve(approx_size_for_internal_tables);
         }
     }
@@ -673,7 +664,7 @@ public:
      */
     [[nodiscard]] auto num_nodes() const noexcept -> size_type {
         size_type res = 0U;
-        for (std::size_t i = 0; i < num_internal_tables_; ++i) {
+        for (std::size_t i = 0; i < num_internal_tables; ++i) {
             res += shared_table(i)->num_nodes();
         }
         return res;
@@ -685,7 +676,7 @@ public:
      * \param[in] value Maximum load factor.
      */
     void max_load_factor(float value) {
-        for (std::size_t i = 0; i < num_internal_tables_; ++i) {
+        for (std::size_t i = 0; i < num_internal_tables; ++i) {
             exclusive_table(i)->max_load_factor(value);
         }
     }
@@ -800,11 +791,11 @@ private:
         -> std::pair<size_type, internal::hashed_key_view<key_type>> {
         const size_type hash_number = hash_(key);
         const size_type internal_table_index =
-            hash_number & internal_table_index_mask_;
+            hash_number & internal_table_index_mask;
         const size_type internal_table_hash_number =
-            hash_number >> internal_table_hash_shift_;
+            hash_number >> internal_table_hash_shift;
         assert(hash_number ==
-            internal_table_hash_number * num_internal_tables_ +
+            internal_table_hash_number * num_internal_tables +
                 internal_table_index);
         return {internal_table_index,
             internal::hashed_key_view<key_type>(
@@ -820,7 +811,7 @@ private:
     [[nodiscard]] auto shared_table(size_type table_index)
         -> locked_internal_table<internal_table_type,
             std::unique_lock<std::mutex>> {
-        assert(table_index < num_internal_tables_);
+        assert(table_index < num_internal_tables);
         internal_table_data_type& data =
             // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
             internal_tables_[table_index].get();
@@ -838,7 +829,7 @@ private:
     [[nodiscard]] auto shared_table(size_type table_index) const
         -> locked_internal_table<const internal_table_type,
             std::unique_lock<std::mutex>> {
-        assert(table_index < num_internal_tables_);
+        assert(table_index < num_internal_tables);
         internal_table_data_type& data =
             // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
             internal_tables_[table_index].get();
@@ -856,7 +847,7 @@ private:
     [[nodiscard]] auto exclusive_table(size_type table_index)
         -> locked_internal_table<internal_table_type,
             std::unique_lock<std::mutex>> {
-        assert(table_index < num_internal_tables_);
+        assert(table_index < num_internal_tables);
         internal_table_data_type& data =
             // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
             internal_tables_[table_index].get();
@@ -865,11 +856,23 @@ private:
             data.internal_table, std::unique_lock<std::mutex>(data.mutex));
     }
 
-    //! Internal tables.
-    utility::value_storage<internal_table_data_type>* internal_tables_;
-
     //! Number of internal tables.
-    size_type num_internal_tables_;
+    static constexpr size_type num_internal_tables =
+        utility::round_up_to_power_of_two(
+            std::max<size_type>(MinNumTables, 2U));
+
+    //! Bit mask to get the index of the internal table.
+    static constexpr size_type internal_table_index_mask =
+        num_internal_tables - 1U;
+
+    //! Number of bits to shift to calculate hash numbers in internal tables.
+    static constexpr size_type internal_table_hash_shift =
+        utility::count_right_zero_bits(num_internal_tables);
+
+    //! Internal tables.
+    mutable std::array<utility::value_storage<internal_table_data_type>,
+        num_internal_tables>
+        internal_tables_{};
 
     //! Function to extract keys from values.
     extract_key_type extract_key_;
@@ -879,12 +882,6 @@ private:
 
     //! Function to check whether keys are equal.
     key_equal_type key_equal_;
-
-    //! Bit mask to get the index of the internal table.
-    size_type internal_table_index_mask_{};
-
-    //! Number of bits to shift to calculate hash numbers in internal tables.
-    size_type internal_table_hash_shift_{};
 };
 
 }  // namespace hash_tables::tables

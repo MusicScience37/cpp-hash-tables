@@ -33,7 +33,7 @@ namespace hash_tables::utility {
  * \return Count.
  */
 template <typename Integer>
-inline auto count_right_zero_bits(Integer val) {
+inline constexpr auto count_right_zero_bits(Integer val) {
     static_assert(std::is_integral_v<Integer>);
     static_assert(std::is_unsigned_v<Integer>);
 

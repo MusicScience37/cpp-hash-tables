@@ -569,7 +569,8 @@ TEMPLATE_TEST_CASE("hash_tables::tables::multi_open_address_table_st", "",
 
         CHECK(table.size() == 1);
         CHECK(table.num_nodes() ==
-            table_type::default_num_tables *
+            hash_tables::tables::internal::
+                    multi_open_address_table_st_default_min_num_tables *
                 table_type::default_num_internal_nodes);
 
         SECTION("to larger size") {
@@ -585,7 +586,8 @@ TEMPLATE_TEST_CASE("hash_tables::tables::multi_open_address_table_st", "",
             CHECK_NOTHROW(table.reserve(size));
             CHECK(table.size() == 1);
             CHECK(table.num_nodes() ==
-                table_type::default_num_tables *
+                hash_tables::tables::internal::
+                        multi_open_address_table_st_default_min_num_tables *
                     table_type::default_num_internal_nodes);
             CHECK(table.at(key) == value);
         }

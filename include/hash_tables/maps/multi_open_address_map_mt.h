@@ -88,21 +88,18 @@ public:
     /*!
      * \brief Constructor.
      *
-     * \param[in] min_num_tables Minimum number of internal tables.
      * \param[in] min_internal_num_nodes Minimum number of nodes in internal
      * tables.
      * \param[in] hash Hash function.
      * \param[in] key_equal Function to check whether keys are equal.
      * \param[in] allocator Allocator.
      */
-    explicit multi_open_address_map_mt(size_type min_num_tables,
-        size_type min_internal_num_nodes =
-            table_type::default_num_internal_nodes,
+    explicit multi_open_address_map_mt(size_type min_internal_num_nodes,
         hash_type hash = hash_type(),
         key_equal_type key_equal = key_equal_type(),
         const allocator_type& allocator = allocator_type())
-        : table_(min_num_tables, min_internal_num_nodes, extract_key_type(),
-              hash, key_equal, allocator) {}
+        : table_(min_internal_num_nodes, extract_key_type(), hash, key_equal,
+              allocator) {}
 
     multi_open_address_map_mt(const multi_open_address_map_mt&) = delete;
     multi_open_address_map_mt(multi_open_address_map_mt&&) = delete;

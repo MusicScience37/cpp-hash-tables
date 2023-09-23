@@ -87,7 +87,7 @@ inline constexpr auto propagate_bits_to_right(Integer val) noexcept -> Integer {
  * \return Result.
  */
 template <typename Integer>
-inline auto round_up_to_power_of_two(Integer val) {
+inline constexpr auto round_up_to_power_of_two(Integer val) {
     static_assert(std::is_integral_v<Integer>);
     static_assert(std::is_unsigned_v<Integer>);
 
