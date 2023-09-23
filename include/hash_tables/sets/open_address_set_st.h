@@ -153,26 +153,6 @@ public:
         return table_.insert(std::move(value));
     }
 
-    /*!
-     * \brief Merge another set.
-     *
-     * \param[in] other Set to merge.
-     */
-    void merge(const open_address_set_st& other) {
-        other.for_all([this](const value_type& value) { this->insert(value); });
-    }
-
-    /*!
-     * \brief Merge another set.
-     *
-     * \param[in] other Set to merge.
-     * \return This.
-     */
-    auto operator+=(const open_address_set_st& other) -> open_address_set_st& {
-        merge(other);
-        return *this;
-    }
-
     ///@}
 
     /*!
@@ -235,6 +215,90 @@ public:
         return table_.erase_if(function);
     }
 
+    ///@}
+
+    /*!
+     * \name Check conditions for elements.
+     */
+    ///@{
+
+    /*!
+     * \brief Check whether all elements satisfy a condition.
+     *
+     * \tparam Function Type of the function.
+     * \param[in] function Function to check each element.
+     * \retval true All elements satisfied the condition.
+     * \retval false Some elements didn't satisfy the condition.
+     */
+    template <typename Function>
+    auto check_all_satisfy(Function&& function) const -> bool {
+        return table_.check_all_satisfy(std::forward<Function>(function));
+    }
+
+    /*!
+     * \brief Check whether at least one element satisfies a condition.
+     *
+     * \tparam Function Type of the function.
+     * \param[in] function Function to check each element.
+     * \retval true At least one element satisfied the condition.
+     * \retval false No element satisfied the condition.
+     */
+    template <typename Function>
+    auto check_any_satisfy(Function&& function) const -> bool {
+        return table_.check_any_satisfy(std::forward<Function>(function));
+    }
+
+    /*!
+     * \brief Check whether no element satisfies a condition.
+     *
+     * \tparam Function Type of the function.
+     * \param[in] function Function to check each element.
+     * \retval true No element satisfied the condition.
+     * \retval false At least one element satisfied the condition.
+     */
+    template <typename Function>
+    auto check_none_satisfy(Function&& function) const -> bool {
+        return table_.check_none_satisfy(std::forward<Function>(function));
+    }
+
+    ///@}
+
+    /*!
+     * \name Operations of sets.
+     */
+    ///@{
+
+    /*!
+     * \brief Merge another set.
+     *
+     * \param[in] other Set to merge.
+     */
+    void merge(const open_address_set_st& other) {
+        other.for_all([this](const value_type& value) { this->insert(value); });
+    }
+
+    /*!
+     * \brief Merge another set.
+     *
+     * \param[in] other Set to merge.
+     * \return This.
+     */
+    auto operator+=(const open_address_set_st& other) -> open_address_set_st& {
+        merge(other);
+        return *this;
+    }
+
+    /*!
+     * \brief Merge another set.
+     *
+     * \param[in] right Right-hand-side object.
+     * \return Merged set.
+     */
+    auto operator+(const open_address_set_st& right) const
+        -> open_address_set_st {
+        return open_address_set_st(*this) += right;
+    }
+
     /*!
      * \brief Delete values in another set.
      *
@@ -256,6 +320,18 @@ public:
     }
 
     /*!
+     * \brief Delete values in another set.
+     *
+     * \param[in] right Right-hand-side object.
+     * \return A set with elements same as this set except for elements in the
+     * right-hand-side set.
+     */
+    auto operator-(const open_address_set_st& right) const
+        -> open_address_set_st {
+        return open_address_set_st(*this) -= right;
+    }
+
+    /*!
      * \brief Remove values not in the intersection with another set.
      *
      * \param[in] other Another set.
@@ -263,6 +339,18 @@ public:
     void keep_only_intersection_with(const open_address_set_st& other) {
         erase_if(
             [&other](const value_type& value) { return !other.has(value); });
+    }
+
+    /*!
+     * \brief Determine whether this set and the given set have common elements.
+     *
+     * \param[in] other Another set.
+     * \return Whether this set and the given set have common elements.
+     */
+    [[nodiscard]] auto has_intersection_with(
+        const open_address_set_st& other) const {
+        return check_any_satisfy(
+            [&other](const value_type& value) { return other.has(value); });
     }
 
     ///@}

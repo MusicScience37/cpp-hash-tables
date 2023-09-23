@@ -446,6 +446,64 @@ public:
     ///@}
 
     /*!
+     * \name Check conditions for elements.
+     */
+    ///@{
+
+    /*!
+     * \brief Check whether all elements satisfy a condition.
+     *
+     * \tparam Function Type of the function.
+     * \param[in] function Function to check each element.
+     * \retval true All elements satisfied the condition.
+     * \retval false Some elements didn't satisfy the condition.
+     */
+    template <typename Function>
+    auto check_all_satisfy(Function&& function) const -> bool {
+        return table_.check_all_satisfy([&function](const value_type& value) {
+            return std::invoke(function,
+                static_cast<const key_type&>(value.first),
+                static_cast<const mapped_type&>(value.second));
+        });
+    }
+
+    /*!
+     * \brief Check whether at least one element satisfies a condition.
+     *
+     * \tparam Function Type of the function.
+     * \param[in] function Function to check each element.
+     * \retval true At least one element satisfied the condition.
+     * \retval false No element satisfied the condition.
+     */
+    template <typename Function>
+    auto check_any_satisfy(Function&& function) const -> bool {
+        return table_.check_any_satisfy([&function](const value_type& value) {
+            return std::invoke(function,
+                static_cast<const key_type&>(value.first),
+                static_cast<const mapped_type&>(value.second));
+        });
+    }
+
+    /*!
+     * \brief Check whether no element satisfies a condition.
+     *
+     * \tparam Function Type of the function.
+     * \param[in] function Function to check each element.
+     * \retval true No element satisfied the condition.
+     * \retval false At least one element satisfied the condition.
+     */
+    template <typename Function>
+    auto check_none_satisfy(Function&& function) const -> bool {
+        return table_.check_none_satisfy([&function](const value_type& value) {
+            return std::invoke(function,
+                static_cast<const key_type&>(value.first),
+                static_cast<const mapped_type&>(value.second));
+        });
+    }
+
+    ///@}
+
+    /*!
      * \name Handle size.
      */
     ///@{

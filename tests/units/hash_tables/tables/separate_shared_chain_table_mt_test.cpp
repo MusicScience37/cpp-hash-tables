@@ -402,10 +402,8 @@ TEMPLATE_TEST_CASE("hash_tables::tables::separate_shared_chain_table_mt", "",
         table_type table;
 
         const auto value1 = std::string("abc");
-        const char key1 = extract_key_type()(value1);
         CHECK(table.insert(value1));
         const auto value2 = std::string("bcd");
-        const char key2 = extract_key_type()(value2);
         CHECK(table.insert(value2));
 
         std::unordered_set<std::string> args;
@@ -421,10 +419,8 @@ TEMPLATE_TEST_CASE("hash_tables::tables::separate_shared_chain_table_mt", "",
         table_type table;
 
         const auto value1 = std::string("abc");
-        const char key1 = extract_key_type()(value1);
         CHECK(table.insert(value1));
         const auto value2 = std::string("bcd");
-        const char key2 = extract_key_type()(value2);
         CHECK(table.insert(value2));
 
         const auto& const_table = table;
@@ -522,6 +518,45 @@ TEMPLATE_TEST_CASE("hash_tables::tables::separate_shared_chain_table_mt", "",
         CHECK_FALSE(table.has(key1));
         CHECK(table.has(key2));
         CHECK(table.size() == 1);
+    }
+
+    SECTION("check_all_satisfy") {
+        table_type table;
+        CHECK(table.insert("abc"));
+        CHECK(table.insert("bcd"));
+
+        CHECK(table.check_all_satisfy(
+            [](const std::string& val) { return !val.empty(); }));
+        CHECK_FALSE(table.check_all_satisfy(
+            [](const std::string& val) { return val == "abc"; }));
+        CHECK_FALSE(table.check_all_satisfy(
+            [](const std::string& val) { return val.empty(); }));
+    }
+
+    SECTION("check_any_satisfy") {
+        table_type table;
+        CHECK(table.insert("abc"));
+        CHECK(table.insert("bcd"));
+
+        CHECK(table.check_any_satisfy(
+            [](const std::string& val) { return !val.empty(); }));
+        CHECK(table.check_any_satisfy(
+            [](const std::string& val) { return val == "abc"; }));
+        CHECK_FALSE(table.check_any_satisfy(
+            [](const std::string& val) { return val.empty(); }));
+    }
+
+    SECTION("check_none_satisfy") {
+        table_type table;
+        CHECK(table.insert("abc"));
+        CHECK(table.insert("bcd"));
+
+        CHECK_FALSE(table.check_none_satisfy(
+            [](const std::string& val) { return !val.empty(); }));
+        CHECK_FALSE(table.check_none_satisfy(
+            [](const std::string& val) { return val == "abc"; }));
+        CHECK(table.check_none_satisfy(
+            [](const std::string& val) { return val.empty(); }));
     }
 
     SECTION("max_size") {

@@ -408,10 +408,8 @@ TEMPLATE_TEST_CASE("hash_tables::tables::multi_open_address_table_mt", "",
         table_type table;
 
         const auto value1 = std::string("abc");
-        const char key1 = extract_key_type()(value1);
         CHECK(table.insert(value1));
         const auto value2 = std::string("bcd");
-        const char key2 = extract_key_type()(value2);
         CHECK(table.insert(value2));
 
         std::unordered_set<std::string> args;
@@ -427,10 +425,8 @@ TEMPLATE_TEST_CASE("hash_tables::tables::multi_open_address_table_mt", "",
         table_type table;
 
         const auto value1 = std::string("abc");
-        const char key1 = extract_key_type()(value1);
         CHECK(table.insert(value1));
         const auto value2 = std::string("bcd");
-        const char key2 = extract_key_type()(value2);
         CHECK(table.insert(value2));
 
         const auto& const_table = table;
@@ -530,6 +526,45 @@ TEMPLATE_TEST_CASE("hash_tables::tables::multi_open_address_table_mt", "",
         CHECK(table.size() == 1);
     }
 
+    SECTION("check_all_satisfy") {
+        table_type table;
+        CHECK(table.insert("abc"));
+        CHECK(table.insert("bcd"));
+
+        CHECK(table.check_all_satisfy(
+            [](const std::string& val) { return !val.empty(); }));
+        CHECK_FALSE(table.check_all_satisfy(
+            [](const std::string& val) { return val == "abc"; }));
+        CHECK_FALSE(table.check_all_satisfy(
+            [](const std::string& val) { return val.empty(); }));
+    }
+
+    SECTION("check_any_satisfy") {
+        table_type table;
+        CHECK(table.insert("abc"));
+        CHECK(table.insert("bcd"));
+
+        CHECK(table.check_any_satisfy(
+            [](const std::string& val) { return !val.empty(); }));
+        CHECK(table.check_any_satisfy(
+            [](const std::string& val) { return val == "abc"; }));
+        CHECK_FALSE(table.check_any_satisfy(
+            [](const std::string& val) { return val.empty(); }));
+    }
+
+    SECTION("check_none_satisfy") {
+        table_type table;
+        CHECK(table.insert("abc"));
+        CHECK(table.insert("bcd"));
+
+        CHECK_FALSE(table.check_none_satisfy(
+            [](const std::string& val) { return !val.empty(); }));
+        CHECK_FALSE(table.check_none_satisfy(
+            [](const std::string& val) { return val == "abc"; }));
+        CHECK(table.check_none_satisfy(
+            [](const std::string& val) { return val.empty(); }));
+    }
+
     SECTION("max_size") {
         table_type table;
 
@@ -546,7 +581,8 @@ TEMPLATE_TEST_CASE("hash_tables::tables::multi_open_address_table_mt", "",
 
         CHECK(table.size() == 1);
         CHECK(table.num_nodes() ==
-            table_type::default_num_tables *
+            hash_tables::tables::internal::
+                    multi_open_address_table_mt_default_min_num_tables *
                 table_type::default_num_internal_nodes);
 
         SECTION("to larger size") {
@@ -562,7 +598,8 @@ TEMPLATE_TEST_CASE("hash_tables::tables::multi_open_address_table_mt", "",
             CHECK_NOTHROW(table.reserve(size));
             CHECK(table.size() == 1);
             CHECK(table.num_nodes() ==
-                table_type::default_num_tables *
+                hash_tables::tables::internal::
+                        multi_open_address_table_mt_default_min_num_tables *
                     table_type::default_num_internal_nodes);
             CHECK(table.at(key) == value);
         }

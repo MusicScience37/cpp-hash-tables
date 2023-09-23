@@ -28,6 +28,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "hash_tables/hashes/std_hash.h"
+#include "hash_tables/tables/multi_open_address_table_st.h"
 #include "hash_tables_test/hashes/fixed_hash.h"
 
 // NOLINTNEXTLINE
@@ -244,15 +245,15 @@ TEMPLATE_TEST_CASE("hash_tables::maps::multi_open_address_map_st", "",
         CHECK(map.size() == 1);
         CHECK(map.at(key) == mapped);
 
-        const int mapped2 = 12345;
-        CHECK(map.get_or_create_with_factory(
-                  key, [&mapped2] { return mapped2; }) == mapped);
+        static constexpr int mapped2 = 12345;
+        CHECK(map.get_or_create_with_factory(key, [] { return mapped2; }) ==
+            mapped);
         CHECK(map.size() == 1);
         CHECK(map.at(key) == mapped);
 
         const auto key2 = std::to_string(mapped2);
-        CHECK(map.get_or_create_with_factory(
-                  key2, [&mapped2] { return mapped2; }) == mapped2);
+        CHECK(map.get_or_create_with_factory(key2, [] { return mapped2; }) ==
+            mapped2);
         CHECK(map.size() == 2);
         CHECK(map.at(key2) == mapped2);
     }
@@ -456,6 +457,66 @@ TEMPLATE_TEST_CASE("hash_tables::maps::multi_open_address_map_st", "",
         CHECK(map.at(key2) == mapped2);
     }
 
+    SECTION("check_all_satisfy") {
+        map_type map;
+
+        CHECK(map.emplace("123", 123));
+        CHECK(map.emplace("12345", 123));
+
+        CHECK(map.check_all_satisfy(
+            [](const std::string& key, const mapped_type& /*mapped*/) {
+                return !key.empty();
+            }));
+        CHECK_FALSE(map.check_all_satisfy(
+            [](const std::string& key, const mapped_type& mapped) {
+                return std::to_string(mapped) == key;
+            }));
+        CHECK_FALSE(map.check_all_satisfy(
+            [](const std::string& key, const mapped_type& /*mapped*/) {
+                return key.empty();
+            }));
+    }
+
+    SECTION("check_any_satisfy") {
+        map_type map;
+
+        CHECK(map.emplace("123", 123));
+        CHECK(map.emplace("12345", 123));
+
+        CHECK(map.check_any_satisfy(
+            [](const std::string& key, const mapped_type& /*mapped*/) {
+                return !key.empty();
+            }));
+        CHECK(map.check_any_satisfy(
+            [](const std::string& key, const mapped_type& mapped) {
+                return std::to_string(mapped) == key;
+            }));
+        CHECK_FALSE(map.check_any_satisfy(
+            [](const std::string& key, const mapped_type& /*mapped*/) {
+                return key.empty();
+            }));
+    }
+
+    SECTION("check_none_satisfy") {
+        map_type map;
+
+        CHECK(map.emplace("123", 123));
+        CHECK(map.emplace("12345", 123));
+
+        CHECK_FALSE(map.check_none_satisfy(
+            [](const std::string& key, const mapped_type& /*mapped*/) {
+                return !key.empty();
+            }));
+        CHECK_FALSE(map.check_none_satisfy(
+            [](const std::string& key, const mapped_type& mapped) {
+                return std::to_string(mapped) == key;
+            }));
+        CHECK(map.check_none_satisfy(
+            [](const std::string& key, const mapped_type& /*mapped*/) {
+                return key.empty();
+            }));
+    }
+
     SECTION("reserve") {
         map_type map;
 
@@ -465,7 +526,8 @@ TEMPLATE_TEST_CASE("hash_tables::maps::multi_open_address_map_st", "",
 
         CHECK(map.size() == 1);
         CHECK(map.num_nodes() ==
-            map_type::table_type::default_num_tables *
+            hash_tables::tables::internal::
+                    multi_open_address_table_st_default_min_num_tables *
                 map_type::table_type::default_num_internal_nodes);
 
         SECTION("to larger size") {
@@ -481,7 +543,8 @@ TEMPLATE_TEST_CASE("hash_tables::maps::multi_open_address_map_st", "",
             CHECK_NOTHROW(map.reserve(size));
             CHECK(map.size() == 1);
             CHECK(map.num_nodes() ==
-                map_type::table_type::default_num_tables *
+                hash_tables::tables::internal::
+                        multi_open_address_table_st_default_min_num_tables *
                     map_type::table_type::default_num_internal_nodes);
             CHECK(map.at(key) == mapped);
         }

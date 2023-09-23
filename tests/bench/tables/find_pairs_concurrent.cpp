@@ -55,7 +55,7 @@ public:
         add_param<std::size_t>("size")
             ->add(100)   // NOLINT
             ->add(1000)  // NOLINT
-#ifdef NDEBUG
+#ifdef HASH_TABLES_ENABLE_HEAVY_BENCH
             ->add(10000)   // NOLINT
             ->add(100000)  // NOLINT
 #endif
@@ -105,7 +105,6 @@ STAT_BENCH_CASE_F(find_pairs_concurrent_fixture, "find_pairs_concurrent",
         const std::size_t end_ind =
             std::min((thread_ind + 1) * size_per_thread, size_);
         for (std::size_t i = begin_ind; i < end_ind; ++i) {
-            const auto& key = keys_.at(i);
             std::unique_lock<std::mutex> lock(mutex);
             stat_bench::do_not_optimize(table.at(keys_.at(i)));
         }
@@ -135,7 +134,6 @@ STAT_BENCH_CASE_F(find_pairs_concurrent_fixture, "find_pairs_concurrent",
         const std::size_t end_ind =
             std::min((thread_ind + 1) * size_per_thread, size_);
         for (std::size_t i = begin_ind; i < end_ind; ++i) {
-            const auto& key = keys_.at(i);
             stat_bench::do_not_optimize(table.at(keys_.at(i)));
         }
     };
@@ -163,7 +161,6 @@ STAT_BENCH_CASE_F(
         const std::size_t end_ind =
             std::min((thread_ind + 1) * size_per_thread, size_);
         for (std::size_t i = begin_ind; i < end_ind; ++i) {
-            const auto& key = keys_.at(i);
             stat_bench::do_not_optimize(table.at(keys_.at(i)));
         }
     };

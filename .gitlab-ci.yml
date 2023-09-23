@@ -10,17 +10,14 @@ variables:
 include:
   - template: Dependency-Scanning.gitlab-ci.yml
   - template: Security/SAST.gitlab-ci.yml
-  - template: Security/License-Scanning.gitlab-ci.yml
 sast:
   needs: []
 dependency_scanning:
   needs: []
-license_scanning:
-  needs: []
 
 sync poetry:
   stage: prepare
-  image: musicscience37/clang-ci:clang14
+  image: musicscience37/clang-ci:clang16
   script:
     - mkdir -p .venv
     - poetry config virtualenvs.in-project true
@@ -62,24 +59,22 @@ pre-commit:
     - sync poetry
   dependencies:
     - sync poetry
-  image: musicscience37/clang-ci:clang14
+  image: musicscience37/clang-ci:clang16
   script:
     - poetry run pre-commit run --all-files
 
 test release:
-  needs:
-    - sync poetry
-  dependencies:
-    - sync poetry
+  needs: []
+  dependencies: []
   parallel:
     matrix:
       - COMPILER_TYPE: ["gcc10", "gcc12"]
         IMAGE_PATH: "musicscience37/gcc-ci"
         CXX_STANDARD: 17
-      - COMPILER_TYPE: ["clang14", "clang15"]
+      - COMPILER_TYPE: ["clang16", "clang15"]
         IMAGE_PATH: "musicscience37/clang-ci"
         CXX_STANDARD: 17
-      - COMPILER_TYPE: ["clang14"]
+      - COMPILER_TYPE: ["clang16"]
         IMAGE_PATH: "musicscience37/clang-ci"
         CXX_STANDARD: 20
   image: ${IMAGE_PATH}:${COMPILER_TYPE}
@@ -87,9 +82,13 @@ test release:
     GIT_SUBMODULE_STRATEGY: recursive
     BUILD_TYPE: Release
     BUILD_DIR: build_${COMPILER_TYPE}_release
+    VCPKG_DEFAULT_BINARY_CACHE: ${CI_PROJECT_DIR}/.vcpkg-cache
+    CCACHE_DIR: ${CI_PROJECT_DIR}/.ccache
+    CCACHE_COMPILERCHECK: content
   before_script:
     - apt-get update
     - apt-get install -y --no-install-recommends curl zip unzip tar
+    - mkdir -p $VCPKG_DEFAULT_BINARY_CACHE
     - ./vcpkg/bootstrap-vcpkg.sh
     - mkdir $BUILD_DIR
   script:
@@ -100,12 +99,22 @@ test release:
       -DHASH_TABLES_TESTING:BOOL=ON
       -DHASH_TABLES_ENABLE_BENCH=ON
       -DHASH_TABLES_TEST_BENCHMARKS=ON
+      -DHASH_TABLES_ENABLE_HEAVY_BENCH=OFF
       -DHASH_TABLES_BUILD_EXAMPLES=ON
       -DHASH_TABLES_TEST_EXAMPLES=ON
       -DHASH_TABLES_WRITE_JUNIT:BOOL=ON
+      -DHASH_TABLES_ENABLE_CCACHE:BOOL=ON
       -DCMAKE_CXX_STANDARD=$CXX_STANDARD
     - cmake --build .
     - ctest -V
+  cache:
+    key:
+      prefix: vcpkg-${CI_JOB_NAME}
+      files:
+        - vcpkg-configuration.json
+    paths:
+      - .vcpkg-cache
+      - .ccache
   artifacts:
     paths:
       - $BUILD_DIR/bench
@@ -126,7 +135,7 @@ test debug:
       - COMPILER_TYPE: ["gcc10"]
         IMAGE_PATH: "musicscience37/gcc-ci"
         CXX_STANDARD: 17
-      - COMPILER_TYPE: ["clang14"]
+      - COMPILER_TYPE: ["clang16"]
         IMAGE_PATH: "musicscience37/clang-ci"
         CXX_STANDARD: 17
   variables:
@@ -141,15 +150,20 @@ test debug:
       -DHASH_TABLES_BUILD_EXAMPLES=ON
       -DHASH_TABLES_TEST_EXAMPLES=ON
       -DHASH_TABLES_WRITE_JUNIT:BOOL=ON
+      -DHASH_TABLES_ENABLE_CCACHE:BOOL=ON
       -DCMAKE_CXX_STANDARD=$CXX_STANDARD
     - cmake --build .
     - ctest -V
 
 clang coverage:
   extends: test debug
+  needs:
+    - sync poetry
+  dependencies:
+    - sync poetry
   parallel:
     matrix:
-      - COMPILER_TYPE: "clang14"
+      - COMPILER_TYPE: "clang16"
         IMAGE_PATH: "musicscience37/clang-ci"
         CXX_STANDARD: 17
   variables:
@@ -164,6 +178,7 @@ clang coverage:
       -DHASH_TABLES_TESTING:BOOL=ON
       -DHASH_TABLES_WRITE_JUNIT:BOOL=ON
       -DHASH_TABLES_ENABLE_INTEG_TESTS:BOOL=OFF
+      -DHASH_TABLES_ENABLE_CCACHE:BOOL=ON
       "-DCMAKE_CXX_FLAGS=-stdlib=libc++ -fprofile-instr-generate -fcoverage-mapping"
       "-DCMAKE_MODULE_LINKER_FLAGS=-fprofile-instr-generate -fcoverage-mapping"
     - mkdir coverage
@@ -192,11 +207,11 @@ clang coverage:
     when: always
     expire_in: "1 mos"
 
-clang-14-asan-ubsan:
+clang-16-asan-ubsan:
   extends: test debug
   parallel:
     matrix:
-      - COMPILER_TYPE: "clang14"
+      - COMPILER_TYPE: "clang16"
         IMAGE_PATH: "musicscience37/clang-ci"
         CXX_STANDARD: 17
   variables:
@@ -213,6 +228,7 @@ clang-14-asan-ubsan:
       -DCMAKE_BUILD_TYPE=Debug
       -DHASH_TABLES_TESTING:BOOL=ON
       -DHASH_TABLES_WRITE_JUNIT:BOOL=ON
+      -DHASH_TABLES_ENABLE_CCACHE:BOOL=ON
       -DHASH_TABLES_ENABLE_AUSAN:BOOL=ON
     - cmake --build .
     - ctest -V
@@ -230,13 +246,9 @@ msvc-release:
     BUILD_DIR: build_msvc_release
     # workaround in https://github.com/python-poetry/poetry/issues/1917#issuecomment-1235998997
     PYTHON_KEYRING_BACKEND: keyring.backends.null.Keyring
+    VCPKG_DEFAULT_BINARY_CACHE: ${CI_PROJECT_DIR}/.vcpkg-cache
   before_script:
-    - Import-Module "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
-    - choco install cmake -y --installargs 'ADD_CMAKE_TO_PATH=System'
-    - choco install python --version=3.11.0 -y
-    - RefreshEnv
-    - pip install poetry==1.3.2
-    - poetry install --without dev
+    - New-Item -ItemType Directory -Force -Path $VCPKG_DEFAULT_BINARY_CACHE
     - .\vcpkg\bootstrap-vcpkg.bat
     - mkdir $BUILD_DIR
   script:
@@ -251,6 +263,13 @@ msvc-release:
       -DHASH_TABLES_WRITE_JUNIT:BOOL=ON
     - cmake --build . --config Release --parallel
     - ctest -V --build-config Release
+  cache:
+    key:
+      prefix: vcpkg-${CI_JOB_NAME}
+      files:
+        - vcpkg-configuration.json
+    paths:
+      - .vcpkg-cache
   artifacts:
     paths:
       - $BUILD_DIR/bench
@@ -268,9 +287,13 @@ msvc-release:
 
 static analysis:
   extends: test debug
+  needs:
+    - sync poetry
+  dependencies:
+    - sync poetry
   parallel:
     matrix:
-      - COMPILER_TYPE: "clang14"
+      - COMPILER_TYPE: "clang16"
         IMAGE_PATH: "musicscience37/clang-ci"
         CXX_STANDARD: 17
   variables:
@@ -324,13 +347,15 @@ doc:
     - sync poetry
   dependencies:
     - sync poetry
-  image: musicscience37/sphinx-doxygen:clang14
+  image: musicscience37/sphinx-doxygen:clang16
   variables:
     GIT_SUBMODULE_STRATEGY: recursive
     BUILD_DIR: build_doc
+    VCPKG_DEFAULT_BINARY_CACHE: ${CI_PROJECT_DIR}/.vcpkg-cache
   before_script:
     - apt-get update
     - apt-get install -y --no-install-recommends curl zip unzip tar
+    - mkdir -p $VCPKG_DEFAULT_BINARY_CACHE
     - ./vcpkg/bootstrap-vcpkg.sh
     - mkdir $BUILD_DIR
   script:
@@ -339,6 +364,13 @@ doc:
       -DCMAKE_TOOLCHAIN_FILE=../vcpkg/scripts/buildsystems/vcpkg.cmake
       -DHASH_TABLES_BUILD_DOC:BOOL=ON
     - cmake --build . --target hash_tables_doc
+  cache:
+    key:
+      prefix: vcpkg-${CI_JOB_NAME}
+      files:
+        - vcpkg-configuration.json
+    paths:
+      - .vcpkg-cache
   artifacts:
     paths:
       - $BUILD_DIR/doc

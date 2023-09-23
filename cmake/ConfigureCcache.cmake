@@ -21,26 +21,14 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ]]
-
-add_library(${PROJECT_NAME}_cpp_warnings INTERFACE)
-
 string(TOUPPER ${PROJECT_NAME} UPPER_PROJECT_NAME)
-option(${UPPER_PROJECT_NAME}_ENABLE_CPP_WARNINGS
-       "enable compiler warnings of C++" OFF)
+option(${UPPER_PROJECT_NAME}_ENABLE_CCACHE "enable ccache" OFF)
 
-if(${UPPER_PROJECT_NAME}_ENABLE_CPP_WARNINGS)
-    if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-        target_compile_options(${PROJECT_NAME}_cpp_warnings INTERFACE -Wall
-                                                                      -Wextra)
+if(${UPPER_PROJECT_NAME}_ENABLE_CCACHE)
+    find_program(CCACHE_EXECUTABLE ccache)
+    if(CCACHE_EXECUTABLE)
+        message(STATUS "Ccache found ${CCACHE_EXECUTABLE}")
+        set(CMAKE_C_COMPILER_LAUNCHER ${CCACHE_EXECUTABLE})
+        set(CMAKE_CXX_COMPILER_LAUNCHER ${CCACHE_EXECUTABLE})
     endif()
-    if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-        target_compile_options(${PROJECT_NAME}_cpp_warnings
-                               INTERFACE -Wimplicit-float-conversion)
-    endif()
-endif()
-
-if(MSVC)
-    target_compile_definitions(${PROJECT_NAME}_cpp_warnings
-                               INTERFACE _CRT_SECURE_NO_WARNINGS=1)
-    target_compile_options(${PROJECT_NAME}_cpp_warnings INTERFACE /EHsc /utf-8)
 endif()

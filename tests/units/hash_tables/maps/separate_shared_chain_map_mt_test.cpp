@@ -196,15 +196,15 @@ TEMPLATE_TEST_CASE("hash_tables::maps::separate_shared_chain_map_mt", "",
         CHECK(map.size() == 1);
         CHECK(map.at(key) == mapped);
 
-        const int mapped2 = 12345;
-        CHECK(map.get_or_create_with_factory(
-                  key, [&mapped2] { return mapped2; }) == mapped);
+        static constexpr int mapped2 = 12345;
+        CHECK(map.get_or_create_with_factory(key, [] { return mapped2; }) ==
+            mapped);
         CHECK(map.size() == 1);
         CHECK(map.at(key) == mapped);
 
         const auto key2 = std::to_string(mapped2);
-        CHECK(map.get_or_create_with_factory(
-                  key2, [&mapped2] { return mapped2; }) == mapped2);
+        CHECK(map.get_or_create_with_factory(key2, [] { return mapped2; }) ==
+            mapped2);
         CHECK(map.size() == 2);
         CHECK(map.at(key2) == mapped2);
     }
@@ -362,6 +362,66 @@ TEMPLATE_TEST_CASE("hash_tables::maps::separate_shared_chain_map_mt", "",
         CHECK(map.size() == 1);
         CHECK_THROWS(map.at(key1));
         CHECK(map.at(key2) == mapped2);
+    }
+
+    SECTION("check_all_satisfy") {
+        map_type map;
+
+        CHECK(map.emplace("123", 123));
+        CHECK(map.emplace("12345", 123));
+
+        CHECK(map.check_all_satisfy(
+            [](const std::string& key, const mapped_type& /*mapped*/) {
+                return !key.empty();
+            }));
+        CHECK_FALSE(map.check_all_satisfy(
+            [](const std::string& key, const mapped_type& mapped) {
+                return std::to_string(mapped) == key;
+            }));
+        CHECK_FALSE(map.check_all_satisfy(
+            [](const std::string& key, const mapped_type& /*mapped*/) {
+                return key.empty();
+            }));
+    }
+
+    SECTION("check_any_satisfy") {
+        map_type map;
+
+        CHECK(map.emplace("123", 123));
+        CHECK(map.emplace("12345", 123));
+
+        CHECK(map.check_any_satisfy(
+            [](const std::string& key, const mapped_type& /*mapped*/) {
+                return !key.empty();
+            }));
+        CHECK(map.check_any_satisfy(
+            [](const std::string& key, const mapped_type& mapped) {
+                return std::to_string(mapped) == key;
+            }));
+        CHECK_FALSE(map.check_any_satisfy(
+            [](const std::string& key, const mapped_type& /*mapped*/) {
+                return key.empty();
+            }));
+    }
+
+    SECTION("check_none_satisfy") {
+        map_type map;
+
+        CHECK(map.emplace("123", 123));
+        CHECK(map.emplace("12345", 123));
+
+        CHECK_FALSE(map.check_none_satisfy(
+            [](const std::string& key, const mapped_type& /*mapped*/) {
+                return !key.empty();
+            }));
+        CHECK_FALSE(map.check_none_satisfy(
+            [](const std::string& key, const mapped_type& mapped) {
+                return std::to_string(mapped) == key;
+            }));
+        CHECK(map.check_none_satisfy(
+            [](const std::string& key, const mapped_type& /*mapped*/) {
+                return key.empty();
+            }));
     }
 
     SECTION("load_factor") {

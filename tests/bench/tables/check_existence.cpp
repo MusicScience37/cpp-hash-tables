@@ -52,7 +52,7 @@ public:
         add_param<std::size_t>("size")
             ->add(100)   // NOLINT
             ->add(1000)  // NOLINT
-#ifdef NDEBUG
+#ifdef HASH_TABLES_ENABLE_HEAVY_BENCH
             ->add(10000)   // NOLINT
             ->add(100000)  // NOLINT
 #endif
@@ -107,7 +107,6 @@ STAT_BENCH_CASE_F(
 
     STAT_BENCH_MEASURE() {
         for (std::size_t i = 0; i < size_; ++i) {
-            const auto& key = keys_.at(i);
             stat_bench::do_not_optimize(table.try_get(keys_.at(i)));
         }
     };
@@ -128,7 +127,6 @@ STAT_BENCH_CASE_F(
 
     STAT_BENCH_MEASURE() {
         for (std::size_t i = 0; i < size_; ++i) {
-            const auto& key = keys_.at(i);
             stat_bench::do_not_optimize(table.try_get(keys_.at(i)));
         }
     };
