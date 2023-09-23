@@ -318,6 +318,45 @@ TEMPLATE_TEST_CASE("hash_tables::sets::open_address_set_st", "",
         CHECK_FALSE(set1.has_intersection_with(set3));
     }
 
+    SECTION("check_all_satisfy") {
+        set_type set;
+        set.insert("abc");
+        set.insert("bcd");
+
+        CHECK(set.check_all_satisfy(
+            [](const std::string& val) { return !val.empty(); }));
+        CHECK_FALSE(set.check_all_satisfy(
+            [](const std::string& val) { return val == "abc"; }));
+        CHECK_FALSE(set.check_all_satisfy(
+            [](const std::string& val) { return val.empty(); }));
+    }
+
+    SECTION("check_any_satisfy") {
+        set_type set;
+        set.insert("abc");
+        set.insert("bcd");
+
+        CHECK(set.check_any_satisfy(
+            [](const std::string& val) { return !val.empty(); }));
+        CHECK(set.check_any_satisfy(
+            [](const std::string& val) { return val == "abc"; }));
+        CHECK_FALSE(set.check_any_satisfy(
+            [](const std::string& val) { return val.empty(); }));
+    }
+
+    SECTION("check_none_satisfy") {
+        set_type set;
+        set.insert("abc");
+        set.insert("bcd");
+
+        CHECK_FALSE(set.check_none_satisfy(
+            [](const std::string& val) { return !val.empty(); }));
+        CHECK_FALSE(set.check_none_satisfy(
+            [](const std::string& val) { return val == "abc"; }));
+        CHECK(set.check_none_satisfy(
+            [](const std::string& val) { return val.empty(); }));
+    }
+
     SECTION("reserve") {
         set_type set;
 
