@@ -11,7 +11,7 @@ import multiprocessing
 import click
 import tqdm
 
-CLANG_INCLUDE_OPTION = ["-isystem", "/usr/lib/llvm-14/include/c++/v1/"]
+CLANG_INCLUDE_OPTION = ["-isystem", "/usr/lib/llvm-16/include/c++/v1/"]
 
 ROOT_DIR = pathlib.Path(__file__).absolute().parent.parent
 IWYU_MAPPING_PATH = ROOT_DIR / "iwyu_mappings.imp"

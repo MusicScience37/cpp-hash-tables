@@ -20,6 +20,7 @@ Checks: >
   cert-*,
   bugprone-*,
     -bugprone-easily-swappable-parameters,
+    -bugprone-unchecked-optional-access,
   concurrency-*,
   boost-*,
   openmp-*,
@@ -30,6 +31,7 @@ Checks: >
 # - readability-function-cognitive-complexity is hard to be fixed in tests.
 # - cppcoreguidelines-owning-memory, cppcoreguidelines-pro-bounds-constant-array-index, cppcoreguidelines-pro-bounds-array-to-pointer-decay, hicpp-no-array-decay forces to use an external library.
 # - bugprone-easily-swappable-parameters is difficult to be solved.
+# - bugprone-unchecked-optional-access has a bug as in https://github.com/clangd/clangd/issues/1700.
 
 CheckOptions:
   # Naming Conventions

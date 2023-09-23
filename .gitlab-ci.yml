@@ -17,7 +17,7 @@ dependency_scanning:
 
 sync poetry:
   stage: prepare
-  image: musicscience37/clang-ci:clang14
+  image: musicscience37/clang-ci:clang16
   script:
     - mkdir -p .venv
     - poetry config virtualenvs.in-project true
@@ -59,7 +59,7 @@ pre-commit:
     - sync poetry
   dependencies:
     - sync poetry
-  image: musicscience37/clang-ci:clang14
+  image: musicscience37/clang-ci:clang16
   script:
     - poetry run pre-commit run --all-files
 
@@ -71,10 +71,10 @@ test release:
       - COMPILER_TYPE: ["gcc10", "gcc12"]
         IMAGE_PATH: "musicscience37/gcc-ci"
         CXX_STANDARD: 17
-      - COMPILER_TYPE: ["clang14", "clang15"]
+      - COMPILER_TYPE: ["clang16", "clang15"]
         IMAGE_PATH: "musicscience37/clang-ci"
         CXX_STANDARD: 17
-      - COMPILER_TYPE: ["clang14"]
+      - COMPILER_TYPE: ["clang16"]
         IMAGE_PATH: "musicscience37/clang-ci"
         CXX_STANDARD: 20
   image: ${IMAGE_PATH}:${COMPILER_TYPE}
@@ -131,7 +131,7 @@ test debug:
       - COMPILER_TYPE: ["gcc10"]
         IMAGE_PATH: "musicscience37/gcc-ci"
         CXX_STANDARD: 17
-      - COMPILER_TYPE: ["clang14"]
+      - COMPILER_TYPE: ["clang16"]
         IMAGE_PATH: "musicscience37/clang-ci"
         CXX_STANDARD: 17
   variables:
@@ -158,7 +158,7 @@ clang coverage:
     - sync poetry
   parallel:
     matrix:
-      - COMPILER_TYPE: "clang14"
+      - COMPILER_TYPE: "clang16"
         IMAGE_PATH: "musicscience37/clang-ci"
         CXX_STANDARD: 17
   variables:
@@ -201,11 +201,11 @@ clang coverage:
     when: always
     expire_in: "1 mos"
 
-clang-14-asan-ubsan:
+clang-16-asan-ubsan:
   extends: test debug
   parallel:
     matrix:
-      - COMPILER_TYPE: "clang14"
+      - COMPILER_TYPE: "clang16"
         IMAGE_PATH: "musicscience37/clang-ci"
         CXX_STANDARD: 17
   variables:
@@ -286,7 +286,7 @@ static analysis:
     - sync poetry
   parallel:
     matrix:
-      - COMPILER_TYPE: "clang14"
+      - COMPILER_TYPE: "clang16"
         IMAGE_PATH: "musicscience37/clang-ci"
         CXX_STANDARD: 17
   variables:
@@ -340,7 +340,7 @@ doc:
     - sync poetry
   dependencies:
     - sync poetry
-  image: musicscience37/sphinx-doxygen:clang14
+  image: musicscience37/sphinx-doxygen:clang16
   variables:
     GIT_SUBMODULE_STRATEGY: recursive
     BUILD_DIR: build_doc
