@@ -21,6 +21,7 @@
     "cmakelang",
     "cobertura",
     "Codecov",
+    "COMPILERCHECK",
     "CPUPROFILE",
     "ctest",
     "DCMAKE",
