@@ -55,6 +55,11 @@ namespace hash_tables {
     //! Namespace of hash tables.
     namespace tables {
 
+        /*!
+         * \dir include/hash_tables/tables/internal
+         * \brief Directory of internal implementation.
+         */
+
         //! Namespace of internal implementations.
         namespace internal {}
 
@@ -66,7 +71,25 @@ namespace hash_tables {
      */
 
     //! Namespace of maps from keys to values.
-    namespace maps {}
+    namespace maps {
+
+        /*!
+         * \dir include/hash_tables/maps/internal
+         * \brief Directory of internal implementation.
+         */
+
+        //! Namespace of internal implementations.
+        namespace internal {}
+
+    }  // namespace maps
+
+    /*!
+     * \dir include/hash_tables/sets
+     * \brief Directory of sets of values.
+     */
+
+    //! Namespace of sets of values.
+    namespace sets {}
 
     /*!
      * \dir include/hash_tables/utility

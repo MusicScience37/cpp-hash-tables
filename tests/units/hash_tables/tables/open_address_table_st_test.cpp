@@ -515,6 +515,45 @@ TEMPLATE_TEST_CASE("hash_tables::tables::open_address_table_st", "",
         CHECK(table.size() == 1);
     }
 
+    SECTION("check_all_satisfy") {
+        table_type table;
+        CHECK(table.insert("abc"));
+        CHECK(table.insert("bcd"));
+
+        CHECK(table.check_all_satisfy(
+            [](const std::string& val) { return !val.empty(); }));
+        CHECK_FALSE(table.check_all_satisfy(
+            [](const std::string& val) { return val == "abc"; }));
+        CHECK_FALSE(table.check_all_satisfy(
+            [](const std::string& val) { return val.empty(); }));
+    }
+
+    SECTION("check_any_satisfy") {
+        table_type table;
+        CHECK(table.insert("abc"));
+        CHECK(table.insert("bcd"));
+
+        CHECK(table.check_any_satisfy(
+            [](const std::string& val) { return !val.empty(); }));
+        CHECK(table.check_any_satisfy(
+            [](const std::string& val) { return val == "abc"; }));
+        CHECK_FALSE(table.check_any_satisfy(
+            [](const std::string& val) { return val.empty(); }));
+    }
+
+    SECTION("check_none_satisfy") {
+        table_type table;
+        CHECK(table.insert("abc"));
+        CHECK(table.insert("bcd"));
+
+        CHECK_FALSE(table.check_none_satisfy(
+            [](const std::string& val) { return !val.empty(); }));
+        CHECK_FALSE(table.check_none_satisfy(
+            [](const std::string& val) { return val == "abc"; }));
+        CHECK(table.check_none_satisfy(
+            [](const std::string& val) { return val.empty(); }));
+    }
+
     SECTION("max_size") {
         table_type table;
 

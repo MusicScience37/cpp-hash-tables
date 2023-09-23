@@ -364,6 +364,66 @@ TEMPLATE_TEST_CASE("hash_tables::maps::multi_open_address_map_mt", "",
         CHECK(map.at(key2) == mapped2);
     }
 
+    SECTION("check_all_satisfy") {
+        map_type map;
+
+        CHECK(map.emplace("123", 123));
+        CHECK(map.emplace("12345", 123));
+
+        CHECK(map.check_all_satisfy(
+            [](const std::string& key, const mapped_type& /*mapped*/) {
+                return !key.empty();
+            }));
+        CHECK_FALSE(map.check_all_satisfy(
+            [](const std::string& key, const mapped_type& mapped) {
+                return std::to_string(mapped) == key;
+            }));
+        CHECK_FALSE(map.check_all_satisfy(
+            [](const std::string& key, const mapped_type& /*mapped*/) {
+                return key.empty();
+            }));
+    }
+
+    SECTION("check_any_satisfy") {
+        map_type map;
+
+        CHECK(map.emplace("123", 123));
+        CHECK(map.emplace("12345", 123));
+
+        CHECK(map.check_any_satisfy(
+            [](const std::string& key, const mapped_type& /*mapped*/) {
+                return !key.empty();
+            }));
+        CHECK(map.check_any_satisfy(
+            [](const std::string& key, const mapped_type& mapped) {
+                return std::to_string(mapped) == key;
+            }));
+        CHECK_FALSE(map.check_any_satisfy(
+            [](const std::string& key, const mapped_type& /*mapped*/) {
+                return key.empty();
+            }));
+    }
+
+    SECTION("check_none_satisfy") {
+        map_type map;
+
+        CHECK(map.emplace("123", 123));
+        CHECK(map.emplace("12345", 123));
+
+        CHECK_FALSE(map.check_none_satisfy(
+            [](const std::string& key, const mapped_type& /*mapped*/) {
+                return !key.empty();
+            }));
+        CHECK_FALSE(map.check_none_satisfy(
+            [](const std::string& key, const mapped_type& mapped) {
+                return std::to_string(mapped) == key;
+            }));
+        CHECK(map.check_none_satisfy(
+            [](const std::string& key, const mapped_type& /*mapped*/) {
+                return key.empty();
+            }));
+    }
+
     SECTION("reserve") {
         map_type map;
 
