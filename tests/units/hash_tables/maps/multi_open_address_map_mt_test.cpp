@@ -28,6 +28,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "hash_tables/hashes/std_hash.h"
+#include "hash_tables/tables/multi_open_address_table_mt.h"
 #include "hash_tables_test/hashes/fixed_hash.h"
 
 // NOLINTNEXTLINE
@@ -433,7 +434,8 @@ TEMPLATE_TEST_CASE("hash_tables::maps::multi_open_address_map_mt", "",
 
         CHECK(map.size() == 1);
         CHECK(map.num_nodes() ==
-            map_type::table_type::default_num_tables *
+            hash_tables::tables::internal::
+                    multi_open_address_table_mt_default_min_num_tables *
                 map_type::table_type::default_num_internal_nodes);
 
         SECTION("to larger size") {
@@ -449,7 +451,8 @@ TEMPLATE_TEST_CASE("hash_tables::maps::multi_open_address_map_mt", "",
             CHECK_NOTHROW(map.reserve(size));
             CHECK(map.size() == 1);
             CHECK(map.num_nodes() ==
-                map_type::table_type::default_num_tables *
+                hash_tables::tables::internal::
+                        multi_open_address_table_mt_default_min_num_tables *
                     map_type::table_type::default_num_internal_nodes);
             CHECK(map.at(key) == mapped);
         }
