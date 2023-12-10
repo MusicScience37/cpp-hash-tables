@@ -2,7 +2,7 @@
 
 [![GitLab Release](https://img.shields.io/gitlab/v/release/35726343?sort=semver)](https://gitlab.com/MusicScience37Projects/utility-libraries/cpp-hash-tables/-/releases)
 [![C++ standard](https://img.shields.io/badge/standard-C%2B%2B17-blue?logo=c%2B%2B)](https://en.cppreference.com/w/cpp/compiler_support/17)
-[![pipeline status](https://gitlab.com/MusicScience37Projects/utility-libraries/cpp-hash-tables/badges/develop/pipeline.svg)](https://gitlab.com/MusicScience37Projects/utility-libraries/cpp-hash-tables/-/commits/develop)
+[![pipeline status](https://gitlab.com/MusicScience37Projects/utility-libraries/cpp-hash-tables/badges/main/pipeline.svg)](https://gitlab.com/MusicScience37Projects/utility-libraries/cpp-hash-tables/-/commits/main)
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit)
 
 Hash tables in C++.
@@ -14,7 +14,7 @@ Hash tables in C++.
 
 ## Documentation
 
-- [Documentation build on develop branch](https://musicscience37projects.gitlab.io/utility-libraries/cpp-hash-tables/)
+- [Documentation build on main branch](https://musicscience37projects.gitlab.io/utility-libraries/cpp-hash-tables/)
 
 ## How to Use
 
