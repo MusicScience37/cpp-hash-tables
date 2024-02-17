@@ -31,6 +31,7 @@
     "Doxyfile",
     "doxygen",
     "doxygenclass",
+    "doxygenfunction",
     "doxygentypedef",
     "DVCPKG",
     "endfunction",
