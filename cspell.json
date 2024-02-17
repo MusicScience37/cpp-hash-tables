@@ -63,6 +63,7 @@
     "maxdepth",
     "mkdir",
     "mpmath",
+    "msgpack",
     "MSVC",
     "MusicScience37",
     "nodecount",
