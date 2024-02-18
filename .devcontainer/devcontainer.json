@@ -6,10 +6,19 @@
     "--security-opt",
     "seccomp=unconfined"
   ],
+  "mounts": [
+    {
+      "type": "volume",
+      "source": "${localWorkspaceFolderBasename}-cache",
+      "target": "/cache_volume/"
+    }
+  ],
   "containerEnv": {
     "ASAN_OPTIONS": "alloc_dealloc_mismatch=0",
     "CCACHE_COMPILERCHECK": "content",
-    "CCACHE_MAXSIZE": "10G"
+    "CCACHE_DIR": "/cache_volume/ccache/",
+    "VCPKG_DEFAULT_BINARY_CACHE": "/cache_volume/vcpkg/",
+    "POETRY_CACHE_DIR": "/cache_volume/poetry/"
   },
   "customizations": {
     "vscode": {
@@ -25,6 +34,7 @@
         "jebbs.plantuml",
         "esbenp.prettier-vscode",
         "ms-python.python",
+        "ms-python.black-formatter",
         "njpwerner.autodocstring",
         "lextudio.restructuredtext",
         "trond-snekvik.simple-rst",
@@ -40,5 +50,6 @@
       }
     }
   },
-  "postCreateCommand": "bash ./.devcontainer/setup.bash"
+  "postCreateCommand": "bash ./.devcontainer/setup.bash",
+  "remoteUser": "ubuntu"
 }

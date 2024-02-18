@@ -12,3 +12,4 @@ API Reference
     hashes
     tables
     maps
+    sets
