@@ -51,7 +51,7 @@ line count:
     - scc
       --format-multi "tabular:stdout,html:line_count/src_line_count.html"
       --by-file -s complexity
-      include src
+      include
   artifacts:
     paths:
       - line_count
