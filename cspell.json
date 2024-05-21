@@ -73,6 +73,7 @@
     "NOLINTNEXTLINE",
     "nothrow",
     "nullopt",
+    "openmetrics",
     "pipenv",
     "Pipfile",
     "plantuml",
