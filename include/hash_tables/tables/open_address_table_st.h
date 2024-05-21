@@ -261,15 +261,14 @@ public:
      */
     open_address_table_st(open_address_table_st&&)
 #ifndef HASH_TABLES_DOCUMENTATION
-        noexcept(std::is_nothrow_move_constructible_v<extract_key_type>&&   //
-                std::is_nothrow_move_constructible_v<hash_type>&&           //
-                    std::is_nothrow_move_constructible_v<key_equal_type>&&  //
-                        std::is_nothrow_move_constructible_v<std::vector<
-                            internal::open_address_table_st_node<value_type>,
-                            typename std::allocator_traits<allocator_type>::
-                                template rebind_alloc<
-                                    internal::open_address_table_st_node<
-                                        value_type>>>>)
+        noexcept(std::is_nothrow_move_constructible_v<extract_key_type> &&  //
+            std::is_nothrow_move_constructible_v<hash_type> &&              //
+            std::is_nothrow_move_constructible_v<key_equal_type> &&         //
+            std::is_nothrow_move_constructible_v<
+                std::vector<internal::open_address_table_st_node<value_type>,
+                    typename std::allocator_traits<allocator_type>::
+                        template rebind_alloc<
+                            internal::open_address_table_st_node<value_type>>>>)
 #endif
         = default;
 
@@ -288,15 +287,14 @@ public:
      */
     auto operator=(open_address_table_st&&)
 #ifndef HASH_TABLES_DOCUMENTATION
-        noexcept(std::is_nothrow_move_assignable_v<extract_key_type>&&   //
-                std::is_nothrow_move_assignable_v<hash_type>&&           //
-                    std::is_nothrow_move_assignable_v<key_equal_type>&&  //
-                        std::is_nothrow_move_assignable_v<std::vector<
-                            internal::open_address_table_st_node<value_type>,
-                            typename std::allocator_traits<allocator_type>::
-                                template rebind_alloc<
-                                    internal::open_address_table_st_node<
-                                        value_type>>>>)
+        noexcept(std::is_nothrow_move_assignable_v<extract_key_type> &&  //
+            std::is_nothrow_move_assignable_v<hash_type> &&              //
+            std::is_nothrow_move_assignable_v<key_equal_type> &&         //
+            std::is_nothrow_move_assignable_v<
+                std::vector<internal::open_address_table_st_node<value_type>,
+                    typename std::allocator_traits<allocator_type>::
+                        template rebind_alloc<
+                            internal::open_address_table_st_node<value_type>>>>)
 #endif
             -> open_address_table_st& = default;
 
