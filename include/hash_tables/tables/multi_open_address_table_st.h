@@ -143,10 +143,11 @@ public:
      */
     multi_open_address_table_st(multi_open_address_table_st&& other)
 #ifndef HASH_TABLES_DOCUMENTATION
-        noexcept(std::is_nothrow_move_constructible_v<internal_table_type>&&  //
-                std::is_nothrow_move_constructible_v<extract_key_type>&&      //
-                    std::is_nothrow_move_constructible_v<hash_type>&&         //
-                        std::is_nothrow_move_constructible_v<key_equal_type>)
+        noexcept(
+            std::is_nothrow_move_constructible_v<internal_table_type> &&  //
+            std::is_nothrow_move_constructible_v<extract_key_type> &&     //
+            std::is_nothrow_move_constructible_v<hash_type> &&            //
+            std::is_nothrow_move_constructible_v<key_equal_type>)
 #endif
         : extract_key_(std::move(other.extract_key_)),
           hash_(std::move(other.hash_)),
@@ -179,10 +180,10 @@ public:
      */
     auto operator=(multi_open_address_table_st&& other)
 #ifndef HASH_TABLES_DOCUMENTATION
-        noexcept(std::is_nothrow_move_assignable_v<internal_table_type>&&  //
-                std::is_nothrow_move_assignable_v<extract_key_type>&&      //
-                    std::is_nothrow_move_assignable_v<hash_type>&&         //
-                        std::is_nothrow_move_assignable_v<key_equal_type>)
+        noexcept(std::is_nothrow_move_assignable_v<internal_table_type> &&  //
+            std::is_nothrow_move_assignable_v<extract_key_type> &&          //
+            std::is_nothrow_move_assignable_v<hash_type> &&                 //
+            std::is_nothrow_move_assignable_v<key_equal_type>)
 #endif
             -> multi_open_address_table_st& {
         extract_key_ = std::move(other.extract_key_);

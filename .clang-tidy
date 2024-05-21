@@ -6,10 +6,13 @@ Checks: >
     -cppcoreguidelines-owning-memory,
     -cppcoreguidelines-pro-bounds-constant-array-index,
     -cppcoreguidelines-pro-bounds-array-to-pointer-decay,
+    -cppcoreguidelines-missing-std-forward,
+    -cppcoreguidelines-noexcept-move-operations,
   google-*,
     -google-runtime-references,
     -google-readability-todo,
   performance-*,
+    -performance-noexcept-move-constructor,
   portability-*,
   readability-*,
     readability-identifier-naming,
@@ -17,6 +20,7 @@ Checks: >
   modernize-*,
   hicpp-*,
     -hicpp-no-array-decay,
+    -hicpp-noexcept-move,
   cert-*,
   bugprone-*,
     -bugprone-easily-swappable-parameters,
@@ -32,6 +36,8 @@ Checks: >
 # - cppcoreguidelines-owning-memory, cppcoreguidelines-pro-bounds-constant-array-index, cppcoreguidelines-pro-bounds-array-to-pointer-decay, hicpp-no-array-decay forces to use an external library.
 # - bugprone-easily-swappable-parameters is difficult to be solved.
 # - bugprone-unchecked-optional-access has a bug as in https://github.com/clangd/clangd/issues/1700.
+# - cppcoreguidelines-missing-std-forward generates many false positives.
+# - cppcoreguidelines-noexcept-move-operations, hicpp-noexcept-move, performance-noexcept-move-constructor generates warnings which shouldn't be fixed.
 
 CheckOptions:
   # Naming Conventions

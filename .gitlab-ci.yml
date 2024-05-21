@@ -17,7 +17,7 @@ dependency_scanning:
 
 sync poetry:
   stage: prepare
-  image: musicscience37/clang-ci:clang16
+  image: musicscience37/clang-ci:clang17
   script:
     - mkdir -p .venv
     - poetry config virtualenvs.in-project true
@@ -36,22 +36,30 @@ sync poetry:
     expire_in: "1 mos"
 
 line count:
-  stage: prepare
-  dependencies: []
-  image: registry.gitlab.com/musicscience37projects/docker/cloc-docker
+  stage: test
+  needs: []
+  image: registry.gitlab.com/musicscience37projects/docker/scc-docker
   script:
     - mkdir -p line_count
-    - cloc ./
-      --exclude-dir=line_count
-      --force-lang=C++,h
-      --json --out=line_count/line_count.json
-    - cloc ./include
-      --force-lang=C++,h
-      --json --out=line_count/src_line_count.json
+    - scc
+      --format-multi "tabular:stdout,html:line_count/line_count.html"
+      .
+    - scc
+      --format-multi "openmetrics:line_count/cpp_line_count.txt"
+      -i h,cpp
+      .
+    - scc
+      --format-multi "tabular:stdout,html:line_count/src_line_count.html"
+      --by-file -s complexity
+      include
   artifacts:
     paths:
       - line_count
+    reports:
+      metrics:
+        - "line_count/cpp_line_count.txt"
     expire_in: "1 mos"
+  interruptible: true
 
 pre-commit:
   stage: test
@@ -59,7 +67,7 @@ pre-commit:
     - sync poetry
   dependencies:
     - sync poetry
-  image: musicscience37/clang-ci:clang16
+  image: musicscience37/clang-ci:clang17
   script:
     - poetry run pre-commit run --all-files
 
@@ -71,10 +79,10 @@ test release:
       - COMPILER_TYPE: ["gcc10", "gcc12"]
         IMAGE_PATH: "musicscience37/gcc-ci"
         CXX_STANDARD: 17
-      - COMPILER_TYPE: ["clang16", "clang15"]
+      - COMPILER_TYPE: ["clang16", "clang17"]
         IMAGE_PATH: "musicscience37/clang-ci"
         CXX_STANDARD: 17
-      - COMPILER_TYPE: ["clang16"]
+      - COMPILER_TYPE: ["clang17"]
         IMAGE_PATH: "musicscience37/clang-ci"
         CXX_STANDARD: 20
   image: ${IMAGE_PATH}:${COMPILER_TYPE}
@@ -135,7 +143,7 @@ test debug:
       - COMPILER_TYPE: ["gcc10"]
         IMAGE_PATH: "musicscience37/gcc-ci"
         CXX_STANDARD: 17
-      - COMPILER_TYPE: ["clang16"]
+      - COMPILER_TYPE: ["clang17"]
         IMAGE_PATH: "musicscience37/clang-ci"
         CXX_STANDARD: 17
   variables:
@@ -163,7 +171,7 @@ clang coverage:
     - sync poetry
   parallel:
     matrix:
-      - COMPILER_TYPE: "clang16"
+      - COMPILER_TYPE: "clang17"
         IMAGE_PATH: "musicscience37/clang-ci"
         CXX_STANDARD: 17
   variables:
@@ -211,7 +219,7 @@ clang-16-asan-ubsan:
   extends: test debug
   parallel:
     matrix:
-      - COMPILER_TYPE: "clang16"
+      - COMPILER_TYPE: "clang17"
         IMAGE_PATH: "musicscience37/clang-ci"
         CXX_STANDARD: 17
   variables:
@@ -286,7 +294,7 @@ static analysis:
     - sync poetry
   parallel:
     matrix:
-      - COMPILER_TYPE: "clang16"
+      - COMPILER_TYPE: "clang17"
         IMAGE_PATH: "musicscience37/clang-ci"
         CXX_STANDARD: 17
   variables:
@@ -340,7 +348,7 @@ doc:
     - sync poetry
   dependencies:
     - sync poetry
-  image: musicscience37/sphinx-doxygen:clang16
+  image: musicscience37/sphinx-doxygen:clang17
   variables:
     GIT_SUBMODULE_STRATEGY: recursive
     BUILD_DIR: build_doc
