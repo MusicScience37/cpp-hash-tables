@@ -12,6 +12,7 @@ Checks: >
     -google-runtime-references,
     -google-readability-todo,
   performance-*,
+    -performance-noexcept-move-constructor,
   portability-*,
   readability-*,
     readability-identifier-naming,
@@ -36,7 +37,7 @@ Checks: >
 # - bugprone-easily-swappable-parameters is difficult to be solved.
 # - bugprone-unchecked-optional-access has a bug as in https://github.com/clangd/clangd/issues/1700.
 # - cppcoreguidelines-missing-std-forward generates many false positives.
-# - cppcoreguidelines-noexcept-move-operations, hicpp-noexcept-move generates warnings which shouldn't be fixed.
+# - cppcoreguidelines-noexcept-move-operations, hicpp-noexcept-move, performance-noexcept-move-constructor generates warnings which shouldn't be fixed.
 
 CheckOptions:
   # Naming Conventions
