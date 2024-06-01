@@ -22,6 +22,7 @@
 #include <cassert>
 #include <cmath>
 #include <cstddef>
+#include <cstdint>
 #include <functional>
 #include <memory>
 #include <optional>
@@ -53,7 +54,7 @@ public:
     using value_type = ValueType;
 
     //! Enumeration of states of nodes.
-    enum class node_state {
+    enum class node_state : std::uint8_t {
         //! Initial state.
         init,
 

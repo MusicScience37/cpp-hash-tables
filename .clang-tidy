@@ -17,6 +17,7 @@ Checks: >
   readability-*,
     readability-identifier-naming,
     -readability-function-cognitive-complexity,
+    -readability-redundant-member-init,
   modernize-*,
   hicpp-*,
     -hicpp-no-array-decay,
@@ -38,6 +39,7 @@ Checks: >
 # - bugprone-unchecked-optional-access has a bug as in https://github.com/clangd/clangd/issues/1700.
 # - cppcoreguidelines-missing-std-forward generates many false positives.
 # - cppcoreguidelines-noexcept-move-operations, hicpp-noexcept-move, performance-noexcept-move-constructor generates warnings which shouldn't be fixed.
+# - readability-redundant-member-init prevents specifying initialization of member variables.
 
 CheckOptions:
   # Naming Conventions
