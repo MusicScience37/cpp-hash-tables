@@ -7,7 +7,7 @@ readme = "README.md"
 packages = [{ include = "scripts" }]
 
 [tool.poetry.dependencies]
-python = ">=3.11,<3.12"
+python = ">=3.11,<3.13"
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.4.2"
@@ -18,9 +18,9 @@ myst-parser = "^3.0.1"
 pre-commit = "^3.7.1"
 pylint = "^3.2.2"
 sphinx = "^7.3.7"
-sphinx-orange-book-theme = "^0.9.0"
+sphinx-orange-book-theme = "^0.10.0"
 sphinx-autobuild = "^2024.4.16"
-sphinxcontrib-plantuml = "^0.29"
+sphinxcontrib-plantuml = "^0.30"
 mpmath = "^1.3.0"
 clang-tidy-checker = "^0.5.0"
 lcov-cobertura = "^2.0.2"
