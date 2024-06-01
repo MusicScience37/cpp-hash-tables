@@ -42,5 +42,6 @@
   },
   "[yaml]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
-  }
+  },
+  "restructuredtext.pythonRecommendation.disabled": true
 }
