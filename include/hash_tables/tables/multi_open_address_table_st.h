@@ -340,8 +340,8 @@ public:
      * \return Value.
      */
     template <typename... Args>
-    [[nodiscard]] auto get_or_create(const key_type& key, Args&&... args)
-        -> value_type& {
+    [[nodiscard]] auto get_or_create(
+        const key_type& key, Args&&... args) -> value_type& {
         const auto [internal_table_index, internal_key] =
             prepare_for_search(key);
         return internal_tables_[internal_table_index]

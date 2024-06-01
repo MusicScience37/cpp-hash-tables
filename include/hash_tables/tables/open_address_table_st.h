@@ -22,6 +22,7 @@
 #include <cassert>
 #include <cmath>
 #include <cstddef>
+#include <cstdint>
 #include <functional>
 #include <memory>
 #include <optional>
@@ -53,7 +54,7 @@ public:
     using value_type = ValueType;
 
     //! Enumeration of states of nodes.
-    enum class node_state {
+    enum class node_state : std::uint8_t {
         //! Initial state.
         init,
 
@@ -89,8 +90,8 @@ public:
      * \param[in] obj Object to copy from.
      * \return This.
      */
-    auto operator=(const open_address_table_st_node& obj)
-        -> open_address_table_st_node& {
+    auto operator=(
+        const open_address_table_st_node& obj) -> open_address_table_st_node& {
         if (this == &obj) {
             return *this;
         }
@@ -277,8 +278,8 @@ public:
      *
      * \return This.
      */
-    auto operator=(const open_address_table_st&)
-        -> open_address_table_st& = default;
+    auto operator=(
+        const open_address_table_st&) -> open_address_table_st& = default;
 
     /*!
      * \brief Move assignment operator.
@@ -430,8 +431,8 @@ public:
      * \return Value.
      */
     template <typename... Args>
-    [[nodiscard]] auto get_or_create(const key_type& key, Args&&... args)
-        -> value_type& {
+    [[nodiscard]] auto get_or_create(
+        const key_type& key, Args&&... args) -> value_type& {
         reserve(size_ + 1U);
         const auto [node_ptr, dist] = prepare_place_for(key);
         if (node_ptr->state() != node_type::node_state::filled) {
@@ -835,8 +836,8 @@ private:
      * \param[in] key Key.
      * \return Node index.
      */
-    [[nodiscard]] auto desired_node_ind(const key_type& key) const
-        -> size_type {
+    [[nodiscard]] auto desired_node_ind(
+        const key_type& key) const -> size_type {
         const size_type hash_number = hash_(key);
         return hash_number & desired_node_ind_mask_;
     }
@@ -898,8 +899,8 @@ private:
      * \return Pointer to the node and distance from the place determined by
      * hash number.
      */
-    auto prepare_place_for(const key_type& key)
-        -> std::tuple<node_type*, size_type> {
+    auto prepare_place_for(
+        const key_type& key) -> std::tuple<node_type*, size_type> {
         const size_type start_node_ind = desired_node_ind(key);
         auto iter = nodes_.begin() + start_node_ind;
         size_type dist = 0;
@@ -954,8 +955,8 @@ private:
      * \param[in] key Key.
      * \return Node index. (Null if not found.)
      */
-    [[nodiscard]] auto find_node_ind_for(const key_type& key) const
-        -> std::optional<size_type> {
+    [[nodiscard]] auto find_node_ind_for(
+        const key_type& key) const -> std::optional<size_type> {
         const size_type start_node_ind = desired_node_ind(key);
         auto iter = nodes_.begin() + start_node_ind;
         size_type dist = 0;
@@ -986,8 +987,8 @@ private:
      * \return Node index.
      * \throw std::out_of_range If not found.
      */
-    [[nodiscard]] auto require_node_ind_for(const key_type& key) const
-        -> size_type {
+    [[nodiscard]] auto require_node_ind_for(
+        const key_type& key) const -> size_type {
         const auto node_ind = find_node_ind_for(key);
         if (!node_ind) {
             throw key_not_found();

@@ -167,8 +167,8 @@ public:
      * \param[in] value Value.
      * \return The hashed_key_view object.
      */
-    [[nodiscard]] auto operator()(const value_type& value) const
-        -> hashed_key_view<ActualKeyType> {
+    [[nodiscard]] auto operator()(
+        const value_type& value) const -> hashed_key_view<ActualKeyType> {
         return hashed_key_view<ActualKeyType>(
             extract_key_(value.first), value.second);
     }

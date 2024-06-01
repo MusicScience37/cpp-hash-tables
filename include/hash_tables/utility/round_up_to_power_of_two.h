@@ -32,8 +32,7 @@ template <typename Integer, unsigned int TotalDigits,
     unsigned int ShiftBitsInThisIteration,
     std::enable_if_t<(ShiftBitsInThisIteration >= TotalDigits), void*> =
         nullptr>
-inline constexpr auto propagate_bits_to_right_impl(Integer val) noexcept
-    -> Integer {
+constexpr auto propagate_bits_to_right_impl(Integer val) noexcept -> Integer {
     return val;
 }
 #endif
@@ -54,7 +53,7 @@ template <typename Integer, unsigned int TotalDigits,
     std::enable_if_t<(ShiftBitsInThisIteration < TotalDigits), void*> = nullptr
 #endif
     >
-inline constexpr auto propagate_bits_to_right_impl(Integer val) -> Integer {
+constexpr auto propagate_bits_to_right_impl(Integer val) -> Integer {
     return propagate_bits_to_right_impl<Integer, TotalDigits,
         (ShiftBitsInThisIteration << 1U)>(
         val | val >> ShiftBitsInThisIteration);
@@ -71,7 +70,7 @@ inline constexpr auto propagate_bits_to_right_impl(Integer val) -> Integer {
 template <typename Integer,
     unsigned int TotalDigits = static_cast<unsigned int>(
         std::numeric_limits<Integer>::digits)>
-inline constexpr auto propagate_bits_to_right(Integer val) noexcept -> Integer {
+constexpr auto propagate_bits_to_right(Integer val) noexcept -> Integer {
     static_assert(std::is_integral_v<Integer>);
     static_assert(std::is_unsigned_v<Integer>);
     return propagate_bits_to_right_impl<Integer, TotalDigits, 1U>(val);
@@ -87,7 +86,7 @@ inline constexpr auto propagate_bits_to_right(Integer val) noexcept -> Integer {
  * \return Result.
  */
 template <typename Integer>
-inline constexpr auto round_up_to_power_of_two(Integer val) {
+constexpr auto round_up_to_power_of_two(Integer val) {
     static_assert(std::is_integral_v<Integer>);
     static_assert(std::is_unsigned_v<Integer>);
 
