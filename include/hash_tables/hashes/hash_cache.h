@@ -139,8 +139,8 @@ public:
      * \param[in] key Key.
      * \return Hash number.
      */
-    [[nodiscard]] auto operator()(const key_type& key) const
-        -> hash_number_type {
+    [[nodiscard]] auto operator()(
+        const key_type& key) const -> hash_number_type {
         return key.hash_number();
     }
 };

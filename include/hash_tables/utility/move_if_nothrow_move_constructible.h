@@ -51,8 +51,8 @@ template <typename T
 template <typename T,
     std::enable_if_t<!std::is_nothrow_move_constructible_v<std::decay_t<T>>,
         void*> = nullptr>
-[[nodiscard]] auto move_if_nothrow_move_constructible(T&& obj)
-    -> const std::remove_reference_t<T>& {
+[[nodiscard]] auto move_if_nothrow_move_constructible(
+    T&& obj) -> const std::remove_reference_t<T>& {
     return obj;
 }
 #endif

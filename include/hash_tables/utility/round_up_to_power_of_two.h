@@ -32,8 +32,8 @@ template <typename Integer, unsigned int TotalDigits,
     unsigned int ShiftBitsInThisIteration,
     std::enable_if_t<(ShiftBitsInThisIteration >= TotalDigits), void*> =
         nullptr>
-inline constexpr auto propagate_bits_to_right_impl(Integer val) noexcept
-    -> Integer {
+inline constexpr auto propagate_bits_to_right_impl(
+    Integer val) noexcept -> Integer {
     return val;
 }
 #endif

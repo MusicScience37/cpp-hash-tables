@@ -52,8 +52,8 @@ public:
      * \param[in] key Key.
      * \return Hash number.
      */
-    [[nodiscard]] auto operator()(const KeyType& key) const
-        -> hash_number_type {
+    [[nodiscard]] auto operator()(
+        const KeyType& key) const -> hash_number_type {
         (void)key;
         return number_;
     }

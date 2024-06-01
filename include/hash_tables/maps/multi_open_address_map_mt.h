@@ -253,8 +253,8 @@ public:
      * \return Mapped value.
      */
     template <typename... Args>
-    [[nodiscard]] auto get_or_create(const key_type& key, Args&&... args)
-        -> mapped_type {
+    [[nodiscard]] auto get_or_create(
+        const key_type& key, Args&&... args) -> mapped_type {
         internal::mapped_value_getter<mapped_type> value;
         table_.get_or_create_to(value, key, std::piecewise_construct,
             std::forward_as_tuple(key),
@@ -296,8 +296,8 @@ public:
      * \param[in] key Key.
      * \return Value if found, otherwise null.
      */
-    [[nodiscard]] auto try_get(const key_type& key) const
-        -> std::optional<mapped_type> {
+    [[nodiscard]] auto try_get(
+        const key_type& key) const -> std::optional<mapped_type> {
         internal::mapped_value_getter<mapped_type> value;
         if (table_.try_get_to(value, key)) {
             return value.release();

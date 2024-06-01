@@ -266,8 +266,8 @@ public:
      * \return Value.
      */
     template <typename... Args>
-    [[nodiscard]] auto get_or_create(const key_type& key, Args&&... args)
-        -> value_type {
+    [[nodiscard]] auto get_or_create(
+        const key_type& key, Args&&... args) -> value_type {
         const auto [internal_table_index, internal_key] =
             prepare_for_search(key);
         return exclusive_table(internal_table_index)
@@ -352,8 +352,8 @@ public:
      * \param[in] key Key.
      * \return Pointer to the value if found, otherwise nullptr.
      */
-    [[nodiscard]] auto try_get(const key_type& key) const
-        -> std::optional<value_type> {
+    [[nodiscard]] auto try_get(
+        const key_type& key) const -> std::optional<value_type> {
         const auto [internal_table_index, internal_key] =
             prepare_for_search(key);
         const internal_value_type* ptr =
@@ -808,9 +808,9 @@ private:
      * \param[in] table_index Index of the internal table.
      * \return Internal table.
      */
-    [[nodiscard]] auto shared_table(size_type table_index)
-        -> locked_internal_table<internal_table_type,
-            std::unique_lock<std::mutex>> {
+    [[nodiscard]] auto shared_table(
+        size_type table_index) -> locked_internal_table<internal_table_type,
+                                   std::unique_lock<std::mutex>> {
         assert(table_index < num_internal_tables);
         internal_table_data_type& data =
             // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
@@ -844,9 +844,9 @@ private:
      * \param[in] table_index Index of the internal table.
      * \return Internal table.
      */
-    [[nodiscard]] auto exclusive_table(size_type table_index)
-        -> locked_internal_table<internal_table_type,
-            std::unique_lock<std::mutex>> {
+    [[nodiscard]] auto exclusive_table(
+        size_type table_index) -> locked_internal_table<internal_table_type,
+                                   std::unique_lock<std::mutex>> {
         assert(table_index < num_internal_tables);
         internal_table_data_type& data =
             // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)

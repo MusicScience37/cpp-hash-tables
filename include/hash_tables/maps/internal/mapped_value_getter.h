@@ -45,8 +45,8 @@ public:
      * \return This.
      */
     template <typename KeyType>
-    auto operator=(const std::pair<KeyType, MappedType>& value)
-        -> mapped_value_getter& {
+    auto operator=(
+        const std::pair<KeyType, MappedType>& value) -> mapped_value_getter& {
         mapped_value_ = value.second;
         return *this;
     }
