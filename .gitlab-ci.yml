@@ -21,7 +21,7 @@ sync poetry:
   script:
     - mkdir -p .venv
     - poetry config virtualenvs.in-project true
-    - poetry env use 3.11
+    - poetry env use 3.12
     - poetry install
   cache:
     key:
