@@ -119,8 +119,11 @@ public:
      *
      * \return This.
      */
-    auto operator=(
-        const open_address_map_st&) -> open_address_map_st& = default;
+    auto operator=(const open_address_map_st&) -> open_address_map_st&
+#ifndef HASH_TABLES_DOCUMENTATION
+        = default
+#endif
+        ;
 
     /*!
      * \brief Move assignment operator.
@@ -131,7 +134,11 @@ public:
 #ifndef HASH_TABLES_DOCUMENTATION
         noexcept(std::is_nothrow_move_assignable_v<table_type>)
 #endif
-            -> open_address_map_st& = default;
+            -> open_address_map_st&
+#ifndef HASH_TABLES_DOCUMENTATION
+        = default
+#endif
+        ;
 
     /*!
      * \brief Destructor.

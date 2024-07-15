@@ -278,8 +278,11 @@ public:
      *
      * \return This.
      */
-    auto operator=(
-        const open_address_table_st&) -> open_address_table_st& = default;
+    auto operator=(const open_address_table_st&) -> open_address_table_st&
+#ifndef HASH_TABLES_DOCUMENTATION
+        = default
+#endif
+        ;
 
     /*!
      * \brief Move assignment operator.
@@ -297,7 +300,11 @@ public:
                         template rebind_alloc<
                             internal::open_address_table_st_node<value_type>>>>)
 #endif
-            -> open_address_table_st& = default;
+            -> open_address_table_st&
+#ifndef HASH_TABLES_DOCUMENTATION
+        = default
+#endif
+        ;
 
     /*!
      * \brief Destructor.
