@@ -33,8 +33,8 @@ namespace hash_tables_test {
  * \return Vector.
  */
 template <typename ValueType>
-[[nodiscard]] inline auto create_random_int_vector(
-    std::size_t size) -> std::vector<ValueType> {
+[[nodiscard]] inline auto create_random_int_vector(std::size_t size)
+    -> std::vector<ValueType> {
     std::mt19937 engine;  // NOLINT
     std::uniform_int_distribution<ValueType> dist;
     std::unordered_set<ValueType> values;

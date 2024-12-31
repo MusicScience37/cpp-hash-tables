@@ -38,8 +38,9 @@ public:
      * \param[in] value Value.
      * \return Value.
      */
-    [[nodiscard]] auto operator()(
-        const value_type& value) const -> const value_type& {
+    [[nodiscard]] auto operator()(const value_type& value) const
+        -> const value_type& {
+        // NOLINTNEXTLINE(bugprone-return-const-ref-from-parameter) : false positive
         return value;
     }
 };

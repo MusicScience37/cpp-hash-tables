@@ -282,8 +282,8 @@ public:
      * \return Value.
      */
     template <typename... Args>
-    [[nodiscard]] auto get_or_create(
-        const key_type& key, Args&&... args) -> value_type {
+    [[nodiscard]] auto get_or_create(const key_type& key, Args&&... args)
+        -> value_type {
         auto& bucket = bucket_for(key);
         std::unique_lock<std::mutex> lock(bucket.mutex);
         const auto iter = std::find_if(bucket.nodes.begin(), bucket.nodes.end(),
@@ -378,8 +378,8 @@ public:
      * \param[in] key Key.
      * \return Value if found, otherwise null.
      */
-    [[nodiscard]] auto try_get(
-        const key_type& key) const -> std::optional<value_type> {
+    [[nodiscard]] auto try_get(const key_type& key) const
+        -> std::optional<value_type> {
         auto& bucket = bucket_for(key);
         std::unique_lock<std::mutex> lock(bucket.mutex);
         const auto iter = std::find_if(bucket.nodes.begin(), bucket.nodes.end(),
@@ -515,7 +515,7 @@ public:
             auto& bucket = *bucket_ptr;
             std::unique_lock<std::mutex> lock(bucket.mutex);
             for (auto iter = bucket.nodes.begin();
-                 iter != bucket.nodes.end();) {
+                iter != bucket.nodes.end();) {
                 if (std::invoke(
                         function, static_cast<const value_type&>(*iter))) {
                     iter = bucket.nodes.erase(iter);

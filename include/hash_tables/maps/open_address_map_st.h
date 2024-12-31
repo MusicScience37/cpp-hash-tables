@@ -314,8 +314,8 @@ public:
      * \return Mapped value.
      */
     template <typename Function>
-    auto get_or_create_with_factory(
-        const key_type& key, Function&& function) -> mapped_type& {
+    auto get_or_create_with_factory(const key_type& key, Function&& function)
+        -> mapped_type& {
         return table_
             .get_or_create_with_factory(key,
                 [&key, &function] {
@@ -365,8 +365,8 @@ public:
      * \param[in] key Key.
      * \return Pointer to the value if found, otherwise nullptr.
      */
-    [[nodiscard]] auto try_get(
-        const key_type& key) const -> const mapped_type* {
+    [[nodiscard]] auto try_get(const key_type& key) const
+        -> const mapped_type* {
         const auto* value = table_.try_get(key);
         if (value == nullptr) {
             return nullptr;

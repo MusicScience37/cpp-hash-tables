@@ -76,7 +76,7 @@ A development environment including dependencies can be created using
 To build this repository,
 you will require following dependencies:
 
-- [Python](https://www.python.org/) 3.11
+- [Python](https://www.python.org/) 3.12
   - You may want to use [pyenv](https://github.com/pyenv/pyenv).
 - [poetry](https://python-poetry.org/)
   - Required Python packages can be installed using poetry.
@@ -88,11 +88,10 @@ you will require following dependencies:
 - [CMake](https://cmake.org/)
 - C++ 17 Compiler
   - Following compilers are tested in CI:
-    - GCC 10
     - GCC 12
-    - Clang 16
-    - Clang 17
+    - GCC 13
     - Clang 18
+    - Clang 19
     - MSVC 19
 
 Additionally, you will require following dependencies

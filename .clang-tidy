@@ -18,6 +18,7 @@ Checks: >
     readability-identifier-naming,
     -readability-function-cognitive-complexity,
     -readability-redundant-member-init,
+    -readability-use-std-min-max,
   modernize-*,
   hicpp-*,
     -hicpp-no-array-decay,
@@ -40,6 +41,7 @@ Checks: >
 # - cppcoreguidelines-missing-std-forward generates many false positives.
 # - cppcoreguidelines-noexcept-move-operations, hicpp-noexcept-move, performance-noexcept-move-constructor generates warnings which shouldn't be fixed.
 # - readability-redundant-member-init prevents specifying initialization of member variables.
+# - readability-use-std-min-max causes unnecessary copy of objects.
 
 CheckOptions:
   # Naming Conventions
