@@ -33,8 +33,8 @@ namespace hash_tables_test {
  * \param[in] size Size.
  * \return Vector.
  */
-[[nodiscard]] inline auto create_random_string_vector(
-    std::size_t size) -> std::vector<std::string> {
+[[nodiscard]] inline auto create_random_string_vector(std::size_t size)
+    -> std::vector<std::string> {
     std::mt19937 engine;  // NOLINT
 
     constexpr auto len_min = static_cast<std::size_t>(1);

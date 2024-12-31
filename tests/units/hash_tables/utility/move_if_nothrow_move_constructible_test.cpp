@@ -35,8 +35,8 @@ TEST_CASE("hash_tables::utility::move_if_nothrow_constructible") {
             nothrow_type(const nothrow_type&) = default;
             nothrow_type(nothrow_type&&) noexcept = default;
             auto operator=(const nothrow_type&) -> nothrow_type& = default;
-            auto operator=(nothrow_type&&) noexcept(
-                false) -> nothrow_type& = default;
+            auto operator=(nothrow_type&&) noexcept(false)
+                -> nothrow_type& = default;
             ~nothrow_type() = default;
         };
         STATIC_CHECK(std::is_nothrow_move_constructible_v<nothrow_type>);

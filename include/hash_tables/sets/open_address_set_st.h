@@ -301,8 +301,8 @@ public:
      * \param[in] right Right-hand-side object.
      * \return Merged set.
      */
-    auto operator+(
-        const open_address_set_st& right) const -> open_address_set_st {
+    auto operator+(const open_address_set_st& right) const
+        -> open_address_set_st {
         return open_address_set_st(*this) += right;
     }
 
@@ -333,8 +333,8 @@ public:
      * \return A set with elements same as this set except for elements in the
      * right-hand-side set.
      */
-    auto operator-(
-        const open_address_set_st& right) const -> open_address_set_st {
+    auto operator-(const open_address_set_st& right) const
+        -> open_address_set_st {
         return open_address_set_st(*this) -= right;
     }
 
