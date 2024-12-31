@@ -11,8 +11,6 @@ include:
   - template: Security/SAST.gitlab-ci.yml
 sast:
   needs: []
-dependency_scanning:
-  needs: []
 
 sync poetry:
   stage: prepare
