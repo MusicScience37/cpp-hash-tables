@@ -66,6 +66,8 @@ protected:
     std::vector<key_type> keys_{};
 };
 
+STAT_BENCH_GROUP("find_values").add_parameter_to_time_plot_log("size");
+
 // NOLINTNEXTLINE
 STAT_BENCH_CASE_F(find_values_fixture, "find_values", "unordered_set") {
     std::unordered_set<key_type> set;

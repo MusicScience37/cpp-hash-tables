@@ -78,6 +78,9 @@ protected:
     std::vector<std::string> second_values_{};
 };
 
+STAT_BENCH_GROUP("create_pairs_no_reserve")
+    .add_parameter_to_time_plot_log("size");
+
 // NOLINTNEXTLINE
 STAT_BENCH_CASE_F(create_pairs_no_reserve_fixture, "create_pairs_no_reserve",
     "open_address_st") {

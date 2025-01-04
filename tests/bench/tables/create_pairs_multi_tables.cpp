@@ -79,6 +79,10 @@ protected:
     std::vector<std::string> second_values_{};
 };
 
+STAT_BENCH_GROUP("create_pairs_multi_tables")
+    .add_parameter_to_time_plot_log("size")
+    .add_parameter_to_time_plot("tables");
+
 // NOLINTNEXTLINE
 STAT_BENCH_CASE_F(create_pairs_multi_tables_fixture,
     "create_pairs_multi_tables", "multi_open_address_st") {

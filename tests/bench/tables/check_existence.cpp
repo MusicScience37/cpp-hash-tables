@@ -92,6 +92,8 @@ protected:
     std::vector<std::string> second_values_{};
 };
 
+STAT_BENCH_GROUP("check_existence").add_parameter_to_time_plot_log("size");
+
 // NOLINTNEXTLINE
 STAT_BENCH_CASE_F(
     check_existence_fixture, "check_existence", "open_address_st") {
