@@ -74,6 +74,8 @@ protected:
     std::vector<mapped_type> second_values_{};
 };
 
+STAT_BENCH_GROUP("find_pairs").add_parameter_to_time_plot_log("size");
+
 // NOLINTNEXTLINE
 STAT_BENCH_CASE_F(find_pairs_fixture, "find_pairs", "unordered_map") {
     std::unordered_map<key_type, mapped_type> map;

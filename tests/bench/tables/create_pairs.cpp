@@ -81,6 +81,10 @@ protected:
     std::vector<std::string> second_values_{};
 };
 
+STAT_BENCH_GROUP("create_pairs")
+    .add_parameter_to_time_plot_log("size")
+    .add_parameter_to_time_plot("load");
+
 // NOLINTNEXTLINE
 STAT_BENCH_CASE_F(create_pairs_fixture, "create_pairs", "open_address_st") {
     STAT_BENCH_MEASURE() {

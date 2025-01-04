@@ -81,6 +81,10 @@ protected:
     std::vector<std::string> second_values_{};
 };
 
+STAT_BENCH_GROUP("find_pairs")
+    .add_parameter_to_time_plot_log("size")
+    .add_parameter_to_time_plot("load");
+
 // NOLINTNEXTLINE
 STAT_BENCH_CASE_F(find_pairs_fixture, "find_pairs", "open_address_st") {
     hash_tables::tables::open_address_table_st<value_type, key_type,
