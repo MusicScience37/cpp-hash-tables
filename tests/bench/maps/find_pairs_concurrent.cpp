@@ -80,8 +80,8 @@ protected:
 };
 
 STAT_BENCH_GROUP("find_pairs_concurrent")
-    .add_parameter_to_time_plot_log("size")
-    .add_parameter_to_time_plot("threads");
+    .add_parameter_to_time_line_plot_log("size")
+    .add_parameter_to_time_line_plot("threads");
 
 // NOLINTNEXTLINE
 STAT_BENCH_CASE_F(find_pairs_concurrent_fixture, "find_pairs_concurrent",

@@ -66,7 +66,7 @@ protected:
     std::vector<key_type> keys_{};
 };
 
-STAT_BENCH_GROUP("create_values").add_parameter_to_time_plot_log("size");
+STAT_BENCH_GROUP("create_values").add_parameter_to_time_line_plot_log("size");
 
 // NOLINTNEXTLINE
 STAT_BENCH_CASE_F(create_values_fixture, "create_values", "unordered_set") {
