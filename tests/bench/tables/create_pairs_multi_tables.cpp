@@ -80,8 +80,8 @@ protected:
 };
 
 STAT_BENCH_GROUP("create_pairs_multi_tables")
-    .add_parameter_to_time_plot_log("size")
-    .add_parameter_to_time_plot("tables");
+    .add_parameter_to_time_line_plot_log("size")
+    .add_parameter_to_time_line_plot("tables");
 
 // NOLINTNEXTLINE
 STAT_BENCH_CASE_F(create_pairs_multi_tables_fixture,

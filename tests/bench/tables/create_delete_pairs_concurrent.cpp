@@ -82,8 +82,8 @@ protected:
 };
 
 STAT_BENCH_GROUP("create_delete_pairs_concurrent")
-    .add_parameter_to_time_plot_log("size")
-    .add_parameter_to_time_plot("threads");
+    .add_parameter_to_time_line_plot_log("size")
+    .add_parameter_to_time_line_plot("threads");
 
 // NOLINTNEXTLINE
 STAT_BENCH_CASE_F(create_delete_pairs_concurrent,
