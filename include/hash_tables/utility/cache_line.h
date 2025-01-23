@@ -19,41 +19,13 @@
  */
 #pragma once
 
-#if defined(__cpp_lib_hardware_interference_size) || \
-    defined(HASH_TABLES_DOCUMENTATION)
-
-#include <cstddef>
-#include <new>
-
-namespace hash_tables::utility {
-
-/*!
- * \brief Size of cache line.
- *
- * \note Some implementation of C++ standard library doesn't have
- * `std::hardware_destructive_interference_size` even in the latest release.
- * So alternative definition may be used in some platforms.
- */
-inline constexpr std::size_t cache_line =
-    std::hardware_destructive_interference_size;
-
-}  // namespace hash_tables::utility
-
-#else
-
 #include <cstddef>
 
 namespace hash_tables::utility {
 
 /*!
- * \brief Size of cache line.
- *
- * \note This alternative definition is used when C++ standard library doesn't
- * have `std::hardware_destructive_interference_size`.
- * The number is valid for x86_64.
+ * \brief Approximate size of cache line.
  */
 inline constexpr std::size_t cache_line = 64;
 
 }  // namespace hash_tables::utility
-
-#endif
