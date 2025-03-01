@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
-"""Helper script to create lists of source codes for build.
-"""
+"""Helper script to create lists of source codes for build."""
 
-from pathlib import Path
 import subprocess
+from pathlib import Path
 
 THIS_DIR = Path(__file__).parent.absolute()
 

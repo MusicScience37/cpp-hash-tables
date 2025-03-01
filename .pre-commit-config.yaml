@@ -30,9 +30,14 @@ repos:
         entry: poetry run python scripts/check_encoding.py
       - id: black
         name: black
-        description: "Black: The uncompromising Python code formatter"
-        entry: black
-        language: python
+        entry: poetry run black
+        language: system
+        require_serial: true
+        types_or: [python, pyi]
+      - id: isort
+        name: isort
+        entry: poetry run isort
+        language: system
         require_serial: true
         types_or: [python, pyi]
       - id: update-source-list

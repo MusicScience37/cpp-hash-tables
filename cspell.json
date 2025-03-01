@@ -50,6 +50,7 @@
     "installargs",
     "integ",
     "interruptible",
+    "isort",
     "isystem",
     "IWYU",
     "Kabashima",
