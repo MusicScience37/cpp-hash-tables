@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
-"""Check source codes with include-what-you-use.
-"""
+"""Check source codes with include-what-you-use."""
 
 import asyncio
+import multiprocessing
 import pathlib
 import random
 import typing
-import multiprocessing
 
 import click
 import tqdm
